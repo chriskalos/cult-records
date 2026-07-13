@@ -1,6 +1,9 @@
 # macOS the bane of my existence
 .DS_Store
 
+# In the interest of time...
+INSTRUCTIONS.md
+
 # Python-generated files
 __pycache__/
 *.py[oc]
