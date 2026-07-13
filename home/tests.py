@@ -44,17 +44,17 @@ class HomePageTests(TestCase):
         response = self.client.get(reverse("home"))
 
         products = response.context["products"]
-        self.assertEqual(len(products), 4)
-        self.assertEqual(
-            products[0],
-            {
-                "image": None,
-                "title": "Madeon - Victory LP",
-                "description": "Placeholder description for Madeon - Victory LP",
-                "price": Decimal("69.99"),
-            },
+        self.assertQuerySetEqual(
+            products,
+            [
+                "Placeholder Title 1",
+                "Placeholder Title 2",
+                "Placeholder Title 3",
+                "Placeholder Title 4",
+            ],
+            transform=lambda product: product.title,
         )
-        self.assertContains(response, "Madonna - Confessions II LP")
-        self.assertContains(response, "Porter Robinson - Smile LP")
-        self.assertContains(response, "Secret Unreleased Daft Punk LP")
-        self.assertContains(response, "420.00€")
+        self.assertContains(response, "Placeholder Artist 1")
+        self.assertContains(response, "Placeholder Description 2")
+        self.assertContains(response, "Bundle")
+        self.assertContains(response, "49.99€")
