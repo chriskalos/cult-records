@@ -1,3 +1,4 @@
+from django.core.validators import RegexValidator
 from django.db import models
 
 
@@ -8,6 +9,16 @@ class Product(models.Model):
         BUNDLE = "BUNDLE", "Bundle"
         MERCH = "MERCH", "Merch"
 
+    product_id = models.CharField(
+        max_length=20,
+        primary_key=True,
+        validators=[
+            RegexValidator(
+                regex=r"^[A-Z0-9]+$",
+                message="Use only uppercase letters and numbers.",
+            )
+        ],
+    )
     image = models.URLField(blank=True)
     artist = models.CharField(max_length=255)
     title = models.CharField(max_length=255)

@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.urls import reverse
 
@@ -9,6 +10,7 @@ from .models import Product
 class ProductModelTests(TestCase):
     def test_product_stores_catalogue_data(self):
         product = Product.objects.create(
+            product_id="MDNC2LP",
             artist="Madeon",
             title="Victory",
             description="Placeholder description for Madeon - Victory LP",
@@ -17,11 +19,25 @@ class ProductModelTests(TestCase):
         )
 
         product.full_clean()
+        self.assertEqual(product.pk, "MDNC2LP")
         self.assertEqual(product.image, "")
         self.assertEqual(product.artist, "Madeon")
         self.assertEqual(product.product_type, "LP")
         self.assertEqual(product.price, Decimal("69.99"))
         self.assertEqual(str(product), "Madeon - Victory")
+
+    def test_product_id_rejects_invalid_characters(self):
+        product = Product(
+            product_id="invalid-id",
+            artist="Placeholder Artist",
+            title="Placeholder Title",
+            description="Placeholder Description",
+            product_type=Product.ProductType.CD,
+            price=Decimal("29.99"),
+        )
+
+        with self.assertRaises(ValidationError):
+            product.full_clean()
 
     def test_product_type_choices_are_fixed(self):
         self.assertEqual(
@@ -58,3 +74,7 @@ class HomePageTests(TestCase):
         self.assertContains(response, "Placeholder Description 2")
         self.assertContains(response, "Bundle")
         self.assertContains(response, "49.99€")
+        self.assertEqual(
+            list(products.values_list("product_id", flat=True)),
+            ["PLHLP01", "PLHCD02", "PLHBNDL03", "PLHMRCH04"],
+        )
