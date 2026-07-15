@@ -9,8 +9,6 @@
     --cult-red-bright: #ff3b30;
     --cult-bone: #f3f1ed;
     --cult-muted: #bbb8b2;
-    --cult-shadow: rgba(243, 241, 237, 0.18);
-    --cult-shadow-strong: rgba(243, 241, 237, 0.28);
 }
 
 body {
@@ -26,6 +24,10 @@ body {
         var(--cult-black);
     color: var(--cult-bone);
     font-family: "Nunito Sans", sans-serif;
+}
+
+body * {
+    box-shadow: none !important;
 }
 
 h1,
@@ -107,7 +109,6 @@ header .navbar {
     --bs-navbar-brand-hover-color: var(--cult-red-bright);
     background: var(--cult-red-dark) !important;
     border-bottom: 1px solid rgba(243, 241, 237, 0.55);
-    box-shadow: 0 1rem 2.75rem var(--cult-shadow-strong);
     min-height: 7rem;
 }
 
@@ -121,7 +122,6 @@ header .nav-link,
 header .btn,
 header .navbar-toggler {
     border-radius: 0;
-    box-shadow: 0 0.65rem 1.4rem var(--cult-shadow);
     font-weight: 800;
 }
 
@@ -177,7 +177,6 @@ header .dropdown-menu {
     background: var(--cult-coal);
     border-color: rgba(243, 241, 237, 0.55);
     border-radius: 0;
-    box-shadow: 0 0.75rem 1.75rem var(--cult-shadow);
     margin-top: 0.75rem !important;
     min-width: 12rem;
 }
@@ -222,7 +221,7 @@ header form[role="search"] .form-control {
 .btn {
     font-weight: 800;
     padding: 0.65rem 1.05rem;
-    transition: background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+    transition: background-color 120ms ease, border-color 120ms ease;
 }
 
 .btn-primary {
@@ -236,11 +235,6 @@ header form[role="search"] .form-control {
     --bs-btn-active-border-color: #b71322;
     --bs-btn-disabled-bg: #6f3036;
     --bs-btn-disabled-border-color: #6f3036;
-    box-shadow: 0 0.6rem 1.35rem var(--cult-shadow);
-}
-
-.btn-primary:hover {
-    box-shadow: 0 0.45rem 1rem var(--cult-shadow-strong);
 }
 
 .btn-secondary {
@@ -278,7 +272,6 @@ header form[role="search"] .form-control {
 .form-check-input:focus,
 .page-link:focus-visible,
 a:focus-visible {
-    box-shadow: 0 0 0 0.25rem rgba(255, 59, 48, 0.34);
     outline: 2px solid var(--cult-red-bright);
     outline-offset: 2px;
 }
@@ -336,7 +329,6 @@ a:focus-visible {
     background: var(--cult-coal);
     border: 1px solid var(--cult-border);
     border-top: 2px solid var(--cult-red);
-    box-shadow: 0 0.9rem 2.25rem var(--cult-shadow);
     color: var(--cult-bone);
 }
 
@@ -436,7 +428,6 @@ a:focus-visible {
 
 .palette-swatch {
     border: 1px solid var(--cult-border);
-    box-shadow: 0 0.75rem 1.75rem var(--cult-shadow);
     display: flex;
     flex-direction: column;
     font-weight: 800;
@@ -483,9 +474,8 @@ a:focus-visible {
 
 body > footer.bg-body-tertiary {
     align-items: center;
-    background-color: var(--cult-red) !important;
+    background-color: var(--cult-red-dark) !important;
     border-top: 1px solid rgba(243, 241, 237, 0.55);
-    box-shadow: 0 -1rem 2.75rem var(--cult-shadow-strong);
     color: var(--cult-bone);
     display: flex;
     font-weight: 700;
