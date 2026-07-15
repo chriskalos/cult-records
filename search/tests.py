@@ -38,6 +38,29 @@ class SearchFormTests(TestCase):
 
         self.assertTrue(form.is_valid())
 
+    def test_price_defaults_use_catalogue_range(self):
+        Product.objects.create(
+            product_id="MAXPRICE",
+            artist="Test Artist",
+            title="Expensive Album",
+            description="Test description",
+            product_type=Product.ProductType.LP,
+            price=Decimal("89.99"),
+        )
+
+        form = SearchForm()
+
+        self.assertEqual(form.fields["min_price"].initial, Decimal("0.00"))
+        self.assertEqual(form.fields["max_price"].initial, Decimal("89.99"))
+        self.assertEqual(form.catalogue_max_price, Decimal("89.99"))
+
+    def test_missing_price_parameters_receive_catalogue_defaults(self):
+        form = SearchForm({"query": "test"})
+
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data["min_price"], Decimal("0.00"))
+        self.assertEqual(form.cleaned_data["max_price"], Decimal("49.99"))
+
 
 class ProductSearchTests(TestCase):
     @classmethod

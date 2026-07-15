@@ -1,4 +1,8 @@
+from decimal import Decimal
+
 from django import forms
+from django.core.validators import MaxValueValidator
+from django.db.models import Max
 
 from home.models import Product
 
@@ -58,7 +62,33 @@ class SearchForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
+        catalogue_max_price = (
+            Product.objects.aggregate(max_price=Max("price"))["max_price"]
+            or Decimal("0.00")
+        ).quantize(Decimal("0.01"))
+        data = args[0] if args else kwargs.get("data")
+
+        if data is not None:
+            data = data.copy()
+            data.setdefault("min_price", "0.00")
+            data.setdefault("max_price", str(catalogue_max_price))
+
+            if args:
+                args = (data, *args[1:])
+            else:
+                kwargs["data"] = data
+
         super().__init__(*args, **kwargs)
+        self.catalogue_max_price = catalogue_max_price
+        self.fields["min_price"].initial = Decimal("0.00")
+        self.fields["max_price"].initial = catalogue_max_price
+
+        for field_name in ("min_price", "max_price"):
+            field = self.fields[field_name]
+            field.max_value = catalogue_max_price
+            field.validators.append(MaxValueValidator(catalogue_max_price))
+            field.widget.attrs["max"] = str(catalogue_max_price)
+
         artists = (
             Product.objects.order_by("artist")
             .values_list("artist", flat=True)
