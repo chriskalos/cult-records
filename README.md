@@ -4,7 +4,7 @@ Cult Records is a Django web application for browsing and managing a record cata
 
 ## Current functionality
 
-The confirmed visual identity is applied across every page through the shared base template and global stylesheet. It uses a red and near-black palette, square controls, shadow-free surfaces, matching Oxblood header and footer bars, and a consistent Account dropdown. The open-source Instrument Serif and Nunito Sans families are loaded from Google Fonts. Bootstrap remains the responsive layout and component baseline beneath the custom identity.
+The confirmed visual identity is applied across every page through the shared base template and global stylesheet. It uses a red and near-black palette, square controls, shadow-free surfaces, matching Oxblood header and footer bars, and a consistent Account dropdown. The header combines the visible Cult Records wordmark with responsive PNG versions of the record-and-monogram logo. The open-source Instrument Serif and Nunito Sans families are loaded from Google Fonts. Bootstrap remains the responsive layout and component baseline beneath the custom identity.
 
 The `/visuals/` development page remains the component gallery for reviewing new global styles and reusable components before relying on them throughout the site. It renders the real shared header, footer, and product card alongside representative typography, actions, statuses, utility cards, form controls, tabular content, pagination, and a modal.
 
