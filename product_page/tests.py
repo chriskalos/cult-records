@@ -257,7 +257,27 @@ class ReviewPageTests(TestCase):
         self.assertContains(response, "No reviews yet.")
         self.assertContains(response, "Sign in to leave a review")
         self.assertContains(response, "<fieldset disabled>")
+        self.assertContains(
+            response,
+            f'{reverse("accounts:login")}?next=/products/MDEVCTRYLP/%23your-review',
+        )
         self.assertNotContains(response, self.create_url)
+
+    def test_review_sign_in_returns_to_the_product(self):
+        response = self.client.post(
+            reverse("accounts:login"),
+            {
+                "username": "user1",
+                "password": "user1",
+                "next": f"{self.detail_url}#your-review",
+            },
+        )
+
+        self.assertRedirects(
+            response,
+            f"{self.detail_url}#your-review",
+            fetch_redirect_response=False,
+        )
 
     def test_anonymous_user_cannot_submit_a_review(self):
         response = self.client.post(

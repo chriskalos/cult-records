@@ -127,7 +127,12 @@
                             <label for="preview-comment" class="form-label d-block mt-3">Comment</label>
                             <textarea id="preview-comment" class="form-control" rows="4" maxlength="2000"></textarea>
                         </fieldset>
-                        <button type="button" class="btn btn-primary mt-3">Sign in to leave a review</button>
+                        {% with review_return=request.path|add:"#your-review" %}
+                            <a
+                                href="{% url 'accounts:login' %}?next={{ review_return|urlencode }}"
+                                class="btn btn-primary mt-3"
+                            >Sign in to leave a review</a>
+                        {% endwith %}
                     </div>
                 </section>
             {% endif %}
