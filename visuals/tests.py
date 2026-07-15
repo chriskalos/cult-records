@@ -28,6 +28,9 @@ class ComponentGalleryTests(TestCase):
         self.assertTemplateUsed(response, "home/includes/product_card.html")
         self.assertContains(response, "Visual Test Record")
         self.assertContains(response, "visuals/css/gallery.css")
+        self.assertContains(response, "Account")
+        self.assertContains(response, 'data-bs-toggle="dropdown"')
+        self.assertContains(response, "#780D19")
         self.assertContains(
             response,
             "Bringing you the best of music at the best price... If you&#x27;re willing to pay it.",

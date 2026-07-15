@@ -105,7 +105,7 @@ header .navbar {
     --bs-navbar-hover-color: #ffffff;
     --bs-navbar-brand-color: var(--cult-bone);
     --bs-navbar-brand-hover-color: var(--cult-red-bright);
-    background: var(--cult-red) !important;
+    background: var(--cult-red-dark) !important;
     border-bottom: 1px solid rgba(243, 241, 237, 0.55);
     box-shadow: 0 1rem 2.75rem var(--cult-shadow-strong);
     min-height: 7rem;
@@ -152,6 +152,9 @@ header .btn-outline-secondary {
     --bs-btn-hover-bg: var(--cult-coal);
     --bs-btn-hover-border-color: var(--cult-bone);
     --bs-btn-hover-color: var(--cult-bone);
+    --bs-btn-active-bg: var(--cult-steel);
+    --bs-btn-active-border-color: var(--cult-bone);
+    --bs-btn-active-color: var(--cult-bone);
 }
 
 header .navbar-toggler {
@@ -161,6 +164,39 @@ header .navbar-toggler {
 
 header .navbar-toggler-icon {
     filter: invert(1);
+}
+
+header .account-menu > .btn {
+    min-width: 7rem;
+}
+
+header .dropdown-menu {
+    --bs-dropdown-bg: var(--cult-coal);
+    --bs-dropdown-border-color: rgba(243, 241, 237, 0.55);
+    --bs-dropdown-border-radius: 0;
+    background: var(--cult-coal);
+    border-color: rgba(243, 241, 237, 0.55);
+    border-radius: 0;
+    box-shadow: 0 0.75rem 1.75rem var(--cult-shadow);
+    margin-top: 0.75rem !important;
+    min-width: 12rem;
+}
+
+header .dropdown-item,
+header .dropdown-item-text {
+    color: var(--cult-bone);
+    font-weight: 700;
+    padding: 0.65rem 0.85rem;
+}
+
+header .dropdown-item:hover,
+header .dropdown-item:focus-visible {
+    background: var(--cult-steel);
+    color: #ffffff;
+}
+
+header .dropdown-divider {
+    border-color: var(--cult-border);
 }
 
 header form[role="search"] .form-control {
@@ -425,6 +461,11 @@ a:focus-visible {
     background: var(--cult-steel);
 }
 
+.palette-swatch-oxblood {
+    background: var(--cult-red-dark);
+    color: #ffffff;
+}
+
 .palette-swatch-blood {
     background: var(--cult-red);
     color: #ffffff;
@@ -454,13 +495,13 @@ body > footer.bg-body-tertiary {
 
 @media (min-width: 768px) {
     .palette-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 }
 
 @media (min-width: 992px) {
     .palette-grid {
-        grid-template-columns: repeat(6, minmax(0, 1fr));
+        grid-template-columns: repeat(7, minmax(0, 1fr));
     }
 }
 
@@ -476,6 +517,15 @@ body > footer.bg-body-tertiary {
 
     header .navbar-nav {
         gap: 0.75rem;
+    }
+
+    header .account-menu {
+        align-self: flex-start;
+    }
+
+    header .dropdown-menu {
+        position: static !important;
+        transform: none !important;
     }
 
     header form[role="search"] {
