@@ -333,7 +333,6 @@ a:focus-visible {
 .modal-content {
     background: var(--cult-coal);
     border: 1px solid var(--cult-border);
-    border-top: 2px solid var(--cult-red);
     color: var(--cult-bone);
 }
 
