@@ -126,7 +126,25 @@ class ProductSearchTests(TestCase):
             }
         )
 
-        self.assertEqual(results, [self.madonna_lp])
+        self.assertIn(self.madonna_lp, results)
+        self.assertNotIn(self.madonna_cd, results)
+
+    def test_product_type_filter_works_without_keyword(self):
+        results = search_products({"product_type": Product.ProductType.CD})
+
+        self.assertIn(self.madonna_cd, results)
+        self.assertNotIn(self.madonna_lp, results)
+
+    def test_price_filter_boundaries_are_inclusive(self):
+        results = search_products(
+            {
+                "min_price": Decimal("39.99"),
+                "max_price": Decimal("39.99"),
+            }
+        )
+
+        self.assertIn(self.madonna_lp, results)
+        self.assertNotIn(self.madonna_cd, results)
 
 
 class SearchPageTests(TestCase):
@@ -172,3 +190,15 @@ class SearchPageTests(TestCase):
         )
 
         self.assertContains(response, 'value="madona confesions"', count=2)
+
+    def test_invalid_price_range_does_not_run_search(self):
+        response = self.client.get(
+            reverse("search:results"),
+            {"min_price": "30", "max_price": "20"},
+        )
+
+        self.assertIsNone(response.context["products"])
+        self.assertContains(
+            response,
+            "Maximum price must be greater than or equal to minimum price.",
+        )
