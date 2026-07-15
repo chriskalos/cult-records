@@ -10,11 +10,11 @@ Public users can search the catalogue from the site header or the search page. S
 
 Search results can be filtered by artist, product type, minimum price, and maximum price. Price filtering uses a dual-ended slider with editable values. Its range starts at zero and ends at the highest product price currently in the catalogue. Filters apply automatically when changed, with a short delay for price input. The filters appear in a left sidebar on larger screens and stack above the results on smaller screens.
 
-The product database model stores an optional image URL, artist, title, description, product type, and price. Product types are limited to LP, CD, bundle, and merch.
+The product database model stores an optional static image path, artist, title, description, product type, and price. Product types are limited to LP, CD, bundle, and merch.
 
 Each product uses a manually assigned uppercase alphanumeric product ID as its primary key.
 
-An initial data migration adds four placeholder products for development.
+The catalogue contains 11 CD and LP products from cursed locale, Madeon, Madonna, Balu Brigada, and Rick Astley. CDs cost 6.99€ and LPs cost 14.99€. Album artwork is stored with the application as static image assets.
 
 ## Local setup
 
