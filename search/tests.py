@@ -68,6 +68,54 @@ class ProductSearchTests(TestCase):
         self.assertIn(self.madonna_lp, artist_results)
         self.assertIn(self.madonna_lp, description_results)
 
+    def test_words_can_match_across_artist_and_title(self):
+        results = search_products({"query": "madonna confessions"})
+
+        self.assertIn(self.madonna_lp, results)
+
+    def test_word_order_does_not_prevent_a_match(self):
+        results = search_products({"query": "confessions madonna"})
+
+        self.assertIn(self.madonna_lp, results)
+
+    def test_reasonable_misspellings_return_relevant_product(self):
+        results = search_products({"query": "madona confesions"})
+
+        self.assertIn(self.madonna_lp, results)
+
+    def test_unrelated_query_does_not_return_weak_matches(self):
+        results = search_products({"query": "zzzz unrelated"})
+
+        self.assertEqual(results, [])
+
+    def test_exact_match_ranks_above_fuzzy_match(self):
+        fuzzy_product = Product.objects.create(
+            product_id="MDNTRBT",
+            artist="Madona Tribute",
+            title="Live",
+            description="A tribute performance",
+            product_type=Product.ProductType.CD,
+            price=Decimal("14.99"),
+        )
+
+        results = search_products({"query": "Madonna"})
+
+        self.assertLess(results.index(self.madonna_lp), results.index(fuzzy_product))
+
+    def test_artist_and_title_match_ranks_above_description_match(self):
+        description_match = Product.objects.create(
+            product_id="POPDOC",
+            artist="Various Artists",
+            title="Pop Documentary",
+            description="A documentary about Madonna and Confessions",
+            product_type=Product.ProductType.CD,
+            price=Decimal("12.99"),
+        )
+
+        results = search_products({"query": "madonna confessions"})
+
+        self.assertLess(results.index(self.madonna_lp), results.index(description_match))
+
     def test_filters_can_be_combined(self):
         results = search_products(
             {
@@ -78,7 +126,7 @@ class ProductSearchTests(TestCase):
             }
         )
 
-        self.assertQuerySetEqual(results, [self.madonna_lp])
+        self.assertEqual(results, [self.madonna_lp])
 
 
 class SearchPageTests(TestCase):
@@ -97,4 +145,4 @@ class SearchPageTests(TestCase):
         )
 
         self.assertContains(response, "Placeholder Artist 2 - Placeholder Title 2")
-        self.assertNotContains(response, "Placeholder Artist 1 - Placeholder Title 1")
+        self.assertEqual(response.context["products"][0].product_id, "PLHCD02")
