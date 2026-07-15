@@ -10,20 +10,21 @@ from .models import Product
 class ProductModelTests(TestCase):
     def test_product_stores_catalogue_data(self):
         product = Product.objects.create(
-            product_id="MDNC2LP",
+            product_id="TESTCATLP",
+            image="home/images/products/madeon-victory.jpg",
             artist="Madeon",
             title="Victory",
-            description="Placeholder description for Madeon - Victory LP",
+            description="Madeon's 2026 album Victory on vinyl LP.",
             product_type=Product.ProductType.LP,
-            price=Decimal("69.99"),
+            price=Decimal("14.99"),
         )
 
         product.full_clean()
-        self.assertEqual(product.pk, "MDNC2LP")
-        self.assertEqual(product.image, "")
+        self.assertEqual(product.pk, "TESTCATLP")
+        self.assertEqual(product.image, "home/images/products/madeon-victory.jpg")
         self.assertEqual(product.artist, "Madeon")
         self.assertEqual(product.product_type, "LP")
-        self.assertEqual(product.price, Decimal("69.99"))
+        self.assertEqual(product.price, Decimal("14.99"))
         self.assertEqual(str(product), "Madeon - Victory")
 
     def test_product_id_rejects_invalid_characters(self):
@@ -61,23 +62,21 @@ class HomePageTests(TestCase):
         response = self.client.get(reverse("home"))
 
         products = response.context["products"]
-        self.assertQuerySetEqual(
-            products,
-            [
-                "Placeholder Title 1",
-                "Placeholder Title 2",
-                "Placeholder Title 3",
-                "Placeholder Title 4",
-            ],
-            transform=lambda product: product.title,
+        self.assertEqual(products.count(), 11)
+        self.assertContains(response, "Balu Brigada")
+        self.assertContains(response, "chriskalos dot xyz")
+        self.assertContains(response, "2026 album Victory on CD.")
+        self.assertContains(response, "14.99€")
+        self.assertContains(response, "6.99€")
+        self.assertNotContains(response, "Placeholder Artist")
+        self.assertContains(
+            response,
+            "/static/home/images/products/madeon-victory.jpg",
+            count=2,
         )
-        self.assertContains(response, "Placeholder Artist 1")
-        self.assertContains(response, "Placeholder Description 2")
-        self.assertContains(response, "Bundle")
-        self.assertContains(response, "49.99€")
-        self.assertEqual(
-            list(products.values_list("product_id", flat=True)),
-            ["PLHLP01", "PLHCD02", "PLHBNDL03", "PLHMRCH04"],
+        self.assertContains(
+            response,
+            "/static/home/images/products/cursed-locale-dance-w-me.jpg",
         )
 
     def test_header_contains_catalogue_search(self):

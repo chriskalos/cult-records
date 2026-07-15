@@ -19,7 +19,7 @@ class Product(models.Model):
             )
         ],
     )
-    image = models.URLField(blank=True)
+    image = models.CharField(max_length=500, blank=True)
     artist = models.CharField(max_length=255)
     title = models.CharField(max_length=255)
     description = models.TextField()

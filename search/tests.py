@@ -25,7 +25,7 @@ class SearchFormTests(TestCase):
         self.assertIn(("A Test Artist", "A Test Artist"), form.fields["artist"].choices)
 
     def test_price_range_rejects_maximum_below_minimum(self):
-        form = SearchForm({"min_price": "30", "max_price": "20"})
+        form = SearchForm({"min_price": "10", "max_price": "8"})
 
         self.assertFalse(form.is_valid())
         self.assertEqual(
@@ -59,7 +59,7 @@ class SearchFormTests(TestCase):
 
         self.assertTrue(form.is_valid())
         self.assertEqual(form.cleaned_data["min_price"], Decimal("0.00"))
-        self.assertEqual(form.cleaned_data["max_price"], Decimal("49.99"))
+        self.assertEqual(form.cleaned_data["max_price"], Decimal("14.99"))
 
 
 class ProductSearchTests(TestCase):
@@ -187,28 +187,28 @@ class SearchPageTests(TestCase):
         self.assertContains(response, "data-price-max-input")
         self.assertContains(response, "data-price-range")
         self.assertContains(response, "0.00€")
-        self.assertContains(response, "49.99€")
+        self.assertContains(response, "14.99€")
         self.assertContains(response, "/static/search/css/filters.css")
         self.assertContains(response, "/static/search/js/filters.js")
 
     def test_valid_search_displays_matching_products(self):
         response = self.client.get(
             reverse("search:results"),
-            {"query": "Placeholder Title 2"},
+            {"query": "chriskalos dot xyz"},
         )
 
-        self.assertContains(response, "Placeholder Artist 2")
-        self.assertContains(response, "Placeholder Title 2")
-        self.assertEqual(response.context["products"][0].product_id, "PLHCD02")
+        self.assertContains(response, "cursed locale")
+        self.assertContains(response, "chriskalos dot xyz")
+        self.assertEqual(response.context["products"][0].product_id, "CLXYZCD")
         self.assertTemplateUsed(response, "home/includes/product_card.html")
 
     def test_search_page_displays_result_count(self):
         response = self.client.get(
             reverse("search:results"),
-            {"artist": "Placeholder Artist 2"},
+            {"artist": "Madeon"},
         )
 
-        self.assertContains(response, "1 result")
+        self.assertContains(response, "2 results")
 
     def test_search_page_displays_empty_state(self):
         response = self.client.get(
@@ -229,7 +229,7 @@ class SearchPageTests(TestCase):
     def test_invalid_price_range_does_not_run_search(self):
         response = self.client.get(
             reverse("search:results"),
-            {"min_price": "30", "max_price": "20"},
+            {"min_price": "10", "max_price": "8"},
         )
 
         self.assertIsNone(response.context["products"])
