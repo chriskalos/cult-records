@@ -91,6 +91,11 @@ class HomePageTests(TestCase):
         response = self.client.get(reverse("home"))
 
         self.assertContains(response, "/static/css/style.css")
+        self.assertContains(
+            response,
+            "/static/home/images/brand/cult-records-logo-64.png",
+        )
+        self.assertContains(response, "<span>Cult Records</span>", html=True)
         self.assertContains(response, "Account")
         self.assertContains(response, 'data-bs-toggle="dropdown"')
         self.assertContains(response, "Sign in")

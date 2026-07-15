@@ -1,7 +1,25 @@
+{% load static %}
 <header>
     <nav class="navbar navbar-expand-lg bg-body-tertiary" aria-label="Main navigation">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">Cult Records</a>
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <img
+                    src="{% static 'home/images/brand/cult-records-logo-64.png' %}"
+                    srcset="
+                        {% static 'home/images/brand/cult-records-logo-64.png' %} 64w,
+                        {% static 'home/images/brand/cult-records-logo-128.png' %} 128w,
+                        {% static 'home/images/brand/cult-records-logo-256.png' %} 256w,
+                        {% static 'home/images/brand/cult-records-logo-512.png' %} 512w
+                    "
+                    sizes="(max-width: 575px) 52px, 64px"
+                    class="navbar-brand-logo"
+                    width="64"
+                    height="64"
+                    alt=""
+                    aria-hidden="true"
+                >
+                <span>Cult Records</span>
+            </a>
             <button
                 class="navbar-toggler"
                 type="button"
