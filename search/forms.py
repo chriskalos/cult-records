@@ -9,13 +9,20 @@ class SearchForm(forms.Form):
         max_length=100,
         label="Search",
         widget=forms.TextInput(
-            attrs={"placeholder": "Search by title, artist, or description"}
+            attrs={
+                "class": "form-control",
+                "placeholder": "Search by title, artist, or description",
+            }
         ),
     )
-    artist = forms.ChoiceField(required=False)
+    artist = forms.ChoiceField(
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
     product_type = forms.ChoiceField(
         required=False,
         choices=[("", "All product types"), *Product.ProductType.choices],
+        widget=forms.Select(attrs={"class": "form-select"}),
     )
     min_price = forms.DecimalField(
         required=False,
@@ -23,6 +30,9 @@ class SearchForm(forms.Form):
         max_digits=10,
         decimal_places=2,
         label="Minimum price",
+        widget=forms.NumberInput(
+            attrs={"class": "form-control", "placeholder": "0.00"}
+        ),
     )
     max_price = forms.DecimalField(
         required=False,
@@ -30,6 +40,9 @@ class SearchForm(forms.Form):
         max_digits=10,
         decimal_places=2,
         label="Maximum price",
+        widget=forms.NumberInput(
+            attrs={"class": "form-control", "placeholder": "0.00"}
+        ),
     )
 
     def __init__(self, *args, **kwargs):

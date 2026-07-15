@@ -144,5 +144,23 @@ class SearchPageTests(TestCase):
             {"query": "Placeholder Title 2"},
         )
 
-        self.assertContains(response, "Placeholder Artist 2 - Placeholder Title 2")
+        self.assertContains(response, "Placeholder Artist 2")
+        self.assertContains(response, "Placeholder Title 2")
         self.assertEqual(response.context["products"][0].product_id, "PLHCD02")
+        self.assertTemplateUsed(response, "home/includes/product_card.html")
+
+    def test_search_page_displays_result_count(self):
+        response = self.client.get(
+            reverse("search:results"),
+            {"artist": "Placeholder Artist 2"},
+        )
+
+        self.assertContains(response, "1 result")
+
+    def test_search_page_displays_empty_state(self):
+        response = self.client.get(
+            reverse("search:results"),
+            {"query": "zzzz unrelated"},
+        )
+
+        self.assertContains(response, "No products matched your search.")
