@@ -1,0 +1,63 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}{{ product.title }} by {{ product.artist }} | Cult Records{% endblock %}
+
+{% block content %}
+    <nav aria-label="Breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'search:results' %}?artist={{ product.artist|urlencode }}">{{ product.artist }}</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{{ product.title }}</li>
+        </ol>
+    </nav>
+
+    <article>
+        <div class="row g-4 align-items-start mb-5">
+            <div class="col-12 col-md-5">
+                {% if product.image %}
+                    <img
+                        src="{% static product.image %}"
+                        class="img-fluid rounded w-100"
+                        alt="{{ product.title }}"
+                    >
+                {% endif %}
+            </div>
+
+            <div class="col-12 col-md-7">
+                <h1>{{ product.title }}</h1>
+                <p class="fs-5 text-body-secondary">{{ product.artist }}</p>
+                <p class="d-flex flex-wrap gap-2">
+                    <span class="badge text-bg-secondary">{{ product.get_product_type_display }}</span>
+                    {% if product.genre %}
+                        <span class="badge text-bg-light border">{{ product.genre }}</span>
+                    {% endif %}
+                </p>
+                <p>{{ product.description }}</p>
+                {% if page.release_date %}
+                    <p><strong>Release date:</strong> {{ page.release_date|date:"j F Y" }}</p>
+                {% endif %}
+                <p class="fs-4 fw-semibold">{{ product.price|floatformat:2 }}€</p>
+                <button type="button" class="btn btn-primary" disabled>Add to cart</button>
+            </div>
+        </div>
+
+        <section class="mb-5" aria-labelledby="description-heading">
+            <h2 id="description-heading">About this product</h2>
+            {{ long_description|linebreaks }}
+        </section>
+
+        {% if page.tracks %}
+            <section class="mb-5" aria-labelledby="tracks-heading">
+                <h2 id="tracks-heading">Track listing</h2>
+                <ol>
+                    {% for track in page.tracks %}
+                        <li>{{ track }}</li>
+                    {% endfor %}
+                </ol>
+            </section>
+        {% endif %}
+    </article>
+{% endblock %}

@@ -1,11 +1,18 @@
 {% load static %}
 
-<article class="card h-100">
+<article class="card h-100 position-relative">
     {% if product.image %}
         <img src="{% static product.image %}" class="card-img-top" alt="{{ product.title }}">
     {% endif %}
     <div class="card-body d-flex flex-column">
-        <h2 class="card-title h5">{{ product.title }}</h2>
+        <h2 class="card-title h5">
+            <a
+                href="{% url 'product_page:detail' product.product_id %}"
+                class="stretched-link text-reset text-decoration-none"
+            >
+                {{ product.title }}
+            </a>
+        </h2>
         <p class="card-subtitle mb-2 text-body-secondary">{{ product.artist }}</p>
         <p><span class="badge text-bg-secondary">{{ product.get_product_type_display }}</span></p>
         <p class="card-text">{{ product.description }}</p>

@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.test import TestCase
+from django.urls import reverse
 
 from home.models import Product
 
@@ -142,3 +143,68 @@ class ReviewModelTests(TestCase):
         self.product.delete()
 
         self.assertFalse(Review.objects.filter(pk=review.pk).exists())
+
+
+class ProductDetailPageTests(TestCase):
+    def setUp(self):
+        self.product = Product.objects.create(
+            product_id="PAGECD",
+            image="home/images/products/madeon-victory.jpg",
+            artist="Test Artist",
+            title="Page Album",
+            description="Short catalogue description.",
+            genre="Electronic",
+            product_type=Product.ProductType.CD,
+            price=Decimal("6.99"),
+        )
+        self.url = reverse("product_page:detail", args=[self.product.product_id])
+
+    def test_detail_page_displays_product_and_supplementary_data(self):
+        ProductPage.objects.create(
+            product=self.product,
+            long_description="First paragraph.\n\nSecond paragraph.",
+            release_date=date(2026, 7, 15),
+            tracks=["Opening Track", "Closing Track"],
+        )
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "product_page/detail.html")
+        self.assertContains(response, "Page Album")
+        self.assertContains(response, "Test Artist")
+        self.assertContains(response, "Electronic")
+        self.assertContains(response, "15 July 2026")
+        self.assertContains(response, "First paragraph.")
+        self.assertContains(response, "Second paragraph.")
+        self.assertContains(response, "Opening Track")
+        self.assertContains(response, "6.99€")
+        self.assertContains(response, "Add to cart")
+
+    def test_detail_page_falls_back_when_supplementary_data_is_missing(self):
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Short catalogue description.", count=2)
+        self.assertNotContains(response, "Track listing")
+        self.assertNotContains(response, "Release date:")
+
+    def test_artist_breadcrumb_links_to_filtered_catalogue(self):
+        response = self.client.get(self.url)
+
+        self.assertContains(response, "/search/?artist=Test%20Artist")
+
+    def test_unknown_product_returns_not_found(self):
+        response = self.client.get(
+            reverse("product_page:detail", args=["UNKNOWNPRODUCT"])
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_catalogue_cards_link_to_product_detail_pages(self):
+        response = self.client.get(reverse("home"))
+
+        self.assertContains(
+            response,
+            reverse("product_page:detail", args=["MDEVCTRYLP"]),
+        )
