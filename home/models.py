@@ -23,6 +23,7 @@ class Product(models.Model):
     artist = models.CharField(max_length=255)
     title = models.CharField(max_length=255)
     description = models.TextField()
+    genre = models.CharField(max_length=100, blank=True, db_index=True)
     product_type = models.CharField(max_length=6, choices=ProductType.choices)
     price = models.DecimalField(max_digits=10, decimal_places=2)
 

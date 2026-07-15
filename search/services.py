@@ -60,6 +60,9 @@ def search_products(criteria):
     if artist := criteria.get("artist"):
         products = products.filter(artist=artist)
 
+    if genre := criteria.get("genre"):
+        products = products.filter(genre=genre)
+
     if product_type := criteria.get("product_type"):
         products = products.filter(product_type=product_type)
 

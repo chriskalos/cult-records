@@ -15,6 +15,7 @@ class ProductModelTests(TestCase):
             artist="Madeon",
             title="Victory",
             description="Madeon's 2026 album Victory on vinyl LP.",
+            genre="Electronic",
             product_type=Product.ProductType.LP,
             price=Decimal("14.99"),
         )
@@ -23,6 +24,7 @@ class ProductModelTests(TestCase):
         self.assertEqual(product.pk, "TESTCATLP")
         self.assertEqual(product.image, "home/images/products/madeon-victory.jpg")
         self.assertEqual(product.artist, "Madeon")
+        self.assertEqual(product.genre, "Electronic")
         self.assertEqual(product.product_type, "LP")
         self.assertEqual(product.price, Decimal("14.99"))
         self.assertEqual(str(product), "Madeon - Victory")

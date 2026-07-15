@@ -24,6 +24,30 @@ class SearchFormTests(TestCase):
 
         self.assertIn(("A Test Artist", "A Test Artist"), form.fields["artist"].choices)
 
+    def test_genre_choices_exclude_blank_values(self):
+        Product.objects.create(
+            product_id="GENRELP",
+            artist="A Test Artist",
+            title="Genre Album",
+            description="Test description",
+            genre="Electronic",
+            product_type=Product.ProductType.LP,
+            price=Decimal("24.99"),
+        )
+        Product.objects.create(
+            product_id="NOGENRE",
+            artist="A Test Artist",
+            title="Merchandise",
+            description="Test description",
+            product_type=Product.ProductType.MERCH,
+            price=Decimal("12.99"),
+        )
+
+        form = SearchForm()
+
+        self.assertIn(("Electronic", "Electronic"), form.fields["genre"].choices)
+        self.assertNotIn(("", ""), form.fields["genre"].choices)
+
     def test_price_range_rejects_maximum_below_minimum(self):
         form = SearchForm({"min_price": "10", "max_price": "8"})
 
@@ -70,6 +94,7 @@ class ProductSearchTests(TestCase):
             artist="Madonna",
             title="Confessions on a Dance Floor",
             description="A dance-pop album",
+            genre="Pop",
             product_type=Product.ProductType.LP,
             price=Decimal("39.99"),
         )
@@ -78,6 +103,7 @@ class ProductSearchTests(TestCase):
             artist="Madonna",
             title="American Life",
             description="A studio album",
+            genre="Pop",
             product_type=Product.ProductType.CD,
             price=Decimal("19.99"),
         )
@@ -158,6 +184,22 @@ class ProductSearchTests(TestCase):
         self.assertIn(self.madonna_cd, results)
         self.assertNotIn(self.madonna_lp, results)
 
+    def test_genre_filter_uses_an_exact_match(self):
+        electronic_product = Product.objects.create(
+            product_id="ELECTRONICLP",
+            artist="Test Artist",
+            title="Electronic Album",
+            description="Test description",
+            genre="Electronic",
+            product_type=Product.ProductType.LP,
+            price=Decimal("21.99"),
+        )
+
+        results = search_products({"genre": "Electronic"})
+
+        self.assertIn(electronic_product, results)
+        self.assertNotIn(self.madonna_lp, results)
+
     def test_price_filter_boundaries_are_inclusive(self):
         results = search_products(
             {
@@ -179,7 +221,7 @@ class SearchPageTests(TestCase):
         self.assertIsInstance(response.context["form"], SearchForm)
         self.assertIsNone(response.context["products"])
         self.assertContains(response, "data-search-form")
-        self.assertContains(response, 'data-live-filter="immediate"', count=2)
+        self.assertContains(response, 'data-live-filter="immediate"', count=3)
         self.assertContains(response, 'data-live-filter="debounced"', count=2)
         self.assertContains(response, 'type="range"', count=2)
         self.assertContains(response, 'type="number"', count=2)

@@ -42,6 +42,14 @@
                             {% endfor %}
                         </div>
 
+                        <div class="mb-3">
+                            <label for="{{ form.genre.id_for_label }}" class="form-label">{{ form.genre.label }}</label>
+                            {{ form.genre }}
+                            {% for error in form.genre.errors %}
+                                <div class="text-danger mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
                         <fieldset class="mb-3" data-price-range>
                             <legend class="form-label">Price</legend>
                             <div class="row g-2 mb-2">

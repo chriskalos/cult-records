@@ -25,6 +25,12 @@ class SearchForm(forms.Form):
             attrs={"class": "form-select", "data-live-filter": "immediate"}
         ),
     )
+    genre = forms.ChoiceField(
+        required=False,
+        widget=forms.Select(
+            attrs={"class": "form-select", "data-live-filter": "immediate"}
+        ),
+    )
     product_type = forms.ChoiceField(
         required=False,
         choices=[("", "All product types"), *Product.ProductType.choices],
@@ -97,6 +103,17 @@ class SearchForm(forms.Form):
         self.fields["artist"].choices = [
             ("", "All artists"),
             *((artist, artist) for artist in artists),
+        ]
+
+        genres = (
+            Product.objects.exclude(genre="")
+            .order_by("genre")
+            .values_list("genre", flat=True)
+            .distinct()
+        )
+        self.fields["genre"].choices = [
+            ("", "All genres"),
+            *((genre, genre) for genre in genres),
         ]
 
     def clean(self):
