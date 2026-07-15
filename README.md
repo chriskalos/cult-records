@@ -16,9 +16,31 @@ Each product uses a manually assigned uppercase alphanumeric product ID as its p
 
 Every catalogue card links to a responsive product detail page. Supplementary product-page records use the product ID as a one-to-one primary key and can store a long description, an exact release date, and an ordered JSON list of track names. All supplementary fields are optional. A product without a supplementary record still has a detail page and uses its short catalogue description as a fallback.
 
-Product pages include a reviews section with a dynamically calculated average rating and review count. Approved reviews appear newest first. Authenticated users can submit one review per product with a rating from one to five and an optional comment of up to 2,000 characters. They can later edit or delete their own review. Anonymous visitors see an inactive review form and sign-in placeholder until the public account interface is added.
+Product pages include a reviews section with a dynamically calculated average rating and review count. Approved reviews appear newest first. Authenticated users can submit one review per product with a rating from one to five and an optional comment of up to 2,000 characters. They can later edit or delete their own review. Anonymous visitors see an inactive review form with a link to sign in.
+
+Visitors can register with a username and password, sign in, and sign out. Registration signs the new user in automatically. Usernames must be unique regardless of capitalization, and new passwords are checked with Django's configured password validators. Password changes are handled by an administrator because the application does not collect email addresses.
+
+Every authenticated user has a protected dashboard showing their username, account type, and recent review activity. Users can update their own username, but cannot change their role or permissions. Signing in from a product's review section returns the user to that product.
+
+The application recognizes Admin, Editor, User, and Anonymous roles. Admins have full permissions. Editors are assigned catalogue management and review moderation permissions, but not user-management permissions. The future custom management interface will restrict review moderation to approving, hiding, and deleting reviews rather than rewriting their content. Ordinary Users have no management permissions and can only edit or delete their own reviews. Anonymous visitors can only browse the public catalogue. Django's admin interface is not exposed because catalogue and account management will use a custom interface.
 
 The catalogue contains 11 CD and LP products from cursed locale, Madeon, Madonna, Balu Brigada, and Rick Astley. CDs cost 6.99€ and LPs cost 14.99€. Catalogue genres use Electronic for cursed locale and Madeon, Pop for Madonna and Rick Astley, and Alternative for Balu Brigada. Album artwork is stored with the application as static image assets.
+
+## Default development accounts
+
+Database migrations create the following development accounts:
+
+| Role | Username | Password |
+| --- | --- | --- |
+| Admin | `admin` | `admin` |
+| Editor | `editor` | `editor` |
+| User | `user1` | `user1` |
+| User | `user2` | `user2` |
+| User | `user3` | `user3` |
+| User | `user4` | `user4` |
+| User | `user5` | `user5` |
+
+These credentials are intended for local development and demonstration only. Passwords are stored as Django password hashes rather than plain text.
 
 ## Local setup
 
