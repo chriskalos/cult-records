@@ -27,6 +27,11 @@ class ComponentGalleryTests(TestCase):
         self.assertTemplateUsed(response, "home/includes/footer.html")
         self.assertTemplateUsed(response, "home/includes/product_card.html")
         self.assertContains(response, "Visual Test Record")
+        self.assertContains(response, "visuals/css/gallery.css")
+        self.assertContains(
+            response,
+            "Bringing you the best of music at the best price... If you&#x27;re willing to pay it.",
+        )
 
     def test_gallery_works_without_catalogue_products(self):
         Product.objects.all().delete()
