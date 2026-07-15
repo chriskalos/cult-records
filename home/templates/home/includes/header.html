@@ -7,6 +7,18 @@
                     <a class="nav-link active" aria-current="page" href="{% url 'home' %}">Home</a>
                 </li>
             </ul>
+            <form action="{% url 'search:results' %}" method="get" class="d-flex ms-auto" role="search">
+                <label for="header-search" class="visually-hidden">Search the catalogue</label>
+                <input
+                    id="header-search"
+                    name="query"
+                    type="search"
+                    value="{{ request.GET.query|default:'' }}"
+                    class="form-control me-2"
+                    placeholder="Search catalogue"
+                >
+                <button type="submit" class="btn btn-outline-primary">Search</button>
+            </form>
         </div>
     </nav>
 </header>

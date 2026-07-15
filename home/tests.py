@@ -79,3 +79,9 @@ class HomePageTests(TestCase):
             list(products.values_list("product_id", flat=True)),
             ["PLHLP01", "PLHCD02", "PLHBNDL03", "PLHMRCH04"],
         )
+
+    def test_header_contains_catalogue_search(self):
+        response = self.client.get(reverse("home"))
+
+        self.assertContains(response, f'action="{reverse("search:results")}"')
+        self.assertContains(response, 'name="query"')

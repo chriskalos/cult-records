@@ -164,3 +164,11 @@ class SearchPageTests(TestCase):
         )
 
         self.assertContains(response, "No products matched your search.")
+
+    def test_header_search_preserves_current_query(self):
+        response = self.client.get(
+            reverse("search:results"),
+            {"query": "madona confesions"},
+        )
+
+        self.assertContains(response, 'value="madona confesions"', count=2)
