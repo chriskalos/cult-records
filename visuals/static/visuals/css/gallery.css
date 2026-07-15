@@ -9,6 +9,8 @@
     --cult-red-bright: #ff3b30;
     --cult-bone: #f3f1ed;
     --cult-muted: #bbb8b2;
+    --cult-shadow: rgba(243, 241, 237, 0.18);
+    --cult-shadow-strong: rgba(243, 241, 237, 0.28);
 }
 
 body {
@@ -103,9 +105,9 @@ header .navbar {
     --bs-navbar-hover-color: #ffffff;
     --bs-navbar-brand-color: var(--cult-bone);
     --bs-navbar-brand-hover-color: var(--cult-red-bright);
-    background: rgba(8, 8, 9, 0.98) !important;
-    border-bottom: 2px solid var(--cult-red-dark);
-    box-shadow: 0 1rem 2.75rem rgba(0, 0, 0, 0.7);
+    background: var(--cult-red) !important;
+    border-bottom: 1px solid rgba(243, 241, 237, 0.55);
+    box-shadow: 0 1rem 2.75rem var(--cult-shadow-strong);
     min-height: 7rem;
 }
 
@@ -119,13 +121,13 @@ header .nav-link,
 header .btn,
 header .navbar-toggler {
     border-radius: 0;
-    box-shadow: 0 0.65rem 1.4rem rgba(0, 0, 0, 0.58);
+    box-shadow: 0 0.65rem 1.4rem var(--cult-shadow);
     font-weight: 800;
 }
 
 header .nav-link {
-    background: var(--cult-steel);
-    border: 1px solid var(--cult-border);
+    background: var(--cult-coal);
+    border: 1px solid rgba(243, 241, 237, 0.55);
     color: var(--cult-bone);
     display: inline-block;
     padding: 0.65rem 1.1rem !important;
@@ -133,11 +135,27 @@ header .nav-link {
 
 header .nav-link:hover,
 header .nav-link:focus-visible {
-    background: var(--cult-red-dark);
+    background: var(--cult-steel);
+}
+
+header .btn-primary {
+    --bs-btn-bg: var(--cult-coal);
+    --bs-btn-border-color: rgba(243, 241, 237, 0.7);
+    --bs-btn-hover-bg: var(--cult-steel);
+    --bs-btn-hover-border-color: var(--cult-bone);
+}
+
+header .btn-outline-primary,
+header .btn-outline-secondary {
+    --bs-btn-color: var(--cult-bone);
+    --bs-btn-border-color: rgba(243, 241, 237, 0.7);
+    --bs-btn-hover-bg: var(--cult-coal);
+    --bs-btn-hover-border-color: var(--cult-bone);
+    --bs-btn-hover-color: var(--cult-bone);
 }
 
 header .navbar-toggler {
-    border-color: var(--cult-red);
+    border-color: rgba(243, 241, 237, 0.7);
     padding: 0.7rem 0.9rem;
 }
 
@@ -182,11 +200,11 @@ header form[role="search"] .form-control {
     --bs-btn-active-border-color: #b71322;
     --bs-btn-disabled-bg: #6f3036;
     --bs-btn-disabled-border-color: #6f3036;
-    box-shadow: 0 0.6rem 1.35rem rgba(0, 0, 0, 0.52);
+    box-shadow: 0 0.6rem 1.35rem var(--cult-shadow);
 }
 
 .btn-primary:hover {
-    box-shadow: 0 0.45rem 1rem rgba(0, 0, 0, 0.6);
+    box-shadow: 0 0.45rem 1rem var(--cult-shadow-strong);
 }
 
 .btn-secondary {
@@ -282,7 +300,7 @@ a:focus-visible {
     background: var(--cult-coal);
     border: 1px solid var(--cult-border);
     border-top: 2px solid var(--cult-red);
-    box-shadow: 0 0.9rem 2.25rem rgba(0, 0, 0, 0.55);
+    box-shadow: 0 0.9rem 2.25rem var(--cult-shadow);
     color: var(--cult-bone);
 }
 
@@ -382,7 +400,7 @@ a:focus-visible {
 
 .palette-swatch {
     border: 1px solid var(--cult-border);
-    box-shadow: 0 0.75rem 1.75rem rgba(0, 0, 0, 0.48);
+    box-shadow: 0 0.75rem 1.75rem var(--cult-shadow);
     display: flex;
     flex-direction: column;
     font-weight: 800;
@@ -424,9 +442,9 @@ a:focus-visible {
 
 body > footer.bg-body-tertiary {
     align-items: center;
-    background-color: rgba(8, 8, 9, 0.98) !important;
-    border-top: 2px solid var(--cult-red-dark);
-    box-shadow: 0 -1rem 2.75rem rgba(0, 0, 0, 0.7);
+    background-color: var(--cult-red) !important;
+    border-top: 1px solid rgba(243, 241, 237, 0.55);
+    box-shadow: 0 -1rem 2.75rem var(--cult-shadow-strong);
     color: var(--cult-bone);
     display: flex;
     font-weight: 700;
