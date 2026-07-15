@@ -40,10 +40,9 @@ class SearchForm(forms.Form):
         label="Minimum price",
         widget=forms.NumberInput(
             attrs={
-                "class": "price-range-input",
+                "class": "form-control",
                 "data-live-filter": "debounced",
-                "data-price-min": "",
-                "type": "range",
+                "data-price-min-input": "",
             }
         ),
     )
@@ -55,10 +54,9 @@ class SearchForm(forms.Form):
         label="Maximum price",
         widget=forms.NumberInput(
             attrs={
-                "class": "price-range-input",
+                "class": "form-control",
                 "data-live-filter": "debounced",
-                "data-price-max": "",
-                "type": "range",
+                "data-price-max-input": "",
             }
         ),
     )

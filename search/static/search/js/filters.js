@@ -12,46 +12,74 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const priceRange = form.querySelector("[data-price-range]");
-    const minPrice = form.querySelector("[data-price-min]");
-    const maxPrice = form.querySelector("[data-price-max]");
-    const minPriceOutput = form.querySelector("[data-price-min-output]");
-    const maxPriceOutput = form.querySelector("[data-price-max-output]");
+    const minPriceInput = form.querySelector("[data-price-min-input]");
+    const maxPriceInput = form.querySelector("[data-price-max-input]");
+    const minPriceSlider = form.querySelector("[data-price-min-slider]");
+    const maxPriceSlider = form.querySelector("[data-price-max-slider]");
     const priceTrack = form.querySelector("[data-price-track]");
-    const formatPrice = (value) => `${Number(value).toFixed(2)}€`;
+    const formatPrice = (value) => Number(value).toFixed(2);
 
     const updatePriceRange = (changedFilter) => {
         if (!priceRange) {
-            return;
+            return true;
         }
 
-        if (Number(minPrice.value) > Number(maxPrice.value)) {
-            if (changedFilter === minPrice) {
-                maxPrice.value = minPrice.value;
+        if (changedFilter === minPriceInput) {
+            if (minPriceInput.value === "") {
+                return false;
+            }
+            minPriceSlider.value = minPriceInput.value;
+            if (Number(minPriceSlider.value) !== Number(minPriceInput.value)) {
+                minPriceInput.value = formatPrice(minPriceSlider.value);
+            }
+        } else if (changedFilter === maxPriceInput) {
+            if (maxPriceInput.value === "") {
+                return false;
+            }
+            maxPriceSlider.value = maxPriceInput.value;
+            if (Number(maxPriceSlider.value) !== Number(maxPriceInput.value)) {
+                maxPriceInput.value = formatPrice(maxPriceSlider.value);
+            }
+        } else if (changedFilter === minPriceSlider) {
+            minPriceInput.value = formatPrice(minPriceSlider.value);
+        } else if (changedFilter === maxPriceSlider) {
+            maxPriceInput.value = formatPrice(maxPriceSlider.value);
+        }
+
+        if (Number(minPriceSlider.value) > Number(maxPriceSlider.value)) {
+            if (changedFilter === minPriceInput || changedFilter === minPriceSlider) {
+                maxPriceSlider.value = minPriceSlider.value;
+                maxPriceInput.value = formatPrice(maxPriceSlider.value);
             } else {
-                minPrice.value = maxPrice.value;
+                minPriceSlider.value = maxPriceSlider.value;
+                minPriceInput.value = formatPrice(minPriceSlider.value);
             }
         }
 
-        const catalogueMaximum = Number(maxPrice.max) || 1;
-        const start = (Number(minPrice.value) / catalogueMaximum) * 100;
-        const end = (Number(maxPrice.value) / catalogueMaximum) * 100;
+        const catalogueMaximum = Number(maxPriceSlider.max) || 1;
+        const start = (Number(minPriceSlider.value) / catalogueMaximum) * 100;
+        const end = (Number(maxPriceSlider.value) / catalogueMaximum) * 100;
 
-        minPriceOutput.value = formatPrice(minPrice.value);
-        maxPriceOutput.value = formatPrice(maxPrice.value);
         priceTrack.style.setProperty("--price-start", `${start}%`);
         priceTrack.style.setProperty("--price-end", `${end}%`);
+        return minPriceInput.validity.valid && maxPriceInput.validity.valid;
     };
 
     updatePriceRange();
 
     let priceTimer;
 
-    form.querySelectorAll("[data-live-filter='debounced']").forEach((filter) => {
+    const debouncedFilters = [
+        ...form.querySelectorAll("[data-live-filter='debounced']"),
+        minPriceSlider,
+        maxPriceSlider,
+    ].filter(Boolean);
+
+    debouncedFilters.forEach((filter) => {
         filter.addEventListener("input", () => {
             window.clearTimeout(priceTimer);
-            updatePriceRange(filter);
 
-            if (!filter.validity.valid) {
+            if (!updatePriceRange(filter) || !filter.validity.valid) {
                 return;
             }
 

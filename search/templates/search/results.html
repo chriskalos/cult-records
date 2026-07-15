@@ -44,22 +44,47 @@
 
                         <fieldset class="mb-3" data-price-range>
                             <legend class="form-label">Price</legend>
-                            <div class="d-flex justify-content-between mb-2" aria-live="polite">
-                                <output for="{{ form.min_price.id_for_label }}" data-price-min-output>
-                                    {{ form.min_price.value|floatformat:2 }}€
-                                </output>
-                                <span aria-hidden="true">to</span>
-                                <output for="{{ form.max_price.id_for_label }}" data-price-max-output>
-                                    {{ form.max_price.value|floatformat:2 }}€
-                                </output>
+                            <div class="row g-2 mb-2">
+                                <div class="col-6">
+                                    <label for="{{ form.min_price.id_for_label }}" class="form-label small">{{ form.min_price.label }}</label>
+                                    <div class="input-group input-group-sm">
+                                        {{ form.min_price }}
+                                        <span class="input-group-text">€</span>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <label for="{{ form.max_price.id_for_label }}" class="form-label small">{{ form.max_price.label }}</label>
+                                    <div class="input-group input-group-sm">
+                                        {{ form.max_price }}
+                                        <span class="input-group-text">€</span>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="price-range-slider">
                                 <div class="price-range-track" data-price-track></div>
-                                <label for="{{ form.min_price.id_for_label }}" class="visually-hidden">{{ form.min_price.label }}</label>
-                                {{ form.min_price }}
-                                <label for="{{ form.max_price.id_for_label }}" class="visually-hidden">{{ form.max_price.label }}</label>
-                                {{ form.max_price }}
+                                <label for="minimum-price-slider" class="visually-hidden">Minimum price slider</label>
+                                <input
+                                    id="minimum-price-slider"
+                                    class="price-range-input"
+                                    type="range"
+                                    min="0"
+                                    max="{{ form.catalogue_max_price }}"
+                                    step="0.01"
+                                    value="{{ form.min_price.value }}"
+                                    data-price-min-slider
+                                >
+                                <label for="maximum-price-slider" class="visually-hidden">Maximum price slider</label>
+                                <input
+                                    id="maximum-price-slider"
+                                    class="price-range-input"
+                                    type="range"
+                                    min="0"
+                                    max="{{ form.catalogue_max_price }}"
+                                    step="0.01"
+                                    value="{{ form.max_price.value }}"
+                                    data-price-max-slider
+                                >
                             </div>
 
                             <div class="d-flex justify-content-between small text-body-secondary mt-1">
