@@ -86,3 +86,16 @@ class HomePageTests(TestCase):
 
         self.assertContains(response, f'action="{reverse("search:results")}"')
         self.assertContains(response, 'name="query"')
+
+    def test_shared_layout_applies_confirmed_identity(self):
+        response = self.client.get(reverse("home"))
+
+        self.assertContains(response, "/static/css/style.css")
+        self.assertContains(response, "Account")
+        self.assertContains(response, 'data-bs-toggle="dropdown"')
+        self.assertContains(response, "Sign in")
+        self.assertContains(response, "Register")
+        self.assertContains(
+            response,
+            "Bringing you the best of music at the best price... If you're willing to pay it.",
+        )

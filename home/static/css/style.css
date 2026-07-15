@@ -1,3 +1,4 @@
+/* Universal Cult Records visual identity. */
 :root {
     color-scheme: dark;
     --cult-black: #080809;
@@ -218,6 +219,10 @@ header form[role="search"] .form-control {
     border-radius: 0;
 }
 
+.rounded {
+    border-radius: 0 !important;
+}
+
 .btn {
     font-weight: 800;
     padding: 0.65rem 1.05rem;
@@ -353,6 +358,11 @@ a:focus-visible {
 .text-bg-secondary {
     background-color: #4a4a51 !important;
     color: #ffffff !important;
+}
+
+.text-bg-light {
+    background-color: var(--cult-steel) !important;
+    color: var(--cult-bone) !important;
 }
 
 .text-bg-success {

@@ -8,14 +8,14 @@
     --price-end: 100%;
     background: linear-gradient(
         to right,
-        var(--bs-secondary-bg) 0%,
-        var(--bs-secondary-bg) var(--price-start),
-        var(--bs-primary) var(--price-start),
-        var(--bs-primary) var(--price-end),
-        var(--bs-secondary-bg) var(--price-end),
-        var(--bs-secondary-bg) 100%
+        var(--cult-steel) 0%,
+        var(--cult-steel) var(--price-start),
+        var(--cult-red-bright) var(--price-start),
+        var(--cult-red-bright) var(--price-end),
+        var(--cult-steel) var(--price-end),
+        var(--cult-steel) 100%
     );
-    border-radius: 0.5rem;
+    border-radius: 0;
     height: 0.5rem;
     left: 0;
     position: absolute;
@@ -43,9 +43,9 @@
 
 .price-range-input::-webkit-slider-thumb {
     appearance: none;
-    background: var(--bs-primary);
-    border: 2px solid var(--bs-body-bg);
-    border-radius: 50%;
+    background: var(--cult-red-bright);
+    border: 2px solid var(--cult-black);
+    border-radius: 0;
     cursor: pointer;
     height: 1.25rem;
     margin-top: -0.375rem;
@@ -59,9 +59,9 @@
 }
 
 .price-range-input::-moz-range-thumb {
-    background: var(--bs-primary);
-    border: 2px solid var(--bs-body-bg);
-    border-radius: 50%;
+    background: var(--cult-red-bright);
+    border: 2px solid var(--cult-black);
+    border-radius: 0;
     cursor: pointer;
     height: 1.25rem;
     pointer-events: auto;
