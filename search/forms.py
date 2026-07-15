@@ -17,12 +17,16 @@ class SearchForm(forms.Form):
     )
     artist = forms.ChoiceField(
         required=False,
-        widget=forms.Select(attrs={"class": "form-select"}),
+        widget=forms.Select(
+            attrs={"class": "form-select", "data-live-filter": "immediate"}
+        ),
     )
     product_type = forms.ChoiceField(
         required=False,
         choices=[("", "All product types"), *Product.ProductType.choices],
-        widget=forms.Select(attrs={"class": "form-select"}),
+        widget=forms.Select(
+            attrs={"class": "form-select", "data-live-filter": "immediate"}
+        ),
     )
     min_price = forms.DecimalField(
         required=False,
@@ -31,7 +35,11 @@ class SearchForm(forms.Form):
         decimal_places=2,
         label="Minimum price",
         widget=forms.NumberInput(
-            attrs={"class": "form-control", "placeholder": "0.00"}
+            attrs={
+                "class": "form-control",
+                "data-live-filter": "debounced",
+                "placeholder": "0.00",
+            }
         ),
     )
     max_price = forms.DecimalField(
@@ -41,7 +49,11 @@ class SearchForm(forms.Form):
         decimal_places=2,
         label="Maximum price",
         widget=forms.NumberInput(
-            attrs={"class": "form-control", "placeholder": "0.00"}
+            attrs={
+                "class": "form-control",
+                "data-live-filter": "debounced",
+                "placeholder": "0.00",
+            }
         ),
     )
 

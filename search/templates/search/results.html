@@ -1,11 +1,12 @@
 {% extends "home/base.html" %}
+{% load static %}
 
 {% block title %}Search | Cult Records{% endblock %}
 
 {% block content %}
     <h1 class="mb-4">Search the catalogue</h1>
 
-    <form action="{% url 'search:results' %}" method="get" class="mb-4">
+    <form action="{% url 'search:results' %}" method="get" class="mb-4" data-search-form>
         <div class="input-group">
             <label for="{{ form.query.id_for_label }}" class="visually-hidden">{{ form.query.label }}</label>
             {{ form.query }}
@@ -54,9 +55,11 @@
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">Apply filters</button>
                             <a href="{% url 'search:results' %}" class="btn btn-outline-secondary">Clear all</a>
                         </div>
+                        <noscript>
+                            <button type="submit" class="btn btn-primary w-100 mt-2">Apply filters</button>
+                        </noscript>
                     </div>
                 </div>
             </aside>
@@ -85,4 +88,8 @@
             </section>
         </div>
     </form>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'search/js/filters.js' %}"></script>
 {% endblock %}

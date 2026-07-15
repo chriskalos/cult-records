@@ -155,6 +155,10 @@ class SearchPageTests(TestCase):
         self.assertTemplateUsed(response, "search/results.html")
         self.assertIsInstance(response.context["form"], SearchForm)
         self.assertIsNone(response.context["products"])
+        self.assertContains(response, "data-search-form")
+        self.assertContains(response, 'data-live-filter="immediate"', count=2)
+        self.assertContains(response, 'data-live-filter="debounced"', count=2)
+        self.assertContains(response, "/static/search/js/filters.js")
 
     def test_valid_search_displays_matching_products(self):
         response = self.client.get(
