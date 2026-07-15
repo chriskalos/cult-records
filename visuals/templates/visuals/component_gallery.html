@@ -1,0 +1,217 @@
+{% extends "home/base.html" %}
+
+{% block title %}Visual test | Cult Records{% endblock %}
+
+{% block content %}
+    <div class="mb-5">
+        <p class="text-body-secondary mb-2">Cult Records visual identity</p>
+        <h1>Component gallery</h1>
+        <p class="lead mb-0">
+            A single place to review shared interface elements before applying visual changes across the site.
+        </p>
+    </div>
+
+    <section class="mb-5" aria-labelledby="typography-heading">
+        <h2 id="typography-heading" class="mb-3">Typography</h2>
+        <div class="row g-4">
+            <div class="col-12 col-lg-7">
+                <h1>Heading one</h1>
+                <h2>Heading two</h2>
+                <h3>Heading three</h3>
+                <h4>Heading four</h4>
+                <h5>Heading five</h5>
+                <h6>Heading six</h6>
+            </div>
+            <div class="col-12 col-lg-5">
+                <p class="lead">Lead text introduces an important idea or section.</p>
+                <p>Body text explains the catalogue, its products, and the actions available to visitors.</p>
+                <p class="small">Small text supports metadata and secondary details.</p>
+                <p class="text-body-secondary mb-0">Secondary text gives context without competing for attention.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-5" aria-labelledby="actions-heading">
+        <h2 id="actions-heading" class="mb-3">Actions and status</h2>
+        <div class="d-flex flex-wrap gap-2 mb-4">
+            <button type="button" class="btn btn-primary">Primary action</button>
+            <button type="button" class="btn btn-secondary">Secondary action</button>
+            <button type="button" class="btn btn-outline-primary">Outline action</button>
+            <button type="button" class="btn btn-danger">Destructive action</button>
+            <button type="button" class="btn btn-link">Text action</button>
+            <button type="button" class="btn btn-primary" disabled>Disabled action</button>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mb-4" aria-label="Example statuses">
+            <span class="badge text-bg-primary">Primary</span>
+            <span class="badge text-bg-secondary">Secondary</span>
+            <span class="badge text-bg-success">Success</span>
+            <span class="badge text-bg-warning">Warning</span>
+            <span class="badge text-bg-danger">Danger</span>
+        </div>
+        <div class="row g-3">
+            <div class="col-12 col-lg-6">
+                <div class="alert alert-success mb-0" role="alert">Your changes were saved successfully.</div>
+            </div>
+            <div class="col-12 col-lg-6">
+                <div class="alert alert-danger mb-0" role="alert">Something needs your attention before continuing.</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-5" aria-labelledby="cards-heading">
+        <h2 id="cards-heading" class="mb-3">Cards</h2>
+        <div class="row g-4">
+            <div class="col-12 col-md-6 col-xl-4">
+                {% if product %}
+                    {% include "home/includes/product_card.html" %}
+                {% else %}
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h3 class="card-title h5">Product card unavailable</h3>
+                            <p class="card-text mb-0">Add a catalogue product to preview the shared product card.</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col-12 col-md-6 col-xl-4">
+                <article class="card h-100">
+                    <div class="card-body">
+                        <p class="text-body-secondary small mb-2">Featured collection</p>
+                        <h3 class="card-title h5">Electronic essentials</h3>
+                        <p class="card-text">A utility card for editorial content, collections, and supporting information.</p>
+                        <a href="#" class="btn btn-outline-primary">Explore collection</a>
+                    </div>
+                </article>
+            </div>
+            <div class="col-12 col-xl-4">
+                <div class="card h-100">
+                    <div class="card-header">Account summary</div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between">Reviews <span>4</span></li>
+                        <li class="list-group-item d-flex justify-content-between">Wishlist items <span>12</span></li>
+                        <li class="list-group-item d-flex justify-content-between">Orders <span>2</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-5" aria-labelledby="forms-heading">
+        <h2 id="forms-heading" class="mb-3">Form controls</h2>
+        <form class="row g-4" action="#" onsubmit="return false;">
+            <div class="col-12 col-lg-6">
+                <label for="visual-email" class="form-label">Email address</label>
+                <input id="visual-email" type="email" class="form-control" placeholder="listener@example.com">
+                <div class="form-text">We will only use this for your account.</div>
+            </div>
+            <div class="col-12 col-lg-6">
+                <label for="visual-genre" class="form-label">Favourite genre</label>
+                <select id="visual-genre" class="form-select">
+                    <option selected>Choose a genre</option>
+                    <option>Alternative</option>
+                    <option>Electronic</option>
+                    <option>Pop</option>
+                </select>
+            </div>
+            <div class="col-12">
+                <label for="visual-comment" class="form-label">Comment</label>
+                <textarea id="visual-comment" class="form-control" rows="3" placeholder="Share your thoughts"></textarea>
+            </div>
+            <fieldset class="col-12 col-md-6">
+                <legend class="h6">Format</legend>
+                <div class="form-check">
+                    <input id="visual-lp" class="form-check-input" type="checkbox" checked>
+                    <label for="visual-lp" class="form-check-label">LP</label>
+                </div>
+                <div class="form-check">
+                    <input id="visual-cd" class="form-check-input" type="checkbox">
+                    <label for="visual-cd" class="form-check-label">CD</label>
+                </div>
+            </fieldset>
+            <fieldset class="col-12 col-md-6">
+                <legend class="h6">Condition</legend>
+                <div class="form-check">
+                    <input id="visual-new" name="visual-condition" class="form-check-input" type="radio" checked>
+                    <label for="visual-new" class="form-check-label">New</label>
+                </div>
+                <div class="form-check">
+                    <input id="visual-used" name="visual-condition" class="form-check-input" type="radio">
+                    <label for="visual-used" class="form-check-label">Pre-owned</label>
+                </div>
+            </fieldset>
+            <div class="col-12 col-lg-6">
+                <label for="visual-range" class="form-label">Price range</label>
+                <input id="visual-range" type="range" class="form-range" min="0" max="50" value="15">
+            </div>
+            <div class="col-12 col-lg-6 d-flex align-items-end">
+                <div class="form-check form-switch mb-2">
+                    <input id="visual-switch" class="form-check-input" type="checkbox" role="switch" checked>
+                    <label for="visual-switch" class="form-check-label">Notify me about new releases</label>
+                </div>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">Save preferences</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="mb-5" aria-labelledby="data-heading">
+        <h2 id="data-heading" class="mb-3">Structured content</h2>
+        <div class="table-responsive mb-4">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th scope="col">Order</th>
+                        <th scope="col">Product</th>
+                        <th scope="col">Status</th>
+                        <th scope="col" class="text-end">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">#1042</th>
+                        <td>Victory LP</td>
+                        <td><span class="badge text-bg-success">Complete</span></td>
+                        <td class="text-end">14.99€</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">#1041</th>
+                        <td>Confessions II CD</td>
+                        <td><span class="badge text-bg-warning">Processing</span></td>
+                        <td class="text-end">6.99€</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <nav aria-label="Example pagination">
+            <ul class="pagination mb-0">
+                <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+                <li class="page-item active" aria-current="page"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">Next</a></li>
+            </ul>
+        </nav>
+    </section>
+
+    <section aria-labelledby="overlay-heading">
+        <h2 id="overlay-heading" class="mb-3">Overlay</h2>
+        <p>Use the modal to review elevated surfaces, focus treatment, and close controls.</p>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#visual-modal">Open example modal</button>
+    </section>
+
+    <div class="modal fade" id="visual-modal" tabindex="-1" aria-labelledby="visual-modal-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="visual-modal-title">Confirm action</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">This is an example of supporting information shown above the main page.</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

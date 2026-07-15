@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'product_page',
     'search',
     'accounts',
+    'visuals',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',

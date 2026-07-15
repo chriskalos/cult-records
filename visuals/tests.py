@@ -1,0 +1,37 @@
+from decimal import Decimal
+
+from django.test import TestCase
+from django.urls import reverse
+
+from home.models import Product
+
+
+class ComponentGalleryTests(TestCase):
+    def test_gallery_uses_shared_layout_and_components(self):
+        Product.objects.create(
+            product_id="VISUALCD",
+            artist="A Cult Records",
+            title="Visual Test Record",
+            description="A catalogue card shown in the component gallery.",
+            genre="Electronic",
+            product_type=Product.ProductType.CD,
+            price=Decimal("6.99"),
+        )
+
+        response = self.client.get(reverse("visuals:component_gallery"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "visuals/component_gallery.html")
+        self.assertTemplateUsed(response, "home/base.html")
+        self.assertTemplateUsed(response, "home/includes/header.html")
+        self.assertTemplateUsed(response, "home/includes/footer.html")
+        self.assertTemplateUsed(response, "home/includes/product_card.html")
+        self.assertContains(response, "Visual Test Record")
+
+    def test_gallery_works_without_catalogue_products(self):
+        Product.objects.all().delete()
+
+        response = self.client.get(reverse("visuals:component_gallery"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Add a catalogue product to preview the shared product card.")
