@@ -53,3 +53,27 @@ class LoginForm(AuthenticationForm):
             }
         ),
     )
+
+
+class UsernameUpdateForm(forms.ModelForm):
+    class Meta:
+        model = get_user_model()
+        fields = ("username",)
+        widgets = {
+            "username": forms.TextInput(
+                attrs={
+                    "autocomplete": "username",
+                    "autofocus": True,
+                    "class": "form-control",
+                }
+            )
+        }
+
+    def clean_username(self):
+        username = self.cleaned_data["username"].strip()
+        duplicate = get_user_model().objects.filter(username__iexact=username)
+        if self.instance.pk:
+            duplicate = duplicate.exclude(pk=self.instance.pk)
+        if duplicate.exists():
+            raise forms.ValidationError("A user with that username already exists.")
+        return username

@@ -35,7 +35,9 @@
                 </form>
 
                 {% if request.user.is_authenticated %}
-                    <span class="navbar-text me-lg-3">{{ request.user.username }}</span>
+                    <a href="{% url 'accounts:dashboard' %}" class="nav-link me-lg-3">
+                        {{ request.user.username }}
+                    </a>
                     <form action="{% url 'accounts:logout' %}" method="post" class="mt-2 mt-lg-0">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-outline-secondary">Sign out</button>

@@ -5,19 +5,20 @@ from django.contrib.auth.views import LoginView
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
 
-from .forms import LoginForm, RegistrationForm
+from .forms import LoginForm, RegistrationForm, UsernameUpdateForm
+from .roles import role_for_user
 
 
 def register(request):
     if request.user.is_authenticated:
-        return redirect("home")
+        return redirect("accounts:dashboard")
 
     form = RegistrationForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         user = form.save()
         login(request, user)
         messages.success(request, f"Welcome to Cult Records, {user.username}.")
-        return redirect("home")
+        return redirect("accounts:dashboard")
 
     return render(request, "accounts/register.html", {"form": form})
 
@@ -39,3 +40,30 @@ def logout_view(request):
     logout(request)
     messages.success(request, "You have signed out.")
     return redirect("home")
+
+
+@login_required
+def dashboard(request):
+    reviews = request.user.product_reviews.select_related("product").order_by(
+        "-updated_at",
+        "-pk",
+    )[:10]
+    return render(
+        request,
+        "accounts/dashboard.html",
+        {
+            "account_role": role_for_user(request.user),
+            "reviews": reviews,
+        },
+    )
+
+
+@login_required
+def edit_profile(request):
+    form = UsernameUpdateForm(request.POST or None, instance=request.user)
+    if request.method == "POST" and form.is_valid():
+        user = form.save()
+        messages.success(request, "Your profile has been updated.")
+        return redirect("accounts:dashboard")
+
+    return render(request, "accounts/edit_profile.html", {"form": form})

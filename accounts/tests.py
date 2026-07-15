@@ -3,6 +3,9 @@ from django.contrib.auth.models import AnonymousUser, Group
 from django.test import TestCase
 from django.urls import reverse
 
+from home.models import Product
+from product_page.models import Review
+
 from .roles import EDITOR_GROUP_NAME, UserRole, role_for_user
 
 
@@ -76,7 +79,7 @@ class RegistrationTests(TestCase):
         )
 
         user = get_user_model().objects.get(username="new-listener")
-        self.assertRedirects(response, reverse("home"))
+        self.assertRedirects(response, reverse("accounts:dashboard"))
         self.assertEqual(int(self.client.session["_auth_user_id"]), user.pk)
         self.assertEqual(role_for_user(user), UserRole.USER)
         self.assertFalse(user.is_staff)
@@ -120,7 +123,7 @@ class LoginAndLogoutTests(TestCase):
             {"username": "user1", "password": "user1"},
         )
 
-        self.assertRedirects(response, reverse("home"))
+        self.assertRedirects(response, reverse("accounts:dashboard"))
         self.assertEqual(
             int(self.client.session["_auth_user_id"]),
             get_user_model().objects.get(username="user1").pk,
@@ -148,7 +151,7 @@ class LoginAndLogoutTests(TestCase):
             },
         )
 
-        self.assertRedirects(response, reverse("home"))
+        self.assertRedirects(response, reverse("accounts:dashboard"))
 
     def test_logout_requires_post_and_clears_the_session(self):
         self.client.login(username="user1", password="user1")
@@ -173,3 +176,99 @@ class LoginAndLogoutTests(TestCase):
         self.assertContains(authenticated_response, "user1")
         self.assertContains(authenticated_response, "Sign out")
         self.assertNotContains(authenticated_response, ">Register</a>")
+
+
+class DashboardTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.get(username="user1")
+        self.dashboard_url = reverse("accounts:dashboard")
+
+    def test_dashboard_requires_authentication(self):
+        response = self.client.get(self.dashboard_url)
+
+        self.assertRedirects(
+            response,
+            f"{reverse('accounts:login')}?next={self.dashboard_url}",
+        )
+
+    def test_dashboard_displays_account_information(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(self.dashboard_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "user1")
+        self.assertContains(response, "Account type")
+        self.assertContains(response, "User")
+        self.assertContains(response, "contact an administrator")
+
+    def test_dashboard_displays_recent_review_activity(self):
+        product = Product.objects.get(product_id="MDEVCTRYLP")
+        review = Review.objects.create(
+            product=product,
+            author=self.user,
+            rating=5,
+            comment="My dashboard review.",
+        )
+        self.client.force_login(self.user)
+
+        response = self.client.get(self.dashboard_url)
+
+        self.assertContains(response, product.title)
+        self.assertContains(response, product.artist)
+        self.assertContains(response, "My dashboard review.")
+        self.assertContains(response, "5 / 5 stars")
+        self.assertContains(
+            response,
+            f'{product.get_absolute_url()}#your-review',
+        )
+
+    def test_dashboard_has_a_review_empty_state(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(self.dashboard_url)
+
+        self.assertContains(response, "You have not reviewed any products yet.")
+
+
+class ProfileEditingTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.get(username="user1")
+        self.edit_url = reverse("accounts:edit_profile")
+
+    def test_profile_editing_requires_authentication(self):
+        response = self.client.get(self.edit_url)
+
+        self.assertRedirects(
+            response,
+            f"{reverse('accounts:login')}?next={self.edit_url}",
+        )
+
+    def test_profile_form_only_allows_username_changes(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(self.edit_url)
+
+        self.assertEqual(list(response.context["form"].fields), ["username"])
+
+    def test_user_can_change_their_username(self):
+        original_password = self.user.password
+        self.client.force_login(self.user)
+
+        response = self.client.post(self.edit_url, {"username": "new-username"})
+
+        self.user.refresh_from_db()
+        self.assertRedirects(response, reverse("accounts:dashboard"))
+        self.assertEqual(self.user.username, "new-username")
+        self.assertEqual(self.user.password, original_password)
+        self.assertEqual(role_for_user(self.user), UserRole.USER)
+
+    def test_username_change_rejects_case_insensitive_duplicate(self):
+        self.client.force_login(self.user)
+
+        response = self.client.post(self.edit_url, {"username": "EDITOR"})
+
+        self.user.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "already exists")
+        self.assertEqual(self.user.username, "user1")
