@@ -9,4 +9,13 @@
         {{ form.as_p }}
         <button type="submit">Search</button>
     </form>
+
+    {% if products is not None %}
+        <h2>Results</h2>
+        {% for product in products %}
+            <p>{{ product.artist }} - {{ product.title }}</p>
+        {% empty %}
+            <p>No products matched your search.</p>
+        {% endfor %}
+    {% endif %}
 {% endblock %}

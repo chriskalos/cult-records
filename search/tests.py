@@ -6,6 +6,7 @@ from django.urls import reverse
 from home.models import Product
 
 from .forms import SearchForm
+from .services import search_products
 
 
 class SearchFormTests(TestCase):
@@ -38,6 +39,48 @@ class SearchFormTests(TestCase):
         self.assertTrue(form.is_valid())
 
 
+class ProductSearchTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.madonna_lp = Product.objects.create(
+            product_id="MDNCLP",
+            artist="Madonna",
+            title="Confessions on a Dance Floor",
+            description="A dance-pop album",
+            product_type=Product.ProductType.LP,
+            price=Decimal("39.99"),
+        )
+        cls.madonna_cd = Product.objects.create(
+            product_id="MDNACD",
+            artist="Madonna",
+            title="American Life",
+            description="A studio album",
+            product_type=Product.ProductType.CD,
+            price=Decimal("19.99"),
+        )
+
+    def test_keyword_matches_title_artist_or_description(self):
+        title_results = search_products({"query": "confessions"})
+        artist_results = search_products({"query": "madonna"})
+        description_results = search_products({"query": "dance-pop"})
+
+        self.assertIn(self.madonna_lp, title_results)
+        self.assertIn(self.madonna_lp, artist_results)
+        self.assertIn(self.madonna_lp, description_results)
+
+    def test_filters_can_be_combined(self):
+        results = search_products(
+            {
+                "artist": "Madonna",
+                "product_type": Product.ProductType.LP,
+                "min_price": Decimal("30.00"),
+                "max_price": Decimal("40.00"),
+            }
+        )
+
+        self.assertQuerySetEqual(results, [self.madonna_lp])
+
+
 class SearchPageTests(TestCase):
     def test_search_page_is_publicly_available(self):
         response = self.client.get(reverse("search:results"))
@@ -45,3 +88,13 @@ class SearchPageTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "search/results.html")
         self.assertIsInstance(response.context["form"], SearchForm)
+        self.assertIsNone(response.context["products"])
+
+    def test_valid_search_displays_matching_products(self):
+        response = self.client.get(
+            reverse("search:results"),
+            {"query": "Placeholder Title 2"},
+        )
+
+        self.assertContains(response, "Placeholder Artist 2 - Placeholder Title 2")
+        self.assertNotContains(response, "Placeholder Artist 1 - Placeholder Title 1")
