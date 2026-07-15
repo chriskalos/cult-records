@@ -8,13 +8,17 @@ The home page uses a reusable Bootstrap layout with shared header and footer tem
 
 Public users can search the catalogue from the site header or the search page. Search terms are matched against product titles, artists, and descriptions, with relevant results ranked first. The search allows reasonable misspellings and words that appear across more than one product field.
 
-Search results can be filtered by artist, product type, minimum price, and maximum price. Price filtering uses a dual-ended slider with editable values. Its range starts at zero and ends at the highest product price currently in the catalogue. Filters apply automatically when changed, with a short delay for price input. The filters appear in a left sidebar on larger screens and stack above the results on smaller screens.
+Search results can be filtered by artist, genre, product type, minimum price, and maximum price. Genre filtering uses an exact-match list populated from the catalogue. Price filtering uses a dual-ended slider with editable values. Its range starts at zero and ends at the highest product price currently in the catalogue. Filters apply automatically when changed, with a short delay for price input. The filters appear in a left sidebar on larger screens and stack above the results on smaller screens.
 
-The product database model stores an optional static image path, artist, title, description, product type, and price. Product types are limited to LP, CD, bundle, and merch.
+The product database model stores an optional static image path, artist, title, short description, optional genre, product type, and price. Product types are limited to LP, CD, bundle, and merch.
 
 Each product uses a manually assigned uppercase alphanumeric product ID as its primary key.
 
-The catalogue contains 11 CD and LP products from cursed locale, Madeon, Madonna, Balu Brigada, and Rick Astley. CDs cost 6.99€ and LPs cost 14.99€. Album artwork is stored with the application as static image assets.
+Every catalogue card links to a responsive product detail page. Supplementary product-page records use the product ID as a one-to-one primary key and can store a long description, an exact release date, and an ordered JSON list of track names. All supplementary fields are optional. A product without a supplementary record still has a detail page and uses its short catalogue description as a fallback.
+
+Product pages include a reviews section with a dynamically calculated average rating and review count. Approved reviews appear newest first. Authenticated users can submit one review per product with a rating from one to five and an optional comment of up to 2,000 characters. They can later edit or delete their own review. Anonymous visitors see an inactive review form and sign-in placeholder until the public account interface is added.
+
+The catalogue contains 11 CD and LP products from cursed locale, Madeon, Madonna, Balu Brigada, and Rick Astley. CDs cost 6.99€ and LPs cost 14.99€. Catalogue genres use Electronic for cursed locale and Madeon, Pop for Madonna and Rick Astley, and Alternative for Balu Brigada. Album artwork is stored with the application as static image assets.
 
 ## Local setup
 
