@@ -55,6 +55,7 @@ class HomePageTests(TestCase):
         self.assertTemplateUsed(response, "home/base.html")
         self.assertTemplateUsed(response, "home/includes/header.html")
         self.assertTemplateUsed(response, "home/includes/footer.html")
+        self.assertTemplateUsed(response, "home/includes/product_card.html")
 
     def test_home_page_displays_products(self):
         response = self.client.get(reverse("home"))
