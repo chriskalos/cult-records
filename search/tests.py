@@ -181,6 +181,11 @@ class SearchPageTests(TestCase):
         self.assertContains(response, "data-search-form")
         self.assertContains(response, 'data-live-filter="immediate"', count=2)
         self.assertContains(response, 'data-live-filter="debounced"', count=2)
+        self.assertContains(response, 'type="range"', count=2)
+        self.assertContains(response, "data-price-range")
+        self.assertContains(response, "0.00€")
+        self.assertContains(response, "49.99€")
+        self.assertContains(response, "/static/search/css/filters.css")
         self.assertContains(response, "/static/search/js/filters.js")
 
     def test_valid_search_displays_matching_products(self):

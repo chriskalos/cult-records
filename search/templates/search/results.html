@@ -3,6 +3,10 @@
 
 {% block title %}Search | Cult Records{% endblock %}
 
+{% block styles %}
+    <link href="{% static 'search/css/filters.css' %}" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
     <h1 class="mb-4">Search the catalogue</h1>
 
@@ -38,21 +42,38 @@
                             {% endfor %}
                         </div>
 
-                        <div class="mb-3">
-                            <label for="{{ form.min_price.id_for_label }}" class="form-label">{{ form.min_price.label }}</label>
-                            {{ form.min_price }}
+                        <fieldset class="mb-3" data-price-range>
+                            <legend class="form-label">Price</legend>
+                            <div class="d-flex justify-content-between mb-2" aria-live="polite">
+                                <output for="{{ form.min_price.id_for_label }}" data-price-min-output>
+                                    {{ form.min_price.value|floatformat:2 }}€
+                                </output>
+                                <span aria-hidden="true">to</span>
+                                <output for="{{ form.max_price.id_for_label }}" data-price-max-output>
+                                    {{ form.max_price.value|floatformat:2 }}€
+                                </output>
+                            </div>
+
+                            <div class="price-range-slider">
+                                <div class="price-range-track" data-price-track></div>
+                                <label for="{{ form.min_price.id_for_label }}" class="visually-hidden">{{ form.min_price.label }}</label>
+                                {{ form.min_price }}
+                                <label for="{{ form.max_price.id_for_label }}" class="visually-hidden">{{ form.max_price.label }}</label>
+                                {{ form.max_price }}
+                            </div>
+
+                            <div class="d-flex justify-content-between small text-body-secondary mt-1">
+                                <span>0.00€</span>
+                                <span>{{ form.catalogue_max_price|floatformat:2 }}€</span>
+                            </div>
+
                             {% for error in form.min_price.errors %}
                                 <div class="text-danger mt-1">{{ error }}</div>
                             {% endfor %}
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="{{ form.max_price.id_for_label }}" class="form-label">{{ form.max_price.label }}</label>
-                            {{ form.max_price }}
                             {% for error in form.max_price.errors %}
                                 <div class="text-danger mt-1">{{ error }}</div>
                             {% endfor %}
-                        </div>
+                        </fieldset>
 
                         <div class="d-grid gap-2">
                             <a href="{% url 'search:results' %}" class="btn btn-outline-secondary">Clear all</a>
