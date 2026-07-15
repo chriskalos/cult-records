@@ -98,6 +98,22 @@ main > section > h2::before {
     max-width: 54rem;
 }
 
+.breadcrumb {
+    --bs-breadcrumb-divider-color: var(--cult-bone);
+}
+
+.breadcrumb-item,
+.breadcrumb-item.active,
+.breadcrumb-item + .breadcrumb-item::before,
+.breadcrumb-item a {
+    color: var(--cult-bone);
+}
+
+.breadcrumb-item a:hover {
+    color: var(--cult-bone);
+    text-decoration-thickness: 2px;
+}
+
 header {
     position: relative;
     z-index: 10;
