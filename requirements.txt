@@ -1,0 +1,7 @@
+# Generated from uv.lock. Refresh with:
+# uv export --format requirements-txt --no-emit-project --no-hashes --no-annotate --output-file requirements.txt
+asgiref==3.11.1
+django==6.0.7
+rapidfuzz==3.14.5
+sqlparse==0.5.5
+tzdata==2026.2 ; sys_platform == 'win32'
