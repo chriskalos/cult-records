@@ -64,7 +64,7 @@ class HomePageTests(TestCase):
         response = self.client.get(reverse("home"))
 
         products = response.context["products"]
-        self.assertEqual(products.count(), 11)
+        self.assertEqual(products.count(), 29)
         self.assertContains(response, "Balu Brigada")
         self.assertContains(response, "chriskalos dot xyz")
         self.assertContains(response, "2026 album Victory on CD.")
@@ -79,6 +79,12 @@ class HomePageTests(TestCase):
         self.assertContains(
             response,
             "/static/home/images/products/cursed-locale-dance-w-me.jpg",
+        )
+        self.assertContains(response, "WOR$T GIRL IN AMERICA")
+        self.assertContains(
+            response,
+            "/static/home/images/products/callinsick-doubling-down.jpg",
+            count=2,
         )
 
     def test_header_contains_catalogue_search(self):
