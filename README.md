@@ -10,6 +10,8 @@ The `/visuals/` development page remains the component gallery for reviewing new
 
 The home page uses a reusable Bootstrap layout with shared header and footer templates. It displays a responsive product list populated from database records.
 
+CD and LP artwork uses a shared format-aware component on catalogue cards and product detail pages. LPs appear as sleeves with a visible record, while CDs appear in clear jewel cases. CSS provides the packaging geometry and 3D depth. Lightweight vanilla JavaScript tilts each object toward a fine pointer while it is inside the artwork area, then returns it to rest. The interaction remains static on touch devices and when reduced motion is requested, so an external 3D library is not required.
+
 Public users can search the catalogue from the site header or the search page. Search terms are matched against product titles, artists, and descriptions, with relevant results ranked first. The search allows reasonable misspellings and words that appear across more than one product field.
 
 Search results can be filtered by artist, genre, product type, minimum price, and maximum price. Genre filtering uses an exact-match list populated from the catalogue. Price filtering uses a dual-ended slider with editable values. Its range starts at zero and ends at the highest product price currently in the catalogue. Filters apply automatically when changed, with a short delay for price input. The filters appear in a left sidebar on larger screens and stack above the results on smaller screens.
