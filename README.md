@@ -28,7 +28,7 @@ Every authenticated user has a protected dashboard showing their username, accou
 
 The application recognizes Admin, Editor, User, and Anonymous roles. Admins have full permissions. Editors are assigned catalogue management and review moderation permissions, but not user-management permissions. The future custom management interface will restrict review moderation to approving, hiding, and deleting reviews rather than rewriting their content. Ordinary Users have no management permissions and can only edit or delete their own reviews. Anonymous visitors can only browse the public catalogue. Django's admin interface is not exposed because catalogue and account management will use a custom interface.
 
-The catalogue contains 11 CD and LP products from cursed locale, Madeon, Madonna, Balu Brigada, and Rick Astley. CDs cost 6.99€ and LPs cost 14.99€. Catalogue genres use Electronic for cursed locale and Madeon, Pop for Madonna and Rick Astley, and Alternative for Balu Brigada. Album artwork is stored with the application as static image assets.
+The catalogue contains 29 products across 14 artists. Album and EP releases have separate CD and LP products, apart from three cursed locale singles that are available on CD. CDs cost 6.99€ and LPs cost 14.99€. Catalogue genres include Pop, Indie Pop, Electronic, and Alternative. Album artwork is stored with the application as static image assets.
 
 ## Default development accounts
 
