@@ -88,6 +88,7 @@ class HomePageTests(TestCase):
         )
         self.assertContains(response, 'data-product-format="LP"', count=13)
         self.assertContains(response, 'data-product-format="CD"', count=16)
+        self.assertContains(response, 'class="product-media__cd-tab ', count=64)
         self.assertContains(
             response,
             "data-product-media data-product-format",
