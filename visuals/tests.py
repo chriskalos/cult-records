@@ -27,6 +27,8 @@ class ComponentGalleryTests(TestCase):
         self.assertTemplateUsed(response, "home/includes/footer.html")
         self.assertTemplateUsed(response, "home/includes/product_card.html")
         self.assertContains(response, "Visual Test Record")
+        self.assertContains(response, 'data-product-format="LP"')
+        self.assertContains(response, 'data-product-format="CD"')
         self.assertContains(response, "css/style.css")
         self.assertContains(response, "Account")
         self.assertContains(response, 'data-bs-toggle="dropdown"')
@@ -42,4 +44,5 @@ class ComponentGalleryTests(TestCase):
         response = self.client.get(reverse("visuals:component_gallery"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Add a catalogue product to preview the shared product card.")
+        self.assertContains(response, "Add an LP product to preview its shared product card.")
+        self.assertContains(response, "Add a CD product to preview its shared product card.")

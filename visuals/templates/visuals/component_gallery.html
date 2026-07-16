@@ -97,13 +97,25 @@
         <h2 id="cards-heading" class="mb-3">Cards</h2>
         <div class="row g-4">
             <div class="col-12 col-md-6 col-xl-4">
-                {% if product %}
-                    {% include "home/includes/product_card.html" %}
+                {% if lp_product %}
+                    {% include "home/includes/product_card.html" with product=lp_product %}
                 {% else %}
                     <div class="card h-100">
                         <div class="card-body">
-                            <h3 class="card-title h5">Product card unavailable</h3>
-                            <p class="card-text mb-0">Add a catalogue product to preview the shared product card.</p>
+                            <h3 class="card-title h5">LP card unavailable</h3>
+                            <p class="card-text mb-0">Add an LP product to preview its shared product card.</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col-12 col-md-6 col-xl-4">
+                {% if cd_product %}
+                    {% include "home/includes/product_card.html" with product=cd_product %}
+                {% else %}
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h3 class="card-title h5">CD card unavailable</h3>
+                            <p class="card-text mb-0">Add a CD product to preview its shared product card.</p>
                         </div>
                     </div>
                 {% endif %}

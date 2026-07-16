@@ -1,0 +1,60 @@
+{% load static %}
+
+{% if product.product_type == "LP" %}
+    <div class="product-media product-media--lp" data-product-media data-product-format="LP">
+        <div class="product-media__object" data-product-media-object>
+            <div class="product-media__record" aria-hidden="true">
+                <span class="product-media__record-label"></span>
+            </div>
+            <div class="product-media__sleeve">
+                {% if product.image %}
+                    <img
+                        src="{% static product.image %}"
+                        class="product-media__artwork"
+                        alt="{{ product.title }}"
+                    >
+                {% else %}
+                    <div class="product-media__placeholder">{{ product.title }}</div>
+                {% endif %}
+                <span class="product-media__edge product-media__edge--right" aria-hidden="true"></span>
+                <span class="product-media__edge product-media__edge--top" aria-hidden="true"></span>
+            </div>
+        </div>
+    </div>
+{% elif product.product_type == "CD" %}
+    <div class="product-media product-media--cd" data-product-media data-product-format="CD">
+        <div class="product-media__object" data-product-media-object>
+            <div class="product-media__cd-case">
+                <div class="product-media__cd-inlay">
+                    {% if product.image %}
+                        <img
+                            src="{% static product.image %}"
+                            class="product-media__artwork"
+                            alt="{{ product.title }}"
+                        >
+                    {% else %}
+                        <div class="product-media__placeholder">{{ product.title }}</div>
+                    {% endif %}
+                </div>
+                <span class="product-media__cd-spine" aria-hidden="true"></span>
+                <span class="product-media__cd-hinge product-media__cd-hinge--top" aria-hidden="true"></span>
+                <span class="product-media__cd-hinge product-media__cd-hinge--bottom" aria-hidden="true"></span>
+                <span class="product-media__cd-reflection" aria-hidden="true"></span>
+                <span class="product-media__edge product-media__edge--right" aria-hidden="true"></span>
+                <span class="product-media__edge product-media__edge--top" aria-hidden="true"></span>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="product-media product-media--generic">
+        {% if product.image %}
+            <img
+                src="{% static product.image %}"
+                class="product-media__artwork"
+                alt="{{ product.title }}"
+            >
+        {% else %}
+            <div class="product-media__placeholder">{{ product.title }}</div>
+        {% endif %}
+    </div>
+{% endif %}

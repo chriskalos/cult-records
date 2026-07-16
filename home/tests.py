@@ -86,6 +86,13 @@ class HomePageTests(TestCase):
             "/static/home/images/products/callinsick-doubling-down.jpg",
             count=2,
         )
+        self.assertContains(response, 'data-product-format="LP"', count=13)
+        self.assertContains(response, 'data-product-format="CD"', count=16)
+        self.assertContains(
+            response,
+            "data-product-media data-product-format",
+            count=29,
+        )
 
     def test_header_contains_catalogue_search(self):
         response = self.client.get(reverse("home"))
@@ -97,6 +104,7 @@ class HomePageTests(TestCase):
         response = self.client.get(reverse("home"))
 
         self.assertContains(response, "/static/css/style.css")
+        self.assertContains(response, "/static/home/js/product-media.js")
         self.assertContains(
             response,
             "/static/home/images/brand/cult-records-logo-64.png",

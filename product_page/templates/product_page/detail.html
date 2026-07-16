@@ -17,13 +17,9 @@
     <article>
         <div class="row g-4 align-items-start mb-5">
             <div class="col-12 col-md-5">
-                {% if product.image %}
-                    <img
-                        src="{% static product.image %}"
-                        class="img-fluid rounded w-100"
-                        alt="{{ product.title }}"
-                    >
-                {% endif %}
+                <div class="product-detail-media">
+                    {% include "home/includes/product_art.html" %}
+                </div>
             </div>
 
             <div class="col-12 col-md-7">

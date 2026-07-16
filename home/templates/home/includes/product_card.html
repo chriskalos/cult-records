@@ -1,9 +1,5 @@
-{% load static %}
-
-<article class="card h-100 position-relative">
-    {% if product.image %}
-        <img src="{% static product.image %}" class="card-img-top" alt="{{ product.title }}">
-    {% endif %}
+<article class="card h-100 position-relative" data-product-card>
+    {% include "home/includes/product_art.html" %}
     <div class="card-body d-flex flex-column">
         <h2 class="card-title h5">
             <a

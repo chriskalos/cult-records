@@ -181,6 +181,9 @@ class ProductDetailPageTests(TestCase):
         self.assertContains(response, "Opening Track")
         self.assertContains(response, "6.99€")
         self.assertContains(response, "Add to cart")
+        self.assertContains(response, 'data-product-format="CD"')
+        self.assertContains(response, "product-media__cd-case")
+        self.assertContains(response, "/static/home/js/product-media.js")
 
     def test_detail_page_falls_back_when_supplementary_data_is_missing(self):
         response = self.client.get(self.url)
