@@ -1,40 +1,85 @@
 # Cult Records
 
-Cult Records is a Django web application for browsing and managing a record catalogue.
+Cult Records is a Django web application for browsing a record catalogue, finding products through fuzzy search and filters, and sharing product ratings and reviews. It provides account registration, authentication, profile management, and role-based permissions alongside a responsive catalogue interface.
 
-## Current functionality
+## Features
 
-The confirmed visual identity is applied across every page through the shared base template and global stylesheet. It uses a red and near-black palette, square controls, shadow-free surfaces, matching Oxblood header and footer bars, and a consistent Account dropdown. The header combines the visible Cult Records wordmark with responsive PNG versions of the record-and-monogram logo. The open-source Instrument Serif and Nunito Sans families are loaded from Google Fonts. Bootstrap remains the responsive layout and component baseline beneath the custom identity.
+### Catalogue and product pages
 
-The `/visuals/` development page remains the component gallery for reviewing new global styles and reusable components before relying on them throughout the site. It renders the real shared header, footer, and product card alongside representative typography, actions, statuses, utility cards, form controls, tabular content, pagination, and a modal.
+- A responsive catalogue presents products as CD or LP packaging with artwork, artist, title, format, description, genre, and price information.
+- Every product links to a detail page with an optional release date, long description, and ordered track list.
+- CD and LP artwork uses CSS-based packaging geometry and subtle pointer-driven movement. The interaction is disabled for touch input and when the browser reports a reduced-motion preference.
+- Product IDs are manually assigned uppercase alphanumeric codes. The catalogue supports LP, CD, bundle, and merchandise product types.
 
-The home page uses a reusable Bootstrap layout with shared header and footer templates. It displays a responsive product list populated from database records.
+### Search and filtering
 
-CD and LP artwork uses a shared format-aware component on catalogue cards and product detail pages. LPs appear as sleeves with a visible record. CDs use standard jewel-case proportions, a square full-bleed booklet beside the clear spine, hinges, lid clips, and a restrained plastic reflection. CSS provides the packaging geometry and 3D depth. Percentage-based stage sizing and explicitly constrained package layers keep the media square when intrinsic image sizing differs in Firefox and Safari. Lightweight vanilla JavaScript tilts each object toward a fine pointer while it is inside the artwork area, then returns it to rest. The interaction remains static on touch devices and when reduced motion is requested, so an external 3D library is not required.
+- Catalogue search matches titles, artists, and descriptions.
+- Results are ordered by relevance and tolerate misspellings through fuzzy text matching.
+- Filters cover artist, genre, product type, minimum price, and maximum price.
+- Genre options are generated from catalogue data, and the price range is based on the highest catalogue price.
+- Filter controls submit automatically. Price inputs use a short delay to avoid submitting while a value is being typed.
 
-Public users can search the catalogue from the site header or the search page. Search terms are matched against product titles, artists, and descriptions, with relevant results ranked first. The search allows reasonable misspellings and words that appear across more than one product field.
+### Accounts and permissions
 
-Search results can be filtered by artist, genre, product type, minimum price, and maximum price. Genre filtering uses an exact-match list populated from the catalogue. Price filtering uses a dual-ended slider with editable values. Its range starts at zero and ends at the highest product price currently in the catalogue. Filters apply automatically when changed, with a short delay for price input. The filters appear in a left sidebar on larger screens and stack above the results on smaller screens.
+- Visitors can register, sign in, and sign out.
+- Registration enforces case-insensitive username uniqueness and Django's configured password validation rules.
+- Authenticated users have a dashboard containing their username, account role, and ten most recently updated reviews.
+- Users can change their username from the protected profile page.
+- The role model distinguishes Admin, Editor, User, and Anonymous access. Editor permissions cover catalogue content and review moderation, while user-management permissions belong to administrators.
 
-The product database model stores an optional static image path, artist, title, short description, optional genre, product type, and price. Product types are limited to LP, CD, bundle, and merch.
+### Ratings and reviews
 
-Each product uses a manually assigned uppercase alphanumeric product ID as its primary key.
+- Product pages display the average rating, review count, and approved reviews in newest-first order.
+- Authenticated users can submit one review per product with a rating from one to five and an optional comment of up to 2,000 characters.
+- Review authors can edit or delete their own reviews.
+- A small JavaScript enhancement asks for confirmation before a review is deleted.
 
-Every catalogue card links to a responsive product detail page. Supplementary product-page records use the product ID as a one-to-one primary key and can store a long description, an exact release date, and an ordered JSON list of track names. All supplementary fields are optional. A product without a supplementary record still has a detail page and uses its short catalogue description as a fallback.
+## Technologies
 
-Product pages include a reviews section with a dynamically calculated average rating and review count. Approved reviews appear newest first. Authenticated users can submit one review per product with a rating from one to five and an optional comment of up to 2,000 characters. They can later edit or delete their own review. Anonymous visitors see an inactive review form with a link to sign in.
+| Technology | Use in the project | Reason for use |
+| --- | --- | --- |
+| Python 3.13 | Application language | Provides the runtime required by the project and Django 6.0. |
+| Django 6.0 | Routing, views, templates, forms, authentication, authorization, ORM, migrations, and testing | Supplies an integrated web framework with built-in security and data-management features. |
+| SQLite | Development database | Keeps local setup simple while supporting Django's relational models and migrations. |
+| RapidFuzz | Search relevance scoring | Provides efficient fuzzy string comparison for misspelling-tolerant catalogue search. |
+| HTML and Django templates | Page structure and server-rendered content | Produce semantic pages while allowing shared layouts and reusable components. |
+| CSS | Visual identity, responsive refinements, and CD/LP artwork presentation | Applies the Cult Records design system and packaging effects without an external 3D library. |
+| Bootstrap 5.3.3 | Responsive grid, navigation, forms, cards, dropdowns, modal behavior, and utility classes | Provides an accessible responsive component baseline that is customized by the project stylesheet. |
+| Vanilla JavaScript | Search filter behavior, product artwork movement, and delete confirmation | Adds small browser interactions without a JavaScript framework or build process. |
 
-Visitors can register with a username and password, sign in, and sign out. Registration signs the new user in automatically. Usernames must be unique regardless of capitalization, and new passwords are checked with Django's configured password validators. Password changes are handled by an administrator because the application does not collect email addresses.
+The Python project declares Django and RapidFuzz as its direct dependencies in `pyproject.toml`. Exact direct and transitive versions are recorded in `uv.lock` and exported to `requirements.txt`. Bootstrap's CSS and JavaScript bundle are loaded from jsDelivr, so the project does not require npm.
 
-Every authenticated user has a protected dashboard showing their username, account type, and recent review activity. Users can update their own username, but cannot change their role or permissions. Signing in from a product's review section returns the user to that product.
+## Visual design and accessibility
 
-The application recognizes Admin, Editor, User, and Anonymous roles. Admins have full permissions. Editors are assigned catalogue management and review moderation permissions, but not user-management permissions. The future custom management interface will restrict review moderation to approving, hiding, and deleting reviews rather than rewriting their content. Ordinary Users have no management permissions and can only edit or delete their own reviews. Anonymous visitors can only browse the public catalogue. Django's admin interface is not exposed because catalogue and account management will use a custom interface.
+The interface uses a fixed dark theme built around near-black, Oxblood, red, and Bone colors. Instrument Serif is used for headings and Nunito Sans for body and interface text. Both open-source typefaces are loaded from Google Fonts with local fallback families.
 
-The catalogue contains 29 products across 14 artists. Album and EP releases have separate CD and LP products, apart from three cursed locale singles that are available on CD. CDs cost 6.99€ and LPs cost 14.99€. Catalogue genres include Pop, Indie Pop, Electronic, and Alternative. Album artwork is stored with the application as static image assets.
+Bootstrap supplies the responsive foundation, while the global stylesheet applies square controls, visible keyboard focus outlines, high-contrast text, and shadow-free surfaces. Layouts collapse for narrow screens, interactive artwork respects reduced-motion settings, and shared templates provide consistent navigation and footer landmarks. The `/visuals/` route provides a component gallery for typography, colors, controls, forms, tables, pagination, modal content, product cards, and the shared page chrome.
 
-## Default development accounts
+## Security
 
-Database migrations create the following development accounts:
+- Django's ORM builds database queries without interpolating user input into raw SQL.
+- Django templates escape variable output by default.
+- CSRF middleware and form tokens protect state-changing form submissions.
+- Authentication middleware, `login_required` checks, and server-side ownership queries protect account and review actions.
+- Passwords use Django's password hashing system and configured password validators.
+- Review ratings, comment length, product IDs, prices, and track data are validated on the server.
+- Review ownership is enforced when editing or deleting, and database constraints allow only one review per user and product.
+- Sign-out and review mutations accept POST requests rather than GET requests.
+
+## Project structure
+
+| Django app | Responsibility |
+| --- | --- |
+| `home` | Catalogue data, home page, shared templates, global styles, and product artwork presentation |
+| `search` | Search form, catalogue filters, fuzzy relevance scoring, and filter interactions |
+| `product_page` | Product details, supplementary product information, ratings, and reviews |
+| `accounts` | Registration, authentication, dashboard, profile editing, roles, and seeded demonstration users |
+| `visuals` | Reusable component and visual identity gallery |
+| `cultrecords` | Project settings and root URL configuration |
+
+## Demonstration accounts
+
+Database migrations create the following accounts for local demonstration:
 
 | Role | Username | Password |
 | --- | --- | --- |
@@ -46,17 +91,15 @@ Database migrations create the following development accounts:
 | User | `user4` | `user4` |
 | User | `user5` | `user5` |
 
-These credentials are intended for local development and demonstration only. Passwords are stored as Django password hashes rather than plain text.
+These credentials are for local demonstration only. Django stores the passwords as hashes rather than plain text.
 
 ## Local setup
 
-Cult Records requires Python 3.13 or newer. `uv` is optional. A standard Python virtual environment is enough to run the project.
+Cult Records requires Python 3.13 or newer. It can be installed with standard Python tools or with `uv`.
 
 ### Windows with standard Python
 
-Install Python 3.13 from the [Python website](https://www.python.org/downloads/windows/) if it is not already installed. Keep the Python launcher selected during installation.
-
-Open Command Prompt or PowerShell in the project folder, then run:
+Install Python 3.13 from the [Python website](https://www.python.org/downloads/windows/) if necessary. Open Command Prompt or PowerShell in the project folder and run:
 
 ```powershell
 py -3.13 -m venv .venv
@@ -65,10 +108,6 @@ py -3.13 -m venv .venv
 .venv\Scripts\python.exe manage.py migrate
 .venv\Scripts\python.exe manage.py runserver
 ```
-
-Open <http://127.0.0.1:8000/> in a browser. Press `Ctrl+C` in the terminal to stop the server.
-
-These commands call the virtual environment's Python directly, so activating the environment is not required.
 
 ### macOS or Linux with standard Python
 
@@ -80,9 +119,11 @@ python3.13 -m venv .venv
 .venv/bin/python manage.py runserver
 ```
 
+Open <http://127.0.0.1:8000/> in a browser. Stop the server with `Ctrl+C`.
+
 ### Setup with uv
 
-Install `uv` using the [official installation guide](https://docs.astral.sh/uv/getting-started/installation/), then run:
+Install `uv` using its [official installation guide](https://docs.astral.sh/uv/getting-started/installation/), then run:
 
 ```bash
 uv sync --locked
@@ -90,10 +131,31 @@ uv run python manage.py migrate
 uv run python manage.py runserver
 ```
 
-The project uses `uv` during development because it creates and manages the virtual environment, installs dependencies quickly, and keeps exact versions in `uv.lock`. The standard Python instructions use `requirements.txt`, which contains the same resolved dependency versions, so `uv` is not needed to run the application.
+`uv` creates the virtual environment and installs the versions recorded in `uv.lock`. The standard Python instructions install the same resolved dependency versions from `requirements.txt`.
 
-When dependencies change, update `uv.lock` first and refresh the compatibility file with:
+## Tests
+
+Run the Django test suite with either command:
 
 ```bash
+uv run python manage.py test
+```
+
+```bash
+.venv/bin/python manage.py test
+```
+
+On Windows, the equivalent standard Python command is:
+
+```powershell
+.venv\Scripts\python.exe manage.py test
+```
+
+## Dependency maintenance
+
+When Python dependencies change, update `uv.lock` and regenerate `requirements.txt`:
+
+```bash
+uv lock
 uv export --format requirements-txt --no-emit-project --no-hashes --no-annotate --output-file requirements.txt
 ```
