@@ -1,4 +1,6 @@
 from django.contrib.auth import get_user_model
+from django.core.paginator import Paginator
+from django.db.models import Q
 from django.shortcuts import render
 
 from home.models import Product
@@ -10,6 +12,14 @@ from .access import (
     product_editor_required,
     review_moderator_required,
 )
+from .models import AdminActivity
+
+
+def _visible_activity(user):
+    activity = AdminActivity.objects.select_related("actor")
+    if user.is_superuser:
+        return activity
+    return activity.filter(actor=user)
 
 
 @admin_panel_access_required
@@ -26,6 +36,7 @@ def dashboard(request):
             "review_queue_count": Review.objects.filter(is_approved=False).count(),
             "recent_products": Product.objects.order_by("-product_id")[:5],
             "recent_users": User.objects.order_by("-date_joined", "-pk")[:5],
+            "recent_activity": _visible_activity(request.user)[:6],
         },
     )
 
@@ -84,13 +95,42 @@ def reviews(request):
 
 @admin_panel_access_required
 def activity(request):
+    activity_list = _visible_activity(request.user)
+    query = request.GET.get("query", "").strip()
+    action = request.GET.get("action", "").strip()
+    target_type = request.GET.get("target_type", "").strip()
+
+    if query:
+        activity_list = activity_list.filter(
+            Q(actor__username__icontains=query)
+            | Q(target_label__icontains=query)
+            | Q(target_identifier__icontains=query)
+            | Q(summary__icontains=query)
+        )
+    if action in AdminActivity.Action.values:
+        activity_list = activity_list.filter(action=action)
+    if target_type:
+        activity_list = activity_list.filter(target_type=target_type)
+
+    target_types = list(
+        _visible_activity(request.user)
+        .order_by("target_type")
+        .values_list("target_type", flat=True)
+        .distinct()
+    )
+    page = Paginator(activity_list, 25).get_page(request.GET.get("page"))
+
     return render(
         request,
-        "admin_panel/section_placeholder.html",
+        "admin_panel/activity_list.html",
         {
             "active_section": "activity",
-            "section_title": "Activity",
-            "section_description": "Administrative changes and moderation decisions will be recorded here.",
+            "activity_page": page,
+            "activity_actions": AdminActivity.Action.choices,
+            "target_types": target_types,
+            "selected_action": action,
+            "selected_target_type": target_type,
+            "query": query,
         },
     )
 

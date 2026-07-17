@@ -1,0 +1,85 @@
+{% extends "admin_panel/base.html" %}
+
+{% block title %}Administrative activity{% endblock %}
+{% block page_title %}Activity{% endblock %}
+{% block page_description %}A permanent record of changes made through the custom admin panel.{% endblock %}
+
+{% block content %}
+    <section class="admin-panel" aria-labelledby="activity-filters-heading">
+        <div class="admin-panel-header">
+            <div>
+                <p class="admin-panel-eyebrow">Audit filters</p>
+                <h2 id="activity-filters-heading">Find activity</h2>
+            </div>
+        </div>
+        <form method="get" class="admin-filter-form">
+            <div>
+                <label for="activity-query" class="form-label">Search</label>
+                <input
+                    id="activity-query"
+                    name="query"
+                    type="search"
+                    value="{{ query }}"
+                    class="form-control"
+                    placeholder="Actor, target, or summary"
+                >
+            </div>
+            <div>
+                <label for="activity-action" class="form-label">Action</label>
+                <select id="activity-action" name="action" class="form-select">
+                    <option value="">All actions</option>
+                    {% for value, label in activity_actions %}
+                        <option value="{{ value }}"{% if selected_action == value %} selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="activity-target" class="form-label">Target type</label>
+                <select id="activity-target" name="target_type" class="form-select">
+                    <option value="">All targets</option>
+                    {% for value in target_types %}
+                        <option value="{{ value }}"{% if selected_target_type == value %} selected{% endif %}>{{ value }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="admin-filter-actions">
+                <button type="submit" class="btn btn-primary">Apply filters</button>
+                <a href="{% url 'admin_panel:activity' %}" class="btn btn-secondary">Clear</a>
+            </div>
+        </form>
+    </section>
+
+    <section class="admin-panel mt-4" aria-labelledby="activity-results-heading">
+        <div class="admin-panel-header">
+            <div>
+                <p class="admin-panel-eyebrow">Recorded changes</p>
+                <h2 id="activity-results-heading">{{ activity_page.paginator.count }} event{{ activity_page.paginator.count|pluralize }}</h2>
+            </div>
+        </div>
+        {% if activity_page %}
+            <div class="admin-activity-list">
+                {% for entry in activity_page %}
+                    <article class="admin-activity-entry">
+                        <div>
+                            <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                <span class="badge admin-badge-info">{{ entry.get_action_display }}</span>
+                                <strong>{{ entry.summary }}</strong>
+                            </div>
+                            <span>{{ entry.target_type }} · {{ entry.target_label }} · <code>{{ entry.target_identifier }}</code></span>
+                        </div>
+                        <div class="admin-activity-meta">
+                            <span>{{ entry.actor.username|default:"Deleted administrator" }}</span>
+                            <time datetime="{{ entry.created_at|date:'c' }}">{{ entry.created_at|date:"j M Y, H:i" }}</time>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+            {% include "admin_panel/includes/pagination.html" with page_obj=activity_page %}
+        {% else %}
+            <div class="admin-empty-state">
+                <h3>No matching activity</h3>
+                <p>Try removing one or more filters.</p>
+            </div>
+        {% endif %}
+    </section>
+{% endblock %}

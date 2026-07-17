@@ -143,4 +143,35 @@
             </div>
         </section>
     {% endif %}
+
+    <section class="admin-panel mt-4" aria-labelledby="recent-activity-heading">
+        <div class="admin-panel-header">
+            <div>
+                <p class="admin-panel-eyebrow">Audit trail</p>
+                <h2 id="recent-activity-heading">Recent activity</h2>
+            </div>
+            <a href="{% url 'admin_panel:activity' %}">Open activity</a>
+        </div>
+        {% if recent_activity %}
+            <div class="admin-activity-list">
+                {% for entry in recent_activity %}
+                    <article class="admin-activity-entry">
+                        <div>
+                            <strong>{{ entry.summary }}</strong>
+                            <span>{{ entry.target_type }} · {{ entry.target_label }}</span>
+                        </div>
+                        <div class="admin-activity-meta">
+                            <span>{{ entry.actor.username|default:"Deleted administrator" }}</span>
+                            <time datetime="{{ entry.created_at|date:'c' }}">{{ entry.created_at|date:"j M Y, H:i" }}</time>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="admin-empty-state">
+                <h3>No administrative activity yet</h3>
+                <p>Changes made through this panel will be recorded here.</p>
+            </div>
+        {% endif %}
+    </section>
 {% endblock %}
