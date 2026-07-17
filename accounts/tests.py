@@ -34,14 +34,17 @@ class SeededAccountTests(TestCase):
         )
         self.assertEqual(role_for_user(User.objects.get(username="user1")), UserRole.USER)
 
-    def test_editor_receives_catalogue_and_moderation_permissions(self):
+    def test_editor_receives_editing_and_moderation_permissions(self):
         editor = get_user_model().objects.get(username="editor")
 
-        self.assertTrue(editor.has_perm("home.add_product"))
+        self.assertTrue(editor.has_perm("home.view_product"))
         self.assertTrue(editor.has_perm("home.change_product"))
-        self.assertTrue(editor.has_perm("home.delete_product"))
+        self.assertFalse(editor.has_perm("home.add_product"))
+        self.assertFalse(editor.has_perm("home.delete_product"))
+        self.assertTrue(editor.has_perm("product_page.view_productpage"))
+        self.assertTrue(editor.has_perm("product_page.change_productpage"))
         self.assertTrue(editor.has_perm("product_page.change_review"))
-        self.assertTrue(editor.has_perm("product_page.delete_review"))
+        self.assertFalse(editor.has_perm("product_page.delete_review"))
         self.assertFalse(editor.has_perm("auth.change_user"))
         self.assertFalse(editor.has_perm("product_page.add_review"))
 

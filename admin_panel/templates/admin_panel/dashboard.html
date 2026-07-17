@@ -1,0 +1,146 @@
+{% extends "admin_panel/base.html" %}
+
+{% block title %}Admin dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_description %}A working overview frame for catalogue, account, moderation, and simulated purchase activity.{% endblock %}
+
+{% block page_actions %}
+    {% if admin_can_manage_users %}
+        <a href="{% url 'admin_panel:users' %}" class="btn btn-primary">Manage users</a>
+    {% endif %}
+    {% if admin_can_edit_products %}
+        <a href="{% url 'admin_panel:products' %}" class="btn btn-secondary">Manage products</a>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <section class="admin-stat-grid" aria-label="Website overview">
+        <article class="admin-stat-card">
+            <p class="admin-stat-label">Catalogue</p>
+            <p class="admin-stat-value">{{ total_products }}</p>
+            <p class="admin-stat-detail">Products across all categories</p>
+        </article>
+        <article class="admin-stat-card">
+            <p class="admin-stat-label">Accounts</p>
+            <p class="admin-stat-value">{{ total_users }}</p>
+            <p class="admin-stat-detail">{{ active_users }} active users</p>
+        </article>
+        <article class="admin-stat-card">
+            <p class="admin-stat-label">Moderation queue</p>
+            <p class="admin-stat-value">{{ review_queue_count }}</p>
+            <p class="admin-stat-detail">Reviews awaiting a decision</p>
+        </article>
+        <article class="admin-stat-card admin-stat-card-muted">
+            <p class="admin-stat-label">Purchases</p>
+            <p class="admin-stat-value">&mdash;</p>
+            <p class="admin-stat-detail">Ready for simulated purchase data</p>
+        </article>
+    </section>
+
+    <div class="admin-dashboard-grid">
+        <section class="admin-panel" aria-labelledby="recent-products-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Catalogue</p>
+                    <h2 id="recent-products-heading">Product snapshot</h2>
+                </div>
+                {% if admin_can_edit_products %}
+                    <a href="{% url 'admin_panel:products' %}">Open products</a>
+                {% endif %}
+            </div>
+            {% if recent_products %}
+                <div class="table-responsive">
+                    <table class="table admin-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">Product</th>
+                                <th scope="col">Category</th>
+                                <th scope="col" class="text-end">Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in recent_products %}
+                                <tr>
+                                    <td><code>{{ product.product_id }}</code></td>
+                                    <td>
+                                        <strong>{{ product.title }}</strong>
+                                        <span class="admin-table-secondary">{{ product.artist }}</span>
+                                    </td>
+                                    <td><span class="badge admin-badge-info">{{ product.get_product_type_display }}</span></td>
+                                    <td class="text-end">{{ product.price|floatformat:2 }}€</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="admin-empty-state">
+                    <h3>No products yet</h3>
+                    <p>The catalogue overview will appear here once products are added.</p>
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="admin-panel" aria-labelledby="operations-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Workflow</p>
+                    <h2 id="operations-heading">Operations</h2>
+                </div>
+            </div>
+            <div class="admin-operation-list">
+                {% if admin_can_moderate_reviews %}
+                    <a href="{% url 'admin_panel:reviews' %}" class="admin-operation">
+                        <span>
+                            <strong>Review moderation</strong>
+                            <small>Approve, reject, and inspect submissions</small>
+                        </span>
+                        <span aria-hidden="true">→</span>
+                    </a>
+                {% endif %}
+                {% if admin_can_manage_bundles %}
+                    <a href="{% url 'admin_panel:bundles' %}" class="admin-operation">
+                        <span>
+                            <strong>Bundle builder</strong>
+                            <small>Compose products without nested bundles</small>
+                        </span>
+                        <span aria-hidden="true">→</span>
+                    </a>
+                {% endif %}
+                <a href="{% url 'admin_panel:activity' %}" class="admin-operation">
+                    <span>
+                        <strong>Administrative activity</strong>
+                        <small>Audit changes and moderation decisions</small>
+                    </span>
+                    <span aria-hidden="true">→</span>
+                </a>
+            </div>
+        </section>
+    </div>
+
+    {% if admin_can_manage_users %}
+        <section class="admin-panel mt-4" aria-labelledby="recent-users-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Accounts</p>
+                    <h2 id="recent-users-heading">Recent users</h2>
+                </div>
+                <a href="{% url 'admin_panel:users' %}">Open users</a>
+            </div>
+            <div class="admin-user-strip">
+                {% for user in recent_users %}
+                    <div class="admin-user-summary">
+                        <span class="admin-user-initial" aria-hidden="true">{{ user.username|first|upper }}</span>
+                        <span>
+                            <strong>{{ user.username }}</strong>
+                            <small>{% if user.is_superuser %}Admin{% elif user.is_active %}Active user{% else %}Inactive user{% endif %}</small>
+                        </span>
+                    </div>
+                {% empty %}
+                    <p class="admin-muted mb-0">No user accounts exist yet.</p>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+{% endblock %}

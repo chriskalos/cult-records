@@ -66,6 +66,9 @@
                         {% if request.user.is_authenticated %}
                             <li><span class="dropdown-item-text text-body-secondary">{{ request.user.username }}</span></li>
                             <li><a href="{% url 'accounts:dashboard' %}" class="dropdown-item">Dashboard</a></li>
+                            {% if admin_panel_access %}
+                                <li><a href="{% url 'admin_panel:dashboard' %}" class="dropdown-item">Admin panel</a></li>
+                            {% endif %}
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form action="{% url 'accounts:logout' %}" method="post">

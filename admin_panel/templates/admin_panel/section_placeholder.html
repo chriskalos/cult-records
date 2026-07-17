@@ -1,0 +1,17 @@
+{% extends "admin_panel/base.html" %}
+
+{% block title %}{{ section_title }}{% endblock %}
+{% block page_title %}{{ section_title }}{% endblock %}
+{% block page_description %}{{ section_description }}{% endblock %}
+
+{% block content %}
+    <section class="admin-panel admin-placeholder" aria-labelledby="next-slice-heading">
+        <p class="admin-panel-eyebrow">Foundation ready</p>
+        <h2 id="next-slice-heading">This management area is next in the implementation sequence.</h2>
+        <p>
+            Its route and role checks are active now. Forms, tables, validation, confirmations,
+            audit events, and tests will be added as a focused functional slice.
+        </p>
+        <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-secondary">Return to dashboard</a>
+    </section>
+{% endblock %}

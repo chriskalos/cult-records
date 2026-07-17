@@ -1,0 +1,153 @@
+{% extends "admin_panel/base.html" %}
+
+{% block title %}Admin components{% endblock %}
+{% block page_kicker %}Blueprint identity review{% endblock %}
+{% block page_title %}Component gallery{% endblock %}
+{% block page_description %}The required review surface for admin colors, typography, controls, forms, tables, and responsive behavior.{% endblock %}
+
+{% block page_actions %}
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#admin-example-modal">
+        Open dialog
+    </button>
+{% endblock %}
+
+{% block content %}
+    <section class="admin-gallery-section" aria-labelledby="palette-heading">
+        <div class="admin-section-heading">
+            <p class="admin-panel-eyebrow">Color system</p>
+            <h2 id="palette-heading">Blueprint palette</h2>
+        </div>
+        <div class="admin-palette-grid">
+            <div class="admin-swatch admin-swatch-canvas"><span>Canvas</span><code>#07111D</code></div>
+            <div class="admin-swatch admin-swatch-panel"><span>Panel</span><code>#0C1B2A</code></div>
+            <div class="admin-swatch admin-swatch-steel"><span>Steel</span><code>#14283D</code></div>
+            <div class="admin-swatch admin-swatch-navigation"><span>Navigation</span><code>#0A4268</code></div>
+            <div class="admin-swatch admin-swatch-action"><span>Action</span><code>#1677A6</code></div>
+            <div class="admin-swatch admin-swatch-cyan"><span>Cyan</span><code>#46C2E0</code></div>
+            <div class="admin-swatch admin-swatch-white"><span>Text</span><code>#EDF6FA</code></div>
+            <div class="admin-swatch admin-swatch-danger"><span>Danger</span><code>#9E1B32</code></div>
+        </div>
+    </section>
+
+    <div class="admin-gallery-grid">
+        <section class="admin-panel" aria-labelledby="controls-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Actions</p>
+                    <h2 id="controls-heading">Controls</h2>
+                </div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mb-4">
+                <button type="button" class="btn btn-primary">Primary action</button>
+                <button type="button" class="btn btn-secondary">Secondary</button>
+                <button type="button" class="btn btn-outline-primary">Outline</button>
+                <button type="button" class="btn btn-danger">Delete permanently</button>
+                <button type="button" class="btn btn-secondary" disabled>Disabled</button>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <span class="badge admin-badge-info">Visible</span>
+                <span class="badge admin-badge-success">Approved</span>
+                <span class="badge admin-badge-warning">Pending</span>
+                <span class="badge admin-badge-danger">Rejected</span>
+            </div>
+        </section>
+
+        <section class="admin-panel" aria-labelledby="form-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Inputs</p>
+                    <h2 id="form-heading">Form controls</h2>
+                </div>
+            </div>
+            <form>
+                <div class="mb-3">
+                    <label for="gallery-title" class="form-label">Product title</label>
+                    <input id="gallery-title" type="text" class="form-control" value="Blueprint edition">
+                    <div class="form-text">Clear helper text stays readable against the panel.</div>
+                </div>
+                <div class="mb-3">
+                    <label for="gallery-category" class="form-label">Category</label>
+                    <select id="gallery-category" class="form-select">
+                        <option>LP</option>
+                        <option>CD</option>
+                        <option>Bundle</option>
+                        <option>Merch</option>
+                    </select>
+                </div>
+                <div class="form-check mb-3">
+                    <input id="gallery-visible" type="checkbox" class="form-check-input" checked>
+                    <label for="gallery-visible" class="form-check-label">Visible in the catalogue</label>
+                </div>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </form>
+        </section>
+    </div>
+
+    <section class="admin-panel mt-4" aria-labelledby="table-heading">
+        <div class="admin-panel-header">
+            <div>
+                <p class="admin-panel-eyebrow">Structured data</p>
+                <h2 id="table-heading">Management table</h2>
+            </div>
+            <label class="admin-table-search">
+                <span class="visually-hidden">Search products</span>
+                <input type="search" class="form-control" placeholder="Search products">
+            </label>
+        </div>
+        <div class="table-responsive">
+            <table class="table admin-table mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Product</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Status</th>
+                        <th scope="col" class="text-end">Price</th>
+                        <th scope="col"><span class="visually-hidden">Actions</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Random Access Memories</strong><span class="admin-table-secondary">Daft Punk</span></td>
+                        <td>LP</td>
+                        <td><span class="badge admin-badge-info">Visible</span></td>
+                        <td class="text-end">29.99€</td>
+                        <td class="text-end"><a href="#">Edit</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Store essentials</strong><span class="admin-table-secondary">Cult Records</span></td>
+                        <td>Bundle</td>
+                        <td><span class="badge admin-badge-warning">Hidden</span></td>
+                        <td class="text-end">44.00€</td>
+                        <td class="text-end"><a href="#">Edit</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="admin-panel admin-empty-state mt-4" aria-labelledby="empty-heading">
+        <p class="admin-panel-eyebrow">Empty state</p>
+        <h2 id="empty-heading">Nothing needs attention.</h2>
+        <p>When there are pending reviews or operational warnings, they will appear here.</p>
+        <button type="button" class="btn btn-secondary">Refresh queue</button>
+    </section>
+
+    <div class="modal fade" id="admin-example-modal" tabindex="-1" aria-labelledby="admin-example-modal-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title h3" id="admin-example-modal-title">Confirm administrative action</h2>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                </div>
+                <div class="modal-body">
+                    <p>This dialog demonstrates the blueprint surface, focus treatment, and explicit action language.</p>
+                    <p class="admin-muted mb-0">Permanent changes will always explain their consequences.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger">Delete permanently</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
