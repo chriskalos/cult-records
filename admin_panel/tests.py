@@ -1,11 +1,17 @@
+from io import BytesIO
+from tempfile import TemporaryDirectory
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
+from django.test import override_settings
 from django.urls import reverse
+from PIL import Image
 
 from accounts.roles import EDITOR_GROUP_NAME, UserRole, role_for_user
-from home.models import Product
-from product_page.models import Review
+from home.models import BundleItem, Product
+from product_page.models import ProductPage, Review
 
 from .audit import record_admin_activity
 from .models import AdminActivity
@@ -433,3 +439,224 @@ class AdminUserManagementTests(TestCase):
 
         self.assertNotContains(response, "user_permissions")
         self.assertNotContains(response, "Django permissions")
+
+
+class AdminProductManagementTests(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.admin = User.objects.get(username="admin")
+        self.editor = User.objects.get(username="editor")
+        self.product = Product.objects.get(product_id="MDEVCTRYLP")
+        self.media_directory = TemporaryDirectory()
+        self.addCleanup(self.media_directory.cleanup)
+        self.media_override = override_settings(MEDIA_ROOT=self.media_directory.name)
+        self.media_override.enable()
+        self.addCleanup(self.media_override.disable)
+
+    def _product_data(self, **overrides):
+        data = {
+            "product_id": "ADMINTESTCD",
+            "artist": "Admin Test Artist",
+            "title": "Admin Test Album",
+            "description": "A short catalogue description.",
+            "genre": "Electronic",
+            "product_type": Product.ProductType.CD,
+            "price": "12.50",
+            "is_visible": "on",
+            "long_description": "First paragraph.\n\nSecond paragraph.",
+            "release_date": "2026-07-17",
+            "tracks": "Opening Track\nClosing Track",
+        }
+        data.update(overrides)
+        return data
+
+    def _image_upload(self, name="artwork.png"):
+        image_bytes = BytesIO()
+        Image.new("RGB", (20, 20), color=(20, 80, 120)).save(
+            image_bytes,
+            format="PNG",
+        )
+        return SimpleUploadedFile(
+            name,
+            image_bytes.getvalue(),
+            content_type="image/png",
+        )
+
+    def test_product_list_is_searchable_and_role_aware(self):
+        self.client.force_login(self.admin)
+        admin_response = self.client.get(
+            reverse("admin_panel:products"),
+            {"query": self.product.product_id, "visibility": "visible"},
+        )
+
+        self.assertContains(admin_response, self.product.title)
+        self.assertContains(admin_response, "Add product")
+
+        self.client.force_login(self.editor)
+        editor_response = self.client.get(reverse("admin_panel:products"))
+        self.assertNotContains(editor_response, "Add product")
+
+    def test_admin_can_create_product_with_image_and_product_page_data(self):
+        self.client.force_login(self.admin)
+        data = self._product_data()
+        data["uploaded_image"] = self._image_upload()
+
+        response = self.client.post(
+            reverse("admin_panel:product_create"),
+            data,
+        )
+
+        product = Product.objects.get(product_id="ADMINTESTCD")
+        self.assertRedirects(
+            response,
+            reverse("admin_panel:product_edit", args=[product.product_id]),
+        )
+        self.assertTrue(product.uploaded_image.name.startswith("products/ADMINTESTCD/"))
+        self.assertEqual(product.page.tracks, ["Opening Track", "Closing Track"])
+        self.assertEqual(product.page.long_description, "First paragraph.\n\nSecond paragraph.")
+        self.assertTrue(
+            AdminActivity.objects.filter(
+                action=AdminActivity.Action.CREATE,
+                target_identifier=product.product_id,
+            ).exists()
+        )
+
+    def test_product_form_rejects_non_image_upload(self):
+        self.client.force_login(self.admin)
+        invalid_upload = SimpleUploadedFile(
+            "not-an-image.txt",
+            b"not an image",
+            content_type="text/plain",
+        )
+        data = self._product_data()
+        data["uploaded_image"] = invalid_upload
+
+        response = self.client.post(
+            reverse("admin_panel:product_create"),
+            data,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "valid image")
+        self.assertFalse(Product.objects.filter(product_id="ADMINTESTCD").exists())
+
+    def test_editor_can_edit_and_hide_existing_product_but_cannot_change_its_id(self):
+        self.client.force_login(self.editor)
+        edit_data = self._product_data(
+            product_id="CHANGEDID",
+            artist=self.product.artist,
+            title="Edited title",
+            description=self.product.description,
+            genre=self.product.genre,
+            product_type=self.product.product_type,
+            price=str(self.product.price),
+            long_description=self.product.page.long_description,
+            release_date="",
+            tracks="",
+        )
+
+        edit_response = self.client.post(
+            reverse("admin_panel:product_edit", args=[self.product.product_id]),
+            edit_data,
+        )
+        visibility_url = reverse(
+            "admin_panel:product_visibility",
+            args=[self.product.product_id],
+        )
+        get_visibility_response = self.client.get(visibility_url)
+        hide_response = self.client.post(visibility_url, {"action": "hide"})
+
+        self.product.refresh_from_db()
+        self.assertRedirects(
+            edit_response,
+            reverse("admin_panel:product_edit", args=[self.product.product_id]),
+        )
+        self.assertEqual(self.product.product_id, "MDEVCTRYLP")
+        self.assertEqual(self.product.title, "Edited title")
+        self.assertEqual(get_visibility_response.status_code, 405)
+        self.assertRedirects(hide_response, reverse("admin_panel:products"))
+        self.assertFalse(self.product.is_visible)
+
+    def test_editor_cannot_add_delete_or_edit_bundle_products(self):
+        bundle = Product.objects.create(
+            product_id="EDITORBUNDLE",
+            artist="Cult Records",
+            title="Editor bundle",
+            description="Bundle.",
+            product_type=Product.ProductType.BUNDLE,
+            price="20.00",
+        )
+        self.client.force_login(self.editor)
+
+        self.assertEqual(
+            self.client.get(reverse("admin_panel:product_create")).status_code,
+            403,
+        )
+        self.assertEqual(
+            self.client.get(
+                reverse("admin_panel:product_delete", args=[self.product.product_id])
+            ).status_code,
+            403,
+        )
+        self.assertEqual(
+            self.client.get(
+                reverse("admin_panel:product_edit", args=[bundle.product_id])
+            ).status_code,
+            403,
+        )
+
+    def test_component_deletion_requires_related_bundle_deletion(self):
+        bundle = Product.objects.create(
+            product_id="DELETEBUNDLE",
+            artist="Cult Records",
+            title="Delete bundle",
+            description="Bundle.",
+            product_type=Product.ProductType.BUNDLE,
+            price="20.00",
+        )
+        BundleItem.objects.create(bundle=bundle, component=self.product)
+        self.client.force_login(self.admin)
+        delete_url = reverse(
+            "admin_panel:product_delete",
+            args=[self.product.product_id],
+        )
+
+        blocked_response = self.client.post(
+            delete_url,
+            {"confirm_product_id": self.product.product_id},
+        )
+
+        self.assertEqual(blocked_response.status_code, 200)
+        self.assertContains(blocked_response, "Delete those bundles with it or cancel")
+        self.assertTrue(Product.objects.filter(pk=self.product.pk).exists())
+        self.assertTrue(Product.objects.filter(pk=bundle.pk).exists())
+
+        delete_response = self.client.post(
+            delete_url,
+            {
+                "confirm_product_id": self.product.product_id,
+                "delete_related_bundles": "on",
+            },
+        )
+
+        self.assertRedirects(delete_response, reverse("admin_panel:products"))
+        self.assertFalse(Product.objects.filter(pk=self.product.pk).exists())
+        self.assertFalse(Product.objects.filter(pk=bundle.pk).exists())
+
+    def test_product_deletion_removes_product_page_and_reviews(self):
+        review = Review.objects.create(
+            product=self.product,
+            author=get_user_model().objects.get(username="user1"),
+            rating=5,
+        )
+        page_pk = self.product.page.pk
+        self.client.force_login(self.admin)
+
+        response = self.client.post(
+            reverse("admin_panel:product_delete", args=[self.product.product_id]),
+            {"confirm_product_id": self.product.product_id},
+        )
+
+        self.assertRedirects(response, reverse("admin_panel:products"))
+        self.assertFalse(ProductPage.objects.filter(pk=page_pk).exists())
+        self.assertFalse(Review.objects.filter(pk=review.pk).exists())

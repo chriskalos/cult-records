@@ -1,0 +1,102 @@
+{% extends "admin_panel/base.html" %}
+{% load static %}
+
+{% block title %}{{ form_title }}{% endblock %}
+{% block page_title %}{{ form_title }}{% endblock %}
+{% block page_description %}{{ form_description }}{% endblock %}
+
+{% block page_actions %}
+    <a href="{% url 'admin_panel:products' %}" class="btn btn-secondary">Back to products</a>
+    {% if product and product.is_visible %}<a href="{{ product.get_absolute_url }}" class="btn btn-outline-primary">View product</a>{% endif %}
+{% endblock %}
+
+{% block content %}
+    <form method="post" enctype="multipart/form-data" class="admin-product-form" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <section class="admin-panel" aria-labelledby="catalogue-fields-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Catalogue record</p>
+                    <h2 id="catalogue-fields-heading">Core details</h2>
+                </div>
+            </div>
+            <div class="admin-form-grid">
+                {% include "admin_panel/includes/form_field.html" with field=form.product_id %}
+                {% include "admin_panel/includes/form_field.html" with field=form.product_type %}
+                {% include "admin_panel/includes/form_field.html" with field=form.artist %}
+                {% include "admin_panel/includes/form_field.html" with field=form.title %}
+                {% include "admin_panel/includes/form_field.html" with field=form.genre %}
+                {% include "admin_panel/includes/form_field.html" with field=form.price %}
+                <div class="admin-form-full">{% include "admin_panel/includes/form_field.html" with field=form.description %}</div>
+                <div class="admin-form-full">{% include "admin_panel/includes/form_field.html" with field=form.is_visible %}</div>
+            </div>
+        </section>
+
+        <section class="admin-panel mt-4" aria-labelledby="artwork-fields-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Media</p>
+                    <h2 id="artwork-fields-heading">Product artwork</h2>
+                </div>
+            </div>
+            <div class="admin-media-form">
+                <div class="admin-image-preview">
+                    {% if product.uploaded_image %}
+                        <img src="{{ product.uploaded_image.url }}" alt="Current artwork for {{ product.title }}">
+                    {% elif product.image %}
+                        <img src="{% static product.image %}" alt="Current artwork for {{ product.title }}">
+                    {% else %}
+                        <span>No artwork uploaded</span>
+                    {% endif %}
+                </div>
+                <div class="admin-media-fields">
+                    {% include "admin_panel/includes/form_field.html" with field=form.uploaded_image %}
+                    {% if form.remove_uploaded_image %}
+                        {% include "admin_panel/includes/form_field.html" with field=form.remove_uploaded_image %}
+                    {% endif %}
+                    <p class="form-text mb-0">JPEG, PNG, or WebP. Maximum file size 8 MB.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="admin-panel mt-4" aria-labelledby="product-page-fields-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Product page</p>
+                    <h2 id="product-page-fields-heading">Extended information</h2>
+                </div>
+            </div>
+            <div class="admin-form-grid">
+                <div class="admin-form-full">{% include "admin_panel/includes/form_field.html" with field=form.long_description %}</div>
+                {% include "admin_panel/includes/form_field.html" with field=form.release_date %}
+                <div class="admin-form-full">{% include "admin_panel/includes/form_field.html" with field=form.tracks %}</div>
+            </div>
+            <div class="admin-form-actions">
+                <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
+                <a href="{% url 'admin_panel:products' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </section>
+    </form>
+
+    {% if product and admin_can_delete_products %}
+        <section class="admin-panel admin-danger-zone mt-4" aria-labelledby="delete-product-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Permanent action</p>
+                    <h2 id="delete-product-heading">Delete product</h2>
+                </div>
+            </div>
+            <div class="admin-action-row">
+                <div>
+                    <strong>Permanently delete {{ product.product_id }}</strong>
+                    <p>Related product-page data and reviews will also be deleted.</p>
+                </div>
+                <a href="{% url 'admin_panel:product_delete' product.product_id %}" class="btn btn-danger">Delete product</a>
+            </div>
+        </section>
+    {% endif %}
+{% endblock %}

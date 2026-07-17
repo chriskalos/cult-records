@@ -1,0 +1,139 @@
+{% extends "admin_panel/base.html" %}
+
+{% block title %}Manage products{% endblock %}
+{% block page_title %}Products{% endblock %}
+{% block page_description %}Edit catalogue content, upload artwork, control visibility, and permanently delete products.{% endblock %}
+
+{% block page_actions %}
+    {% if admin_can_add_products %}
+        <a href="{% url 'admin_panel:product_create' %}" class="btn btn-primary">Add product</a>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <section class="admin-panel" aria-labelledby="product-filters-heading">
+        <div class="admin-panel-header">
+            <div>
+                <p class="admin-panel-eyebrow">Catalogue filters</p>
+                <h2 id="product-filters-heading">Find products</h2>
+            </div>
+        </div>
+        <form method="get" class="admin-filter-form admin-filter-form-products">
+            <div>
+                <label for="product-query" class="form-label">Search</label>
+                <input id="product-query" name="query" type="search" value="{{ query }}" class="form-control" placeholder="ID, artist, title, or description">
+            </div>
+            <div>
+                <label for="product-type" class="form-label">Category</label>
+                <select id="product-type" name="product_type" class="form-select">
+                    <option value="">All categories</option>
+                    {% for value, label in product_types %}
+                        {% if request.user.is_superuser or value != "BUNDLE" %}
+                            <option value="{{ value }}"{% if selected_product_type == value %} selected{% endif %}>{{ label }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="product-visibility" class="form-label">Visibility</label>
+                <select id="product-visibility" name="visibility" class="form-select">
+                    <option value="">Any visibility</option>
+                    <option value="visible"{% if selected_visibility == "visible" %} selected{% endif %}>Visible</option>
+                    <option value="hidden"{% if selected_visibility == "hidden" %} selected{% endif %}>Hidden</option>
+                </select>
+            </div>
+            <div>
+                <label for="product-genre" class="form-label">Genre</label>
+                <select id="product-genre" name="genre" class="form-select">
+                    <option value="">All genres</option>
+                    {% for value in genres %}
+                        <option value="{{ value }}"{% if selected_genre == value %} selected{% endif %}>{{ value }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="product-sort" class="form-label">Sort</label>
+                <select id="product-sort" name="sort" class="form-select">
+                    <option value="artist"{% if selected_sort == "artist" %} selected{% endif %}>Artist A to Z</option>
+                    <option value="-artist"{% if selected_sort == "-artist" %} selected{% endif %}>Artist Z to A</option>
+                    <option value="title"{% if selected_sort == "title" %} selected{% endif %}>Title A to Z</option>
+                    <option value="-title"{% if selected_sort == "-title" %} selected{% endif %}>Title Z to A</option>
+                    <option value="price"{% if selected_sort == "price" %} selected{% endif %}>Lowest price</option>
+                    <option value="-price"{% if selected_sort == "-price" %} selected{% endif %}>Highest price</option>
+                </select>
+            </div>
+            <div class="admin-filter-actions">
+                <button type="submit" class="btn btn-primary">Apply filters</button>
+                <a href="{% url 'admin_panel:products' %}" class="btn btn-secondary">Clear</a>
+            </div>
+        </form>
+    </section>
+
+    <section class="admin-panel mt-4" aria-labelledby="product-results-heading">
+        <div class="admin-panel-header">
+            <div>
+                <p class="admin-panel-eyebrow">Catalogue</p>
+                <h2 id="product-results-heading">{{ product_page.paginator.count }} product{{ product_page.paginator.count|pluralize }}</h2>
+            </div>
+        </div>
+        {% if product_page %}
+            <div class="table-responsive">
+                <table class="table admin-table mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Product</th>
+                            <th scope="col">Category</th>
+                            <th scope="col">Genre</th>
+                            <th scope="col">Visibility</th>
+                            <th scope="col" class="text-end">Price</th>
+                            <th scope="col"><span class="visually-hidden">Actions</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in product_page %}
+                            <tr>
+                                <td>
+                                    <strong>{{ product.title }}</strong>
+                                    <span class="admin-table-secondary">{{ product.artist }} · <code>{{ product.product_id }}</code></span>
+                                </td>
+                                <td><span class="badge admin-badge-info">{{ product.get_product_type_display }}</span></td>
+                                <td>{{ product.genre|default:"None" }}</td>
+                                <td>
+                                    {% if product.is_visible %}
+                                        <span class="badge admin-badge-success">Visible</span>
+                                    {% else %}
+                                        <span class="badge admin-badge-warning">Hidden</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">{{ product.price|floatformat:2 }}€</td>
+                                <td>
+                                    <div class="admin-table-actions">
+                                        <a href="{% url 'admin_panel:product_edit' product.product_id %}">Edit</a>
+                                        <form action="{% url 'admin_panel:product_visibility' product.product_id %}" method="post">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                            {% if product.is_visible %}
+                                                <input type="hidden" name="action" value="hide">
+                                                <button type="submit" class="admin-text-button">Hide</button>
+                                            {% else %}
+                                                <input type="hidden" name="action" value="show">
+                                                <button type="submit" class="admin-text-button">Show</button>
+                                            {% endif %}
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% include "admin_panel/includes/pagination.html" with page_obj=product_page %}
+        {% else %}
+            <div class="admin-empty-state">
+                <h3>No matching products</h3>
+                <p>Try removing one or more filters.</p>
+                {% if admin_can_add_products %}<a href="{% url 'admin_panel:product_create' %}" class="btn btn-primary">Add product</a>{% endif %}
+            </div>
+        {% endif %}
+    </section>
+{% endblock %}

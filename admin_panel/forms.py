@@ -1,9 +1,14 @@
+from decimal import Decimal
+
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth.password_validation import validate_password
+from django.core.validators import MinValueValidator
 
 from accounts.roles import UserRole, role_for_user, set_user_role
+from home.models import Product
+from product_page.models import ProductPage
 
 
 ROLE_CHOICES = (
@@ -182,3 +187,143 @@ class UserDeleteConfirmationForm(forms.Form):
         if username != self.user.username:
             raise forms.ValidationError("The username does not match.")
         return username
+
+
+class AdminProductForm(forms.ModelForm):
+    price = forms.DecimalField(
+        min_value=Decimal("0.01"),
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
+    long_description = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={"rows": 8}),
+    )
+    release_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={"type": "date"}),
+    )
+    tracks = forms.CharField(
+        required=False,
+        help_text="Enter one track per line. The displayed order matches this list.",
+        widget=forms.Textarea(attrs={"rows": 10}),
+    )
+    remove_uploaded_image = forms.BooleanField(
+        required=False,
+        label="Remove the uploaded image and use the existing static image or placeholder",
+    )
+
+    class Meta:
+        model = Product
+        fields = (
+            "product_id",
+            "uploaded_image",
+            "artist",
+            "title",
+            "description",
+            "genre",
+            "product_type",
+            "price",
+            "is_visible",
+        )
+        widgets = {
+            "product_id": forms.TextInput(
+                attrs={"autocomplete": "off", "spellcheck": "false"}
+            ),
+            "uploaded_image": forms.FileInput(attrs={"accept": "image/jpeg,image/png,image/webp"}),
+            "artist": forms.TextInput(attrs={"autocomplete": "off"}),
+            "title": forms.TextInput(attrs={"autocomplete": "off"}),
+            "description": forms.Textarea(attrs={"rows": 4}),
+            "genre": forms.TextInput(attrs={"autocomplete": "off"}),
+        }
+
+    def __init__(self, *args, allow_bundle=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.allow_bundle = allow_bundle
+        if self.instance and self.instance.pk:
+            self.fields["product_id"].disabled = True
+            self.fields["product_id"].help_text = "Product IDs are immutable."
+            try:
+                page = self.instance.page
+            except ProductPage.DoesNotExist:
+                page = None
+            if page:
+                self.fields["long_description"].initial = page.long_description
+                self.fields["release_date"].initial = page.release_date
+                self.fields["tracks"].initial = "\n".join(page.tracks)
+            if self.instance.product_type == Product.ProductType.BUNDLE:
+                self.fields["product_type"].disabled = True
+        if not (
+            self.instance
+            and self.instance.pk
+            and self.instance.product_type == Product.ProductType.BUNDLE
+        ):
+            self.fields["product_type"].choices = [
+                choice
+                for choice in Product.ProductType.choices
+                if choice[0] != Product.ProductType.BUNDLE
+            ]
+
+        if not self.instance.uploaded_image:
+            self.fields.pop("remove_uploaded_image")
+        _apply_admin_form_classes(self)
+
+    def clean_uploaded_image(self):
+        image = self.cleaned_data.get("uploaded_image")
+        if not image:
+            return image
+        if image.size > 8 * 1024 * 1024:
+            raise forms.ValidationError("Upload an image no larger than 8 MB.")
+        image_format = getattr(getattr(image, "image", None), "format", "")
+        if image_format not in {"JPEG", "PNG", "WEBP"}:
+            raise forms.ValidationError("Upload a JPEG, PNG, or WebP image.")
+        return image
+
+    def clean_tracks(self):
+        value = self.cleaned_data.get("tracks", "")
+        tracks = [line.strip() for line in value.splitlines() if line.strip()]
+        if len(tracks) > 200:
+            raise forms.ValidationError("A track list cannot contain more than 200 tracks.")
+        if any(len(track) > 255 for track in tracks):
+            raise forms.ValidationError("Each track name must be 255 characters or fewer.")
+        return tracks
+
+    def save(self, commit=True):
+        product = super().save(commit=False)
+        if self.cleaned_data.get("remove_uploaded_image") and product.uploaded_image:
+            product.uploaded_image.delete(save=False)
+            product.uploaded_image = ""
+        if commit:
+            product.save()
+            page, _ = ProductPage.objects.get_or_create(product=product)
+            page.long_description = self.cleaned_data["long_description"]
+            page.release_date = self.cleaned_data["release_date"]
+            page.tracks = self.cleaned_data["tracks"]
+            page.full_clean()
+            page.save()
+        return product
+
+
+class ProductDeleteConfirmationForm(forms.Form):
+    confirm_product_id = forms.CharField(
+        label="Type the product ID to confirm",
+        widget=forms.TextInput(attrs={"autocomplete": "off", "class": "form-control"}),
+    )
+    delete_related_bundles = forms.BooleanField(
+        required=False,
+        label="Also permanently delete every bundle containing this product",
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+    )
+
+    def __init__(self, *args, product, has_related_bundles=False, **kwargs):
+        self.product = product
+        super().__init__(*args, **kwargs)
+        if not has_related_bundles:
+            self.fields.pop("delete_related_bundles")
+
+    def clean_confirm_product_id(self):
+        product_id = self.cleaned_data["confirm_product_id"]
+        if product_id != self.product.product_id:
+            raise forms.ValidationError("The product ID does not match.")
+        return product_id

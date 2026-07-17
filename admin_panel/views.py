@@ -2,9 +2,12 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.core.paginator import Paginator
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.db.models import Q
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.http import require_POST
 
 from home.models import Product
 from product_page.models import Review
@@ -17,9 +20,11 @@ from .access import (
 )
 from .audit import record_admin_activity
 from .forms import (
+    AdminProductForm,
     AdminSetPasswordForm,
     AdminUserCreationForm,
     AdminUserUpdateForm,
+    ProductDeleteConfirmationForm,
     UserDeleteConfirmationForm,
 )
 from .models import AdminActivity
@@ -270,13 +275,234 @@ def user_delete(request, user_id):
 
 @product_editor_required
 def products(request):
+    product_list = Product.objects.all()
+    if not request.user.is_superuser:
+        product_list = product_list.exclude(product_type=Product.ProductType.BUNDLE)
+
+    query = request.GET.get("query", "").strip()
+    product_type = request.GET.get("product_type", "").strip()
+    visibility = request.GET.get("visibility", "").strip()
+    genre = request.GET.get("genre", "").strip()
+    sort = request.GET.get("sort", "artist")
+    sort_fields = {
+        "artist": ("artist", "title", "product_id"),
+        "-artist": ("-artist", "title", "product_id"),
+        "title": ("title", "artist", "product_id"),
+        "-title": ("-title", "artist", "product_id"),
+        "price": ("price", "artist", "title"),
+        "-price": ("-price", "artist", "title"),
+    }
+
+    if query:
+        product_list = product_list.filter(
+            Q(product_id__icontains=query)
+            | Q(artist__icontains=query)
+            | Q(title__icontains=query)
+            | Q(description__icontains=query)
+        )
+    if product_type in Product.ProductType.values:
+        product_list = product_list.filter(product_type=product_type)
+    if visibility == "visible":
+        product_list = product_list.filter(is_visible=True)
+    elif visibility == "hidden":
+        product_list = product_list.filter(is_visible=False)
+    if genre:
+        product_list = product_list.filter(genre=genre)
+
+    genres = list(
+        Product.objects.exclude(genre="")
+        .order_by("genre")
+        .values_list("genre", flat=True)
+        .distinct()
+    )
+    page = Paginator(
+        product_list.order_by(*sort_fields.get(sort, sort_fields["artist"])),
+        25,
+    ).get_page(request.GET.get("page"))
+
     return render(
         request,
-        "admin_panel/section_placeholder.html",
+        "admin_panel/product_list.html",
         {
             "active_section": "products",
-            "section_title": "Products",
-            "section_description": "Catalogue editing and product visibility controls will live here.",
+            "product_page": page,
+            "query": query,
+            "selected_product_type": product_type,
+            "selected_visibility": visibility,
+            "selected_genre": genre,
+            "selected_sort": sort,
+            "product_types": Product.ProductType.choices,
+            "genres": genres,
+        },
+    )
+
+
+@admin_only_required
+def product_create(request):
+    form = AdminProductForm(request.POST or None, request.FILES or None)
+    if request.method == "POST" and form.is_valid():
+        with transaction.atomic():
+            product = form.save()
+            record_admin_activity(
+                actor=request.user,
+                action=AdminActivity.Action.CREATE,
+                target_type="Product",
+                target_identifier=product.product_id,
+                target_label=str(product),
+                summary=f"Created product {product.product_id}.",
+                metadata={"category": product.product_type},
+            )
+        messages.success(request, f"Product {product.product_id} has been created.")
+        return redirect("admin_panel:product_edit", product_id=product.product_id)
+
+    return render(
+        request,
+        "admin_panel/product_form.html",
+        {
+            "active_section": "products",
+            "form": form,
+            "form_title": "Add product",
+            "form_description": "Create an LP, CD, or merchandise product. Use the bundle builder for bundles.",
+            "submit_label": "Create product",
+        },
+    )
+
+
+@product_editor_required
+def product_edit(request, product_id):
+    product = get_object_or_404(Product, product_id=product_id)
+    if product.product_type == Product.ProductType.BUNDLE and not request.user.is_superuser:
+        raise PermissionDenied("Editors cannot manage bundles.")
+
+    form = AdminProductForm(
+        request.POST or None,
+        request.FILES or None,
+        instance=product,
+        allow_bundle=product.product_type == Product.ProductType.BUNDLE,
+    )
+    if request.method == "POST" and form.is_valid():
+        changed_fields = list(form.changed_data)
+        with transaction.atomic():
+            product = form.save()
+            record_admin_activity(
+                actor=request.user,
+                action=AdminActivity.Action.UPDATE,
+                target_type="Product",
+                target_identifier=product.product_id,
+                target_label=str(product),
+                summary=f"Updated product {product.product_id}.",
+                metadata={"changed_fields": changed_fields},
+            )
+        messages.success(request, f"Product {product.product_id} has been updated.")
+        return redirect("admin_panel:product_edit", product_id=product.product_id)
+
+    return render(
+        request,
+        "admin_panel/product_form.html",
+        {
+            "active_section": "products",
+            "form": form,
+            "product": product,
+            "form_title": f"Edit {product.title}",
+            "form_description": f"Update {product.product_id} without changing its immutable product ID.",
+            "submit_label": "Save product",
+        },
+    )
+
+
+@product_editor_required
+@require_POST
+def product_visibility(request, product_id):
+    product = get_object_or_404(Product, product_id=product_id)
+    if product.product_type == Product.ProductType.BUNDLE and not request.user.is_superuser:
+        raise PermissionDenied("Editors cannot manage bundles.")
+
+    action = request.POST.get("action")
+    if action not in {"hide", "show"}:
+        raise PermissionDenied("Unknown visibility action.")
+    product.is_visible = action == "show"
+    product.save(update_fields=("is_visible",))
+    action_word = "Showed" if product.is_visible else "Hid"
+    record_admin_activity(
+        actor=request.user,
+        action=AdminActivity.Action.VISIBILITY,
+        target_type="Product",
+        target_identifier=product.product_id,
+        target_label=str(product),
+        summary=f"{action_word} product {product.product_id}.",
+        metadata={"is_visible": product.is_visible},
+    )
+    messages.success(
+        request,
+        f"Product {product.product_id} is now {'visible' if product.is_visible else 'hidden'}.",
+    )
+    next_url = request.POST.get("next", "")
+    if url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return redirect(next_url)
+    return redirect("admin_panel:products")
+
+
+def _remove_product_file(product):
+    if product.uploaded_image:
+        product.uploaded_image.delete(save=False)
+
+
+@admin_only_required
+def product_delete(request, product_id):
+    product = get_object_or_404(Product, product_id=product_id)
+    related_bundles = list(
+        Product.objects.filter(bundle_items__component=product).order_by("title")
+    )
+    form = ProductDeleteConfirmationForm(
+        request.POST or None,
+        product=product,
+        has_related_bundles=bool(related_bundles),
+    )
+    if request.method == "POST" and form.is_valid():
+        delete_related = form.cleaned_data.get("delete_related_bundles", False)
+        if related_bundles and not delete_related:
+            form.add_error(
+                None,
+                "This product belongs to one or more bundles. Delete those bundles with it or cancel.",
+            )
+        else:
+            product_identifier = product.product_id
+            product_label = str(product)
+            deleted_bundle_ids = [bundle.product_id for bundle in related_bundles]
+            with transaction.atomic():
+                for bundle in related_bundles:
+                    _remove_product_file(bundle)
+                    bundle.delete()
+                _remove_product_file(product)
+                product.delete()
+                record_admin_activity(
+                    actor=request.user,
+                    action=AdminActivity.Action.DELETE,
+                    target_type="Product",
+                    target_identifier=product_identifier,
+                    target_label=product_label,
+                    summary=f"Permanently deleted product {product_identifier}.",
+                    metadata={"deleted_bundle_ids": deleted_bundle_ids},
+                )
+            messages.success(
+                request,
+                f"Product {product_identifier} has been permanently deleted.",
+            )
+            return redirect("admin_panel:products")
+
+    return render(
+        request,
+        "admin_panel/product_confirm_delete.html",
+        {
+            "active_section": "products",
+            "form": form,
+            "product": product,
+            "related_bundles": related_bundles,
+            "review_count": product.reviews.count(),
         },
     )
 
