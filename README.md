@@ -1,6 +1,6 @@
 # Cult Records
 
-Cult Records is a Django web application for browsing a record catalogue, finding products through fuzzy search and filters, and sharing product ratings and reviews. It provides account registration, authentication, profile management, and role-based permissions alongside a responsive catalogue interface.
+Cult Records is a Django web application for browsing a record catalogue, finding products through fuzzy search and filters, and sharing product ratings and reviews. It provides account registration, authentication, profile management, role-based permissions, and a custom administrative workspace alongside a responsive catalogue interface.
 
 ## Features
 
@@ -25,7 +25,19 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 - Registration enforces case-insensitive username uniqueness and Django's configured password validation rules.
 - Authenticated users have a dashboard containing their username, account role, and ten most recently updated reviews.
 - Users can change their username from the protected profile page.
-- The role model distinguishes Admin, Editor, User, and Anonymous access. Editor permissions cover catalogue content and review moderation, while user-management permissions belong to administrators.
+- The role model distinguishes Admin, Editor, User, and Anonymous access.
+- Editors can access the custom admin panel to edit catalogue content and moderate reviews. They cannot add or delete products, manage bundles, manage users, or delete reviews.
+- Administrators can access every admin-panel section. User management, bundle management, additions, and permanent deletion remain administrator-only responsibilities.
+
+### Custom admin panel
+
+- The custom panel is available at `/admin/` and does not use Django's built-in admin interface.
+- Anonymous visitors are redirected to sign in, regular users receive no panel access, and every panel route applies its role check on the server.
+- The dashboard foundation shows live product, account, and review-queue counts, recent catalogue data, recent users for administrators, and a reserved purchase metric for the future simulated purchase system.
+- Role-aware navigation exposes only the sections available to the current administrator or editor.
+- The responsive admin shell uses a separate dark blueprint identity with a desktop sidebar and a mobile off-canvas menu.
+- `/admin/visuals/` provides the review surface for admin colors, typography, buttons, forms, badges, tables, empty states, and confirmation dialogs.
+- User, product, bundle, review, and activity routes currently provide protected implementation placeholders while their management workflows are built in focused slices.
 
 ### Ratings and reviews
 
@@ -51,7 +63,7 @@ The Python project declares Django and RapidFuzz as its direct dependencies in `
 
 ## Visual design and accessibility
 
-The interface uses a fixed dark theme built around near-black, Oxblood, red, and Bone colors. Instrument Serif is used for headings and Nunito Sans for body and interface text. Both open-source typefaces are loaded from Google Fonts with local fallback families.
+The public interface uses a fixed dark theme built around near-black, Oxblood, red, and Bone colors. The admin panel uses a separate dark blueprint palette so management work is clearly distinguished from the storefront. Instrument Serif is used for headings and Nunito Sans for body and interface text. Both open-source typefaces are loaded from Google Fonts with local fallback families.
 
 Bootstrap supplies the responsive foundation, while the global stylesheet applies square controls, visible keyboard focus outlines, high-contrast text, and shadow-free surfaces. Layouts collapse for narrow screens, interactive artwork respects reduced-motion settings, and shared templates provide consistent navigation and footer landmarks. The `/visuals/` route provides a component gallery for typography, colors, controls, forms, tables, pagination, modal content, product cards, and the shared page chrome.
 
@@ -61,6 +73,7 @@ Bootstrap supplies the responsive foundation, while the global stylesheet applie
 - Django templates escape variable output by default.
 - CSRF middleware and form tokens protect state-changing form submissions.
 - Authentication middleware, `login_required` checks, and server-side ownership queries protect account and review actions.
+- Custom admin-panel access checks enforce administrator and editor capabilities on every protected route.
 - Passwords use Django's password hashing system and configured password validators.
 - Review ratings, comment length, product IDs, prices, and track data are validated on the server.
 - Review ownership is enforced when editing or deleting, and database constraints allow only one review per user and product.
@@ -70,6 +83,7 @@ Bootstrap supplies the responsive foundation, while the global stylesheet applie
 
 | Django app | Responsibility |
 | --- | --- |
+| `admin_panel` | Custom administration dashboard, access controls, blueprint interface, and management workflows |
 | `home` | Catalogue data, home page, shared templates, global styles, and product artwork presentation |
 | `search` | Search form, catalogue filters, fuzzy relevance scoring, and filter interactions |
 | `product_page` | Product details, supplementary product information, ratings, and reviews |
