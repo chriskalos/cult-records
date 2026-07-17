@@ -34,6 +34,12 @@ urlpatterns = [
         name="product_delete",
     ),
     path("bundles/", views.bundles, name="bundles"),
+    path("bundles/add/", views.bundle_create, name="bundle_create"),
+    path(
+        "bundles/<str:product_id>/edit/",
+        views.bundle_edit,
+        name="bundle_edit",
+    ),
     path("reviews/", views.reviews, name="reviews"),
     path("activity/", views.activity, name="activity"),
     path("visuals/", views.visuals, name="visuals"),

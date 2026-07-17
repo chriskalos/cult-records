@@ -1,0 +1,104 @@
+{% extends "admin_panel/base.html" %}
+
+{% block title %}Manage bundles{% endblock %}
+{% block page_title %}Bundles{% endblock %}
+{% block page_description %}Build fixed products from existing catalogue items and control their price and visibility.{% endblock %}
+
+{% block page_actions %}
+    <a href="{% url 'admin_panel:bundle_create' %}" class="btn btn-primary">Create bundle</a>
+{% endblock %}
+
+{% block content %}
+    <section class="admin-panel" aria-labelledby="bundle-filters-heading">
+        <div class="admin-panel-header">
+            <div>
+                <p class="admin-panel-eyebrow">Bundle filters</p>
+                <h2 id="bundle-filters-heading">Find bundles</h2>
+            </div>
+        </div>
+        <form method="get" class="admin-filter-form">
+            <div>
+                <label for="bundle-query" class="form-label">Search</label>
+                <input id="bundle-query" name="query" type="search" value="{{ query }}" class="form-control" placeholder="ID, title, or description">
+            </div>
+            <div>
+                <label for="bundle-visibility" class="form-label">Visibility</label>
+                <select id="bundle-visibility" name="visibility" class="form-select">
+                    <option value="">Any visibility</option>
+                    <option value="visible"{% if selected_visibility == "visible" %} selected{% endif %}>Visible</option>
+                    <option value="hidden"{% if selected_visibility == "hidden" %} selected{% endif %}>Hidden</option>
+                </select>
+            </div>
+            <div class="admin-filter-actions">
+                <button type="submit" class="btn btn-primary">Apply filters</button>
+                <a href="{% url 'admin_panel:bundles' %}" class="btn btn-secondary">Clear</a>
+            </div>
+        </form>
+    </section>
+
+    <section class="admin-panel mt-4" aria-labelledby="bundle-results-heading">
+        <div class="admin-panel-header">
+            <div>
+                <p class="admin-panel-eyebrow">Bundle catalogue</p>
+                <h2 id="bundle-results-heading">{{ bundle_page.paginator.count }} bundle{{ bundle_page.paginator.count|pluralize }}</h2>
+            </div>
+        </div>
+        {% if bundle_page %}
+            <div class="table-responsive">
+                <table class="table admin-table mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Bundle</th>
+                            <th scope="col">Contents</th>
+                            <th scope="col">Visibility</th>
+                            <th scope="col" class="text-end">Price</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for bundle in bundle_page %}
+                            <tr>
+                                <td>
+                                    <strong>{{ bundle.title }}</strong>
+                                    <span class="admin-table-secondary">{{ bundle.product_id }}</span>
+                                </td>
+                                <td>{{ bundle.component_count }} product{{ bundle.component_count|pluralize }}, {{ bundle.total_units|default:0 }} unit{{ bundle.total_units|default:0|pluralize }}</td>
+                                <td>
+                                    {% if bundle.is_visible %}
+                                        <span class="badge admin-badge-success">Visible</span>
+                                    {% else %}
+                                        <span class="badge admin-badge-warning">Hidden</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">{{ bundle.price|floatformat:2 }}€</td>
+                                <td>
+                                    <div class="admin-table-actions">
+                                        <a href="{% url 'admin_panel:bundle_edit' bundle.product_id %}">Edit</a>
+                                        <form action="{% url 'admin_panel:product_visibility' bundle.product_id %}" method="post">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                            {% if bundle.is_visible %}
+                                                <input type="hidden" name="action" value="hide">
+                                                <button type="submit" class="admin-text-button">Hide</button>
+                                            {% else %}
+                                                <input type="hidden" name="action" value="show">
+                                                <button type="submit" class="admin-text-button">Show</button>
+                                            {% endif %}
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% include "admin_panel/includes/pagination.html" with page_obj=bundle_page %}
+        {% else %}
+            <div class="admin-empty-state">
+                <h3>No matching bundles</h3>
+                <p>Create the first bundle or remove one or more filters.</p>
+                <a href="{% url 'admin_panel:bundle_create' %}" class="btn btn-primary">Create bundle</a>
+            </div>
+        {% endif %}
+    </section>
+{% endblock %}

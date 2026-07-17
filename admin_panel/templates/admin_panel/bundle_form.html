@@ -1,0 +1,134 @@
+{% extends "admin_panel/base.html" %}
+{% load static %}
+
+{% block title %}{{ form_title }}{% endblock %}
+{% block page_title %}{{ form_title }}{% endblock %}
+{% block page_description %}{{ form_description }}{% endblock %}
+
+{% block page_actions %}
+    <a href="{% url 'admin_panel:bundles' %}" class="btn btn-secondary">Back to bundles</a>
+    {% if bundle and bundle.is_visible %}<a href="{{ bundle.get_absolute_url }}" class="btn btn-outline-primary">View bundle</a>{% endif %}
+{% endblock %}
+
+{% block content %}
+    <form method="post" enctype="multipart/form-data" class="admin-product-form" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+
+        <section class="admin-panel" aria-labelledby="bundle-details-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Catalogue record</p>
+                    <h2 id="bundle-details-heading">Bundle details</h2>
+                </div>
+            </div>
+            <div class="admin-form-grid">
+                {% include "admin_panel/includes/form_field.html" with field=form.product_id %}
+                {% include "admin_panel/includes/form_field.html" with field=form.artist %}
+                {% include "admin_panel/includes/form_field.html" with field=form.title %}
+                {% include "admin_panel/includes/form_field.html" with field=form.genre %}
+                {% include "admin_panel/includes/form_field.html" with field=form.price %}
+                <div class="admin-form-full">{% include "admin_panel/includes/form_field.html" with field=form.description %}</div>
+                <div class="admin-form-full">{% include "admin_panel/includes/form_field.html" with field=form.is_visible %}</div>
+            </div>
+        </section>
+
+        <section class="admin-panel mt-4" aria-labelledby="bundle-components-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Fixed contents</p>
+                    <h2 id="bundle-components-heading">Components</h2>
+                    <p class="admin-panel-note">Choose existing LPs, CDs, or merchandise. The same product cannot appear twice, and bundles can never contain other bundles.</p>
+                </div>
+                <button type="button" class="btn btn-secondary" data-add-bundle-component>Add component</button>
+            </div>
+            {{ formset.management_form }}
+            {% if formset.non_form_errors %}<div class="alert alert-danger mx-3 mt-3" role="alert">{{ formset.non_form_errors }}</div>{% endif %}
+            <div class="admin-bundle-formset" data-bundle-formset>
+                {% for component_form in formset %}
+                    <div class="admin-bundle-row" data-bundle-row>
+                        {% for hidden in component_form.hidden_fields %}{{ hidden }}{% endfor %}
+                        {% include "admin_panel/includes/form_field.html" with field=component_form.component %}
+                        {% include "admin_panel/includes/form_field.html" with field=component_form.quantity %}
+                        {% include "admin_panel/includes/form_field.html" with field=component_form.position %}
+                        <div class="admin-bundle-remove">{% include "admin_panel/includes/form_field.html" with field=component_form.DELETE %}</div>
+                    </div>
+                {% endfor %}
+            </div>
+            <template data-empty-bundle-form>
+                <div class="admin-bundle-row" data-bundle-row>
+                    {% for hidden in formset.empty_form.hidden_fields %}{{ hidden }}{% endfor %}
+                    {% include "admin_panel/includes/form_field.html" with field=formset.empty_form.component %}
+                    {% include "admin_panel/includes/form_field.html" with field=formset.empty_form.quantity %}
+                    {% include "admin_panel/includes/form_field.html" with field=formset.empty_form.position %}
+                    <div class="admin-bundle-remove">{% include "admin_panel/includes/form_field.html" with field=formset.empty_form.DELETE %}</div>
+                </div>
+            </template>
+        </section>
+
+        <section class="admin-panel mt-4" aria-labelledby="bundle-artwork-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Media</p>
+                    <h2 id="bundle-artwork-heading">Bundle artwork</h2>
+                </div>
+            </div>
+            <div class="admin-media-form">
+                <div class="admin-image-preview">
+                    {% if bundle.uploaded_image %}
+                        <img src="{{ bundle.uploaded_image.url }}" alt="Current artwork for {{ bundle.title }}">
+                    {% elif bundle.image %}
+                        <img src="{% static bundle.image %}" alt="Current artwork for {{ bundle.title }}">
+                    {% else %}
+                        <span>No artwork uploaded</span>
+                    {% endif %}
+                </div>
+                <div class="admin-media-fields">
+                    {% include "admin_panel/includes/form_field.html" with field=form.uploaded_image %}
+                    {% if form.remove_uploaded_image %}{% include "admin_panel/includes/form_field.html" with field=form.remove_uploaded_image %}{% endif %}
+                    <p class="form-text mb-0">JPEG, PNG, or WebP. Maximum file size 8 MB.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="admin-panel mt-4" aria-labelledby="bundle-page-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Product page</p>
+                    <h2 id="bundle-page-heading">Extended information</h2>
+                </div>
+            </div>
+            <div class="admin-form-grid">
+                <div class="admin-form-full">{% include "admin_panel/includes/form_field.html" with field=form.long_description %}</div>
+                {% include "admin_panel/includes/form_field.html" with field=form.release_date %}
+                <div class="admin-form-full">{% include "admin_panel/includes/form_field.html" with field=form.tracks %}</div>
+            </div>
+            <div class="admin-form-actions">
+                <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
+                <a href="{% url 'admin_panel:bundles' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </section>
+    </form>
+
+    {% if bundle %}
+        <section class="admin-panel admin-danger-zone mt-4" aria-labelledby="delete-bundle-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Permanent action</p>
+                    <h2 id="delete-bundle-heading">Delete bundle</h2>
+                </div>
+            </div>
+            <div class="admin-action-row">
+                <div>
+                    <strong>Permanently delete {{ bundle.product_id }}</strong>
+                    <p>The component products remain in the catalogue.</p>
+                </div>
+                <a href="{% url 'admin_panel:product_delete' bundle.product_id %}" class="btn btn-danger">Delete bundle</a>
+            </div>
+        </section>
+    {% endif %}
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'admin_panel/js/bundle-formset.js' %}"></script>
+{% endblock %}

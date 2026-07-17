@@ -37,6 +37,13 @@ def _detail_context(request, product, review_form=None, is_editing_review=False)
     if user_review:
         approved_reviews = approved_reviews.exclude(pk=user_review.pk)
 
+    bundle_items = None
+    if product.product_type == Product.ProductType.BUNDLE:
+        bundle_items = product.bundle_items.select_related("component").order_by(
+            "position",
+            "pk",
+        )
+
     return {
         "product": product,
         "page": page,
@@ -47,6 +54,7 @@ def _detail_context(request, product, review_form=None, is_editing_review=False)
         "user_review": user_review,
         "review_form": review_form,
         "is_editing_review": is_editing_review,
+        "bundle_items": bundle_items,
     }
 
 

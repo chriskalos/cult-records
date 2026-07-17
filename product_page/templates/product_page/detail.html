@@ -40,6 +40,23 @@
             </div>
         </div>
 
+        {% if bundle_items %}
+            <section class="mb-5" aria-labelledby="bundle-contents-heading">
+                <h2 id="bundle-contents-heading">Bundle contents</h2>
+                <div class="list-group">
+                    {% for item in bundle_items %}
+                        <a href="{{ item.component.get_absolute_url }}" class="list-group-item list-group-item-action d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <span>
+                                <strong>{{ item.quantity }} × {{ item.component.title }}</strong>
+                                <span class="d-block text-body-secondary">{{ item.component.artist }} · {{ item.component.get_product_type_display }}</span>
+                            </span>
+                            <span>{{ item.component.price|floatformat:2 }}€ each</span>
+                        </a>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+
         <section class="mb-5" aria-labelledby="description-heading">
             <h2 id="description-heading">About this product</h2>
             {{ long_description|linebreaks }}

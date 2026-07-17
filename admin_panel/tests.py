@@ -660,3 +660,191 @@ class AdminProductManagementTests(TestCase):
         self.assertRedirects(response, reverse("admin_panel:products"))
         self.assertFalse(ProductPage.objects.filter(pk=page_pk).exists())
         self.assertFalse(Review.objects.filter(pk=review.pk).exists())
+
+
+class AdminBundleManagementTests(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.admin = User.objects.get(username="admin")
+        self.editor = User.objects.get(username="editor")
+        self.component = Product.objects.get(product_id="MDEVCTRYLP")
+        self.second_component = Product.objects.exclude(
+            product_type=Product.ProductType.BUNDLE,
+        ).exclude(pk=self.component.pk).first()
+
+    def _bundle_data(self, **overrides):
+        data = {
+            "product_id": "ADMINBUNDLE",
+            "artist": "Cult Records",
+            "title": "Admin bundle",
+            "description": "A fixed set of catalogue products.",
+            "genre": "Various",
+            "price": "39.00",
+            "is_visible": "on",
+            "long_description": "Everything included in one package.",
+            "release_date": "",
+            "tracks": "",
+            "components-TOTAL_FORMS": "2",
+            "components-INITIAL_FORMS": "0",
+            "components-MIN_NUM_FORMS": "0",
+            "components-MAX_NUM_FORMS": "1000",
+            "components-0-component": self.component.pk,
+            "components-0-quantity": "2",
+            "components-0-position": "1",
+            "components-1-component": self.second_component.pk,
+            "components-1-quantity": "1",
+            "components-1-position": "2",
+        }
+        data.update(overrides)
+        return data
+
+    def test_admin_can_create_bundle_from_existing_non_bundle_products(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.post(
+            reverse("admin_panel:bundle_create"),
+            self._bundle_data(),
+        )
+
+        bundle = Product.objects.get(pk="ADMINBUNDLE")
+        self.assertRedirects(
+            response,
+            reverse("admin_panel:bundle_edit", args=[bundle.pk]),
+        )
+        self.assertEqual(bundle.product_type, Product.ProductType.BUNDLE)
+        self.assertEqual(
+            list(
+                bundle.bundle_items.values_list(
+                    "component_id",
+                    "quantity",
+                    "position",
+                )
+            ),
+            [
+                (self.component.pk, 2, 1),
+                (self.second_component.pk, 1, 2),
+            ],
+        )
+        self.assertTrue(
+            AdminActivity.objects.filter(
+                action=AdminActivity.Action.CREATE,
+                target_type="Bundle",
+                target_identifier=bundle.pk,
+            ).exists()
+        )
+
+    def test_bundle_builder_requires_at_least_one_component(self):
+        self.client.force_login(self.admin)
+        data = self._bundle_data(
+            **{
+                "components-TOTAL_FORMS": "1",
+                "components-0-component": "",
+                "components-0-quantity": "1",
+                "components-0-position": "1",
+            }
+        )
+        for key in (
+            "components-1-component",
+            "components-1-quantity",
+            "components-1-position",
+        ):
+            data.pop(key, None)
+
+        response = self.client.post(reverse("admin_panel:bundle_create"), data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "A bundle must contain at least one product")
+        self.assertFalse(Product.objects.filter(pk="ADMINBUNDLE").exists())
+
+    def test_bundle_builder_rejects_nested_bundles(self):
+        nested = Product.objects.create(
+            product_id="NESTEDSOURCE",
+            artist="Cult Records",
+            title="Existing bundle",
+            description="Cannot be nested.",
+            product_type=Product.ProductType.BUNDLE,
+            price="20.00",
+        )
+        self.client.force_login(self.admin)
+        data = self._bundle_data(
+            **{
+                "components-TOTAL_FORMS": "1",
+                "components-0-component": nested.pk,
+                "components-0-quantity": "1",
+                "components-0-position": "1",
+            }
+        )
+        for key in (
+            "components-1-component",
+            "components-1-quantity",
+            "components-1-position",
+        ):
+            data.pop(key, None)
+
+        response = self.client.post(reverse("admin_panel:bundle_create"), data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Select a valid choice")
+        self.assertFalse(Product.objects.filter(pk="ADMINBUNDLE").exists())
+
+    def test_bundle_contents_are_linked_on_the_public_product_page(self):
+        bundle = Product.objects.create(
+            product_id="PUBLICBUNDLE",
+            artist="Cult Records",
+            title="Public bundle",
+            description="A public set.",
+            product_type=Product.ProductType.BUNDLE,
+            price="25.00",
+        )
+        BundleItem.objects.create(
+            bundle=bundle,
+            component=self.component,
+            quantity=2,
+            position=1,
+        )
+
+        response = self.client.get(bundle.get_absolute_url())
+
+        self.assertContains(response, "Bundle contents")
+        self.assertContains(response, f"2 × {self.component.title}")
+        self.assertContains(response, self.component.get_absolute_url())
+
+    def test_editors_cannot_list_create_or_edit_bundles(self):
+        bundle = Product.objects.create(
+            product_id="ADMINONLYBUNDLE",
+            artist="Cult Records",
+            title="Admin only",
+            description="Bundle.",
+            product_type=Product.ProductType.BUNDLE,
+            price="20.00",
+        )
+        self.client.force_login(self.editor)
+
+        urls = (
+            reverse("admin_panel:bundles"),
+            reverse("admin_panel:bundle_create"),
+            reverse("admin_panel:bundle_edit", args=[bundle.pk]),
+        )
+        for url in urls:
+            with self.subTest(url=url):
+                self.assertEqual(self.client.get(url).status_code, 403)
+
+    def test_admin_product_edit_redirects_bundles_to_the_bundle_builder(self):
+        bundle = Product.objects.create(
+            product_id="REDIRECTBUNDLE",
+            artist="Cult Records",
+            title="Redirect bundle",
+            description="Bundle.",
+            product_type=Product.ProductType.BUNDLE,
+            price="20.00",
+        )
+        self.client.force_login(self.admin)
+
+        response = self.client.get(
+            reverse("admin_panel:product_edit", args=[bundle.pk])
+        )
+
+        self.assertRedirects(
+            response,
+            reverse("admin_panel:bundle_edit", args=[bundle.pk]),
+        )

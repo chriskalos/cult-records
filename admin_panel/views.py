@@ -4,7 +4,7 @@ from django.core.paginator import Paginator
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Q
-from django.db.models import Count
+from django.db.models import Count, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
@@ -20,10 +20,12 @@ from .access import (
 )
 from .audit import record_admin_activity
 from .forms import (
+    AdminBundleForm,
     AdminProductForm,
     AdminSetPasswordForm,
     AdminUserCreationForm,
     AdminUserUpdateForm,
+    BundleItemFormSet,
     ProductDeleteConfirmationForm,
     UserDeleteConfirmationForm,
 )
@@ -371,8 +373,10 @@ def product_create(request):
 @product_editor_required
 def product_edit(request, product_id):
     product = get_object_or_404(Product, product_id=product_id)
-    if product.product_type == Product.ProductType.BUNDLE and not request.user.is_superuser:
-        raise PermissionDenied("Editors cannot manage bundles.")
+    if product.product_type == Product.ProductType.BUNDLE:
+        if not request.user.is_superuser:
+            raise PermissionDenied("Editors cannot manage bundles.")
+        return redirect("admin_panel:bundle_edit", product_id=product.product_id)
 
     form = AdminProductForm(
         request.POST or None,
@@ -509,13 +513,144 @@ def product_delete(request, product_id):
 
 @admin_only_required
 def bundles(request):
+    bundle_list = Product.objects.filter(product_type=Product.ProductType.BUNDLE).annotate(
+        component_count=Count("bundle_items"),
+        total_units=Sum("bundle_items__quantity"),
+    )
+    query = request.GET.get("query", "").strip()
+    visibility = request.GET.get("visibility", "").strip()
+    if query:
+        bundle_list = bundle_list.filter(
+            Q(product_id__icontains=query)
+            | Q(title__icontains=query)
+            | Q(description__icontains=query)
+        )
+    if visibility == "visible":
+        bundle_list = bundle_list.filter(is_visible=True)
+    elif visibility == "hidden":
+        bundle_list = bundle_list.filter(is_visible=False)
+
+    page = Paginator(
+        bundle_list.order_by("title", "product_id"),
+        25,
+    ).get_page(request.GET.get("page"))
+
     return render(
         request,
-        "admin_panel/section_placeholder.html",
+        "admin_panel/bundle_list.html",
         {
             "active_section": "bundles",
-            "section_title": "Bundles",
-            "section_description": "Bundle composition, quantities, ordering, and deletion controls will live here.",
+            "bundle_page": page,
+            "query": query,
+            "selected_visibility": visibility,
+        },
+    )
+
+
+@admin_only_required
+def bundle_create(request):
+    bundle = Product(product_type=Product.ProductType.BUNDLE)
+    form = AdminBundleForm(
+        request.POST or None,
+        request.FILES or None,
+        instance=bundle,
+    )
+    formset = BundleItemFormSet(
+        request.POST or None,
+        instance=bundle,
+        prefix="components",
+    )
+    if request.method == "POST" and form.is_valid() and formset.is_valid():
+        with transaction.atomic():
+            bundle = form.save()
+            formset.instance = bundle
+            formset.save()
+            component_ids = list(
+                bundle.bundle_items.order_by("position").values_list(
+                    "component_id",
+                    flat=True,
+                )
+            )
+            record_admin_activity(
+                actor=request.user,
+                action=AdminActivity.Action.CREATE,
+                target_type="Bundle",
+                target_identifier=bundle.product_id,
+                target_label=bundle.title,
+                summary=f"Created bundle {bundle.product_id}.",
+                metadata={"component_ids": component_ids},
+            )
+        messages.success(request, f"Bundle {bundle.product_id} has been created.")
+        return redirect("admin_panel:bundle_edit", product_id=bundle.product_id)
+
+    return render(
+        request,
+        "admin_panel/bundle_form.html",
+        {
+            "active_section": "bundles",
+            "form": form,
+            "formset": formset,
+            "form_title": "Create bundle",
+            "form_description": "Create a product from existing LPs, CDs, and merchandise.",
+            "submit_label": "Create bundle",
+        },
+    )
+
+
+@admin_only_required
+def bundle_edit(request, product_id):
+    bundle = get_object_or_404(
+        Product,
+        product_id=product_id,
+        product_type=Product.ProductType.BUNDLE,
+    )
+    form = AdminBundleForm(
+        request.POST or None,
+        request.FILES or None,
+        instance=bundle,
+    )
+    formset = BundleItemFormSet(
+        request.POST or None,
+        instance=bundle,
+        prefix="components",
+    )
+    if request.method == "POST" and form.is_valid() and formset.is_valid():
+        changed_fields = list(form.changed_data)
+        with transaction.atomic():
+            bundle = form.save()
+            formset.save()
+            component_ids = list(
+                bundle.bundle_items.order_by("position").values_list(
+                    "component_id",
+                    flat=True,
+                )
+            )
+            record_admin_activity(
+                actor=request.user,
+                action=AdminActivity.Action.UPDATE,
+                target_type="Bundle",
+                target_identifier=bundle.product_id,
+                target_label=bundle.title,
+                summary=f"Updated bundle {bundle.product_id}.",
+                metadata={
+                    "changed_fields": changed_fields,
+                    "component_ids": component_ids,
+                },
+            )
+        messages.success(request, f"Bundle {bundle.product_id} has been updated.")
+        return redirect("admin_panel:bundle_edit", product_id=bundle.product_id)
+
+    return render(
+        request,
+        "admin_panel/bundle_form.html",
+        {
+            "active_section": "bundles",
+            "form": form,
+            "formset": formset,
+            "bundle": bundle,
+            "form_title": f"Edit {bundle.title}",
+            "form_description": "Update bundle details, price, visibility, and ordered components.",
+            "submit_label": "Save bundle",
         },
     )
 

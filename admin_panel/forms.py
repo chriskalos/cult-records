@@ -5,9 +5,10 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth.password_validation import validate_password
 from django.core.validators import MinValueValidator
+from django.forms import BaseInlineFormSet, inlineformset_factory
 
 from accounts.roles import UserRole, role_for_user, set_user_role
-from home.models import Product
+from home.models import BundleItem, Product
 from product_page.models import ProductPage
 
 
@@ -252,9 +253,12 @@ class AdminProductForm(forms.ModelForm):
                 self.fields["long_description"].initial = page.long_description
                 self.fields["release_date"].initial = page.release_date
                 self.fields["tracks"].initial = "\n".join(page.tracks)
-            if self.instance.product_type == Product.ProductType.BUNDLE:
+            if (
+                self.instance.product_type == Product.ProductType.BUNDLE
+                and "product_type" in self.fields
+            ):
                 self.fields["product_type"].disabled = True
-        if not (
+        if "product_type" in self.fields and not (
             self.instance
             and self.instance.pk
             and self.instance.product_type == Product.ProductType.BUNDLE
@@ -327,3 +331,71 @@ class ProductDeleteConfirmationForm(forms.Form):
         if product_id != self.product.product_id:
             raise forms.ValidationError("The product ID does not match.")
         return product_id
+
+
+class AdminBundleForm(AdminProductForm):
+    class Meta(AdminProductForm.Meta):
+        fields = tuple(
+            field
+            for field in AdminProductForm.Meta.fields
+            if field != "product_type"
+        )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, allow_bundle=True, **kwargs)
+        self.fields.pop("product_type", None)
+        if not self.instance.pk:
+            self.fields["artist"].initial = "Cult Records"
+
+    def save(self, commit=True):
+        self.instance.product_type = Product.ProductType.BUNDLE
+        return super().save(commit=commit)
+
+
+class BundleItemForm(forms.ModelForm):
+    class Meta:
+        model = BundleItem
+        fields = ("component", "quantity", "position")
+        widgets = {
+            "quantity": forms.NumberInput(attrs={"min": 1}),
+            "position": forms.NumberInput(attrs={"min": 1}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["component"].queryset = Product.objects.exclude(
+            product_type=Product.ProductType.BUNDLE
+        ).order_by("artist", "title", "product_type")
+        _apply_admin_form_classes(self)
+
+
+class BaseBundleItemFormSet(BaseInlineFormSet):
+    def clean(self):
+        super().clean()
+        if any(self.errors):
+            return
+
+        components = []
+        for form in self.forms:
+            if not hasattr(form, "cleaned_data") or form.cleaned_data.get("DELETE"):
+                continue
+            component = form.cleaned_data.get("component")
+            if component:
+                components.append(component.pk)
+
+        if not components:
+            raise forms.ValidationError("A bundle must contain at least one product.")
+        if len(components) != len(set(components)):
+            raise forms.ValidationError("A product can only appear once in a bundle.")
+
+
+BundleItemFormSet = inlineformset_factory(
+    Product,
+    BundleItem,
+    fk_name="bundle",
+    form=BundleItemForm,
+    formset=BaseBundleItemFormSet,
+    fields=("component", "quantity", "position"),
+    extra=1,
+    can_delete=True,
+)
