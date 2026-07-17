@@ -1,0 +1,120 @@
+{% extends "admin_panel/base.html" %}
+
+{% block title %}Manage users{% endblock %}
+{% block page_title %}Users{% endblock %}
+{% block page_description %}Create accounts, assign fixed roles, replace passwords, and permanently delete users.{% endblock %}
+
+{% block page_actions %}
+    <a href="{% url 'admin_panel:user_create' %}" class="btn btn-primary">Add user</a>
+{% endblock %}
+
+{% block content %}
+    <section class="admin-panel" aria-labelledby="user-filters-heading">
+        <div class="admin-panel-header">
+            <div>
+                <p class="admin-panel-eyebrow">Account filters</p>
+                <h2 id="user-filters-heading">Find users</h2>
+            </div>
+        </div>
+        <form method="get" class="admin-filter-form admin-filter-form-wide">
+            <div>
+                <label for="user-query" class="form-label">Search</label>
+                <input id="user-query" name="query" type="search" value="{{ query }}" class="form-control" placeholder="Username, name, or email">
+            </div>
+            <div>
+                <label for="user-role" class="form-label">Role</label>
+                <select id="user-role" name="role" class="form-select">
+                    <option value="">All roles</option>
+                    {% for value, label in role_choices %}
+                        <option value="{{ value }}"{% if selected_role == value %} selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="user-status" class="form-label">Status</label>
+                <select id="user-status" name="status" class="form-select">
+                    <option value="">All statuses</option>
+                    <option value="active"{% if selected_status == "active" %} selected{% endif %}>Active</option>
+                    <option value="inactive"{% if selected_status == "inactive" %} selected{% endif %}>Inactive</option>
+                </select>
+            </div>
+            <div>
+                <label for="user-sort" class="form-label">Sort</label>
+                <select id="user-sort" name="sort" class="form-select">
+                    <option value="username"{% if selected_sort == "username" %} selected{% endif %}>Username A to Z</option>
+                    <option value="-username"{% if selected_sort == "-username" %} selected{% endif %}>Username Z to A</option>
+                    <option value="-joined"{% if selected_sort == "-joined" %} selected{% endif %}>Newest first</option>
+                    <option value="joined"{% if selected_sort == "joined" %} selected{% endif %}>Oldest first</option>
+                    <option value="-last_login"{% if selected_sort == "-last_login" %} selected{% endif %}>Recent login</option>
+                </select>
+            </div>
+            <div class="admin-filter-actions">
+                <button type="submit" class="btn btn-primary">Apply filters</button>
+                <a href="{% url 'admin_panel:users' %}" class="btn btn-secondary">Clear</a>
+            </div>
+        </form>
+    </section>
+
+    <section class="admin-panel mt-4" aria-labelledby="user-results-heading">
+        <div class="admin-panel-header">
+            <div>
+                <p class="admin-panel-eyebrow">Accounts</p>
+                <h2 id="user-results-heading">{{ user_page.paginator.count }} user{{ user_page.paginator.count|pluralize }}</h2>
+            </div>
+        </div>
+        {% if user_page %}
+            <div class="table-responsive">
+                <table class="table admin-table mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">User</th>
+                            <th scope="col">Role</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Reviews</th>
+                            <th scope="col">Last login</th>
+                            <th scope="col"><span class="visually-hidden">Actions</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for managed_user in user_page %}
+                            <tr>
+                                <td>
+                                    <strong>{{ managed_user.username }}</strong>
+                                    <span class="admin-table-secondary">
+                                        {% if managed_user.get_full_name %}{{ managed_user.get_full_name }}{% elif managed_user.email %}{{ managed_user.email }}{% else %}No profile details{% endif %}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if managed_user.admin_role == "Admin" %}
+                                        <span class="badge admin-badge-info">Admin</span>
+                                    {% elif managed_user.admin_role == "Editor" %}
+                                        <span class="badge admin-badge-warning">Editor</span>
+                                    {% else %}
+                                        <span class="badge admin-badge-neutral">User</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if managed_user.is_active %}
+                                        <span class="badge admin-badge-success">Active</span>
+                                    {% else %}
+                                        <span class="badge admin-badge-danger">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ managed_user.review_count }}</td>
+                                <td>{% if managed_user.last_login %}{{ managed_user.last_login|date:"j M Y, H:i" }}{% else %}Never{% endif %}</td>
+                                <td class="text-end"><a href="{% url 'admin_panel:user_edit' managed_user.pk %}">Edit</a></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% include "admin_panel/includes/pagination.html" with page_obj=user_page %}
+        {% else %}
+            <div class="admin-empty-state">
+                <h3>No matching users</h3>
+                <p>Try removing one or more filters.</p>
+                <a href="{% url 'admin_panel:user_create' %}" class="btn btn-primary">Add user</a>
+            </div>
+        {% endif %}
+    </section>
+{% endblock %}

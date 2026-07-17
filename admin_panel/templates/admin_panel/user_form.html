@@ -1,0 +1,73 @@
+{% extends "admin_panel/base.html" %}
+
+{% block title %}{{ form_title }}{% endblock %}
+{% block page_title %}{{ form_title }}{% endblock %}
+{% block page_description %}{{ form_description }}{% endblock %}
+
+{% block page_actions %}
+    <a href="{% url 'admin_panel:users' %}" class="btn btn-secondary">Back to users</a>
+{% endblock %}
+
+{% block content %}
+    <form method="post" class="admin-form-layout" novalidate>
+        {% csrf_token %}
+        <section class="admin-panel" aria-labelledby="account-fields-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Account</p>
+                    <h2 id="account-fields-heading">Details and access</h2>
+                </div>
+            </div>
+            <div class="admin-form-grid">
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger admin-form-full" role="alert">{{ form.non_field_errors }}</div>
+                {% endif %}
+                {% for field in form %}
+                    {% include "admin_panel/includes/form_field.html" with field=field %}
+                {% endfor %}
+            </div>
+            <div class="admin-form-actions">
+                <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
+                <a href="{% url 'admin_panel:users' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </section>
+    </form>
+
+    {% if managed_user %}
+        <section class="admin-panel mt-4" aria-labelledby="security-actions-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Security</p>
+                    <h2 id="security-actions-heading">Password</h2>
+                </div>
+            </div>
+            <div class="admin-action-row">
+                <div>
+                    <strong>Replace this user's password</strong>
+                    <p>This invalidates their existing authenticated sessions.</p>
+                </div>
+                <a href="{% url 'admin_panel:user_password' managed_user.pk %}" class="btn btn-secondary">Change password</a>
+            </div>
+        </section>
+
+        <section class="admin-panel admin-danger-zone mt-4" aria-labelledby="delete-user-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Permanent action</p>
+                    <h2 id="delete-user-heading">Delete account</h2>
+                </div>
+            </div>
+            <div class="admin-action-row">
+                <div>
+                    <strong>Permanently delete {{ managed_user.username }}</strong>
+                    <p>The account and its reviews will be removed. This cannot be undone.</p>
+                </div>
+                {% if managed_user == request.user %}
+                    <span class="admin-muted">You cannot delete your own account.</span>
+                {% else %}
+                    <a href="{% url 'admin_panel:user_delete' managed_user.pk %}" class="btn btn-danger">Delete user</a>
+                {% endif %}
+            </div>
+        </section>
+    {% endif %}
+{% endblock %}
