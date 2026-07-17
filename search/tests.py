@@ -211,6 +211,14 @@ class ProductSearchTests(TestCase):
         self.assertIn(self.madonna_lp, results)
         self.assertNotIn(self.madonna_cd, results)
 
+    def test_hidden_products_are_excluded_from_search(self):
+        self.madonna_lp.is_visible = False
+        self.madonna_lp.save(update_fields=("is_visible",))
+
+        results = search_products({"query": "confessions"})
+
+        self.assertNotIn(self.madonna_lp, results)
+
 
 class SearchPageTests(TestCase):
     def test_search_page_is_publicly_available(self):

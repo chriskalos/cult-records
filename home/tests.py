@@ -1,10 +1,11 @@
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
+from django.db.models.deletion import ProtectedError
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Product
+from .models import BundleItem, Product
 
 
 class ProductModelTests(TestCase):
@@ -27,6 +28,8 @@ class ProductModelTests(TestCase):
         self.assertEqual(product.genre, "Electronic")
         self.assertEqual(product.product_type, "LP")
         self.assertEqual(product.price, Decimal("14.99"))
+        self.assertTrue(product.is_visible)
+        self.assertFalse(product.uploaded_image)
         self.assertEqual(str(product), "Madeon - Victory")
 
     def test_product_id_rejects_invalid_characters(self):
@@ -47,6 +50,79 @@ class ProductModelTests(TestCase):
             Product.ProductType.values,
             ["LP", "CD", "BUNDLE", "MERCH"],
         )
+
+    def test_bundle_items_require_non_bundle_components(self):
+        bundle = Product.objects.create(
+            product_id="BUNDLEONE",
+            artist="Cult Records",
+            title="First bundle",
+            description="A bundle.",
+            product_type=Product.ProductType.BUNDLE,
+            price=Decimal("20.00"),
+        )
+        nested_bundle = Product.objects.create(
+            product_id="BUNDLETWO",
+            artist="Cult Records",
+            title="Second bundle",
+            description="Another bundle.",
+            product_type=Product.ProductType.BUNDLE,
+            price=Decimal("30.00"),
+        )
+
+        with self.assertRaises(ValidationError):
+            BundleItem.objects.create(
+                bundle=bundle,
+                component=nested_bundle,
+                quantity=1,
+                position=1,
+            )
+
+    def test_component_deletion_is_protected_while_used_by_a_bundle(self):
+        component = Product.objects.create(
+            product_id="COMPONENTLP",
+            artist="Test Artist",
+            title="Component",
+            description="A component.",
+            product_type=Product.ProductType.LP,
+            price=Decimal("10.00"),
+        )
+        bundle = Product.objects.create(
+            product_id="PROTECTEDBUNDLE",
+            artist="Cult Records",
+            title="Protected bundle",
+            description="A bundle.",
+            product_type=Product.ProductType.BUNDLE,
+            price=Decimal("15.00"),
+        )
+        BundleItem.objects.create(bundle=bundle, component=component)
+
+        with self.assertRaises(ProtectedError):
+            component.delete()
+
+    def test_public_catalogue_excludes_hidden_products_and_incomplete_bundles(self):
+        hidden_component = Product.objects.create(
+            product_id="HIDDENCOMP",
+            artist="Test Artist",
+            title="Hidden component",
+            description="Hidden.",
+            product_type=Product.ProductType.CD,
+            price=Decimal("8.00"),
+            is_visible=False,
+        )
+        bundle = Product.objects.create(
+            product_id="HIDDENBUNDLE",
+            artist="Cult Records",
+            title="Hidden component bundle",
+            description="Bundle.",
+            product_type=Product.ProductType.BUNDLE,
+            price=Decimal("10.00"),
+        )
+        BundleItem.objects.create(bundle=bundle, component=hidden_component)
+
+        public_products = Product.objects.public()
+
+        self.assertNotIn(hidden_component, public_products)
+        self.assertNotIn(bundle, public_products)
 
 
 class HomePageTests(TestCase):
@@ -100,6 +176,15 @@ class HomePageTests(TestCase):
 
         self.assertContains(response, f'action="{reverse("search:results")}"')
         self.assertContains(response, 'name="query"')
+
+    def test_hidden_products_do_not_appear_on_the_home_page(self):
+        product = Product.objects.get(product_id="MDEVCTRYLP")
+        product.is_visible = False
+        product.save(update_fields=("is_visible",))
+
+        response = self.client.get(reverse("home"))
+
+        self.assertNotContains(response, product.get_absolute_url())
 
     def test_shared_layout_applies_confirmed_identity(self):
         response = self.client.get(reverse("home"))

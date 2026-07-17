@@ -69,7 +69,7 @@ class SearchForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         catalogue_max_price = (
-            Product.objects.aggregate(max_price=Max("price"))["max_price"]
+            Product.objects.public().aggregate(max_price=Max("price"))["max_price"]
             or Decimal("0.00")
         ).quantize(Decimal("0.01"))
         data = args[0] if args else kwargs.get("data")
@@ -96,7 +96,7 @@ class SearchForm(forms.Form):
             field.widget.attrs["max"] = str(catalogue_max_price)
 
         artists = (
-            Product.objects.order_by("artist")
+            Product.objects.public().order_by("artist")
             .values_list("artist", flat=True)
             .distinct()
         )
@@ -106,7 +106,7 @@ class SearchForm(forms.Form):
         ]
 
         genres = (
-            Product.objects.exclude(genre="")
+            Product.objects.public().exclude(genre="")
             .order_by("genre")
             .values_list("genre", flat=True)
             .distinct()

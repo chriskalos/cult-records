@@ -7,7 +7,13 @@
                 <span class="product-media__record-label"></span>
             </div>
             <div class="product-media__sleeve">
-                {% if product.image %}
+                {% if product.uploaded_image %}
+                    <img
+                        src="{{ product.uploaded_image.url }}"
+                        class="product-media__artwork"
+                        alt="{{ product.title }}"
+                    >
+                {% elif product.image %}
                     <img
                         src="{% static product.image %}"
                         class="product-media__artwork"
@@ -26,7 +32,13 @@
         <div class="product-media__object" data-product-media-object>
             <div class="product-media__cd-case">
                 <div class="product-media__cd-inlay">
-                    {% if product.image %}
+                    {% if product.uploaded_image %}
+                        <img
+                            src="{{ product.uploaded_image.url }}"
+                            class="product-media__artwork"
+                            alt="{{ product.title }}"
+                        >
+                    {% elif product.image %}
                         <img
                             src="{% static product.image %}"
                             class="product-media__artwork"
@@ -51,7 +63,13 @@
     </div>
 {% else %}
     <div class="product-media product-media--generic">
-        {% if product.image %}
+        {% if product.uploaded_image %}
+            <img
+                src="{{ product.uploaded_image.url }}"
+                class="product-media__artwork"
+                alt="{{ product.title }}"
+            >
+        {% elif product.image %}
             <img
                 src="{% static product.image %}"
                 class="product-media__artwork"

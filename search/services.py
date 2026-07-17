@@ -55,7 +55,7 @@ def _product_relevance(product, query):
 
 
 def search_products(criteria):
-    products = Product.objects.all()
+    products = Product.objects.public()
 
     if artist := criteria.get("artist"):
         products = products.filter(artist=artist)

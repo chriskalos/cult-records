@@ -205,6 +205,14 @@ class ProductDetailPageTests(TestCase):
 
         self.assertEqual(response.status_code, 404)
 
+    def test_hidden_product_returns_not_found(self):
+        self.product.is_visible = False
+        self.product.save(update_fields=("is_visible",))
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 404)
+
     def test_catalogue_cards_link_to_product_detail_pages(self):
         response = self.client.get(reverse("home"))
 

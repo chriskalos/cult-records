@@ -51,7 +51,7 @@ def _detail_context(request, product, review_form=None, is_editing_review=False)
 
 
 def product_detail(request, product_id):
-    product = get_object_or_404(Product, product_id=product_id)
+    product = get_object_or_404(Product.objects.public(), product_id=product_id)
 
     return render(
         request,
