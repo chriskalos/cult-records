@@ -37,6 +37,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'home' %}">Home</a>
                     </li>
+                    {% if ham_access %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'ham:dashboard' %}">HAM</a>
+                        </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'cart:detail' %}">
                             Cart <span aria-hidden="true">({{ cart_item_count }})</span>

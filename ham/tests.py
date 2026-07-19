@@ -3,6 +3,7 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.contrib.staticfiles import finders
 from django.test import TestCase
+from django.urls import reverse
 
 from cart.checkout import confirm_paid_order
 from cart.models import Order, OrderItem
@@ -136,3 +137,48 @@ class NetworkSeedTests(TestCase):
     def test_initial_network_includes_directives_and_archive_records(self):
         self.assertEqual(Directive.objects.filter(is_active=True).count(), 4)
         self.assertEqual(ArchiveDocument.objects.filter(is_visible=True).count(), 4)
+
+
+class HamAccessTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            username="network-reader",
+            password="correct-horse-battery-staple",
+        )
+
+    def test_ham_route_looks_missing_without_clearance(self):
+        self.assertEqual(self.client.get(reverse("ham:dashboard")).status_code, 404)
+        self.client.force_login(self.user)
+        self.assertEqual(self.client.get(reverse("ham:dashboard")).status_code, 404)
+
+    def test_ham_navigation_is_hidden_without_clearance(self):
+        response = self.client.get(reverse("home"))
+        self.assertNotContains(response, reverse("ham:dashboard"))
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("home"))
+        self.assertNotContains(response, reverse("ham:dashboard"))
+
+    def test_enlightened_account_sees_navigation_and_network_records(self):
+        HamClearance.objects.create(user=self.user, is_enlightened=True)
+        self.client.force_login(self.user)
+
+        header_response = self.client.get(reverse("home"))
+        response = self.client.get(reverse("ham:dashboard"))
+
+        self.assertContains(header_response, reverse("ham:dashboard"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Nobody is in charge.")
+        self.assertContains(response, "HAM-ATH-042")
+        self.assertContains(response, "The Spoon Protocol")
+
+    def test_asset_query_selects_a_visible_dossier(self):
+        HamClearance.objects.create(user=self.user, is_enlightened=True)
+        self.client.force_login(self.user)
+
+        response = self.client.get(
+            reverse("ham:dashboard"),
+            {"asset": "HAM-VAN-001"},
+        )
+
+        self.assertEqual(response.context["selected_asset"].asset_code, "HAM-VAN-001")
+        self.assertContains(response, "Edith Pike")

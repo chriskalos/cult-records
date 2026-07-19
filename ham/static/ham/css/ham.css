@@ -1,0 +1,819 @@
+.ham-shell {
+    --ham-panel: #111113;
+    --ham-panel-deep: #0b0b0c;
+    --ham-line: #3b3b42;
+    --ham-grid: rgba(243, 241, 237, 0.045);
+    display: grid;
+    gap: 2rem;
+}
+
+/* Keep Leaflet's essential layout intact if its CDN stylesheet is unavailable. */
+.ham-map .leaflet-pane,
+.ham-map .leaflet-tile,
+.ham-map .leaflet-marker-icon,
+.ham-map .leaflet-marker-shadow,
+.ham-map .leaflet-tile-container,
+.ham-map .leaflet-pane > svg,
+.ham-map .leaflet-pane > canvas,
+.ham-map .leaflet-image-layer,
+.ham-map .leaflet-layer {
+    left: 0;
+    position: absolute;
+    top: 0;
+}
+
+.ham-map .leaflet-tile,
+.ham-map .leaflet-marker-icon,
+.ham-map .leaflet-marker-shadow {
+    display: block;
+    user-select: none;
+}
+
+.ham-map .leaflet-tile-pane {
+    z-index: 200;
+}
+
+.ham-map .leaflet-overlay-pane {
+    z-index: 400;
+}
+
+.ham-map .leaflet-shadow-pane {
+    z-index: 500;
+}
+
+.ham-map .leaflet-marker-pane {
+    z-index: 600;
+}
+
+.ham-map .leaflet-tooltip-pane {
+    z-index: 650;
+}
+
+.ham-map .leaflet-popup-pane {
+    z-index: 700;
+}
+
+.ham-map .leaflet-control {
+    clear: both;
+    pointer-events: auto;
+    position: relative;
+    z-index: 800;
+}
+
+.ham-map .leaflet-top,
+.ham-map .leaflet-bottom {
+    pointer-events: none;
+    position: absolute;
+    z-index: 1000;
+}
+
+.ham-map .leaflet-top {
+    top: 0;
+}
+
+.ham-map .leaflet-right {
+    right: 0;
+}
+
+.ham-map .leaflet-bottom {
+    bottom: 0;
+}
+
+.ham-map .leaflet-left {
+    left: 0;
+}
+
+.ham-map .leaflet-control-zoom {
+    margin-left: 0.65rem;
+    margin-top: 0.65rem;
+}
+
+.ham-map .leaflet-control-attribution {
+    margin: 0;
+    padding: 0.15rem 0.35rem;
+}
+
+.ham-map .leaflet-right .leaflet-control {
+    float: right;
+}
+
+.ham-map .leaflet-left .leaflet-control {
+    float: left;
+}
+
+.ham-map .leaflet-interactive {
+    cursor: pointer;
+}
+
+.ham-map .leaflet-zoom-animated {
+    transform-origin: 0 0;
+}
+
+.ham-intro,
+.ham-workspace,
+.ham-panel,
+.ham-archive {
+    background-color: var(--ham-panel);
+    background-image:
+        linear-gradient(var(--ham-grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--ham-grid) 1px, transparent 1px);
+    background-size: 2rem 2rem;
+    border: 1px solid var(--ham-line);
+}
+
+.ham-intro {
+    align-items: end;
+    display: flex;
+    gap: 2rem;
+    justify-content: space-between;
+    padding: clamp(1.5rem, 4vw, 3.5rem);
+}
+
+.ham-intro h1 {
+    font-size: clamp(3.25rem, 8vw, 6.5rem);
+    margin-bottom: 1rem;
+}
+
+.ham-eyebrow,
+.ham-count,
+.ham-network-state,
+.ham-map-notice,
+.ham-status,
+.ham-alias,
+.ham-facts dt,
+.ham-directive-list article > div,
+.ham-directive-list small,
+.ham-ledger li > div,
+.ham-archive summary > span,
+.ham-archive time {
+    font-size: 0.73rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.ham-eyebrow {
+    color: var(--cult-red-bright);
+    margin-bottom: 0.75rem;
+}
+
+.ham-network-state {
+    align-items: center;
+    background: var(--cult-coal);
+    border: 1px solid var(--ham-line);
+    display: flex;
+    flex: 0 0 auto;
+    gap: 0.65rem;
+    margin: 0;
+    padding: 0.85rem 1rem;
+}
+
+.ham-network-state span {
+    background: #27845a;
+    border: 1px solid #dff5e9;
+    height: 0.65rem;
+    width: 0.65rem;
+}
+
+.ham-stat-grid {
+    border: 0;
+    display: grid;
+    gap: 1px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding: 0;
+}
+
+.ham-stat-grid article {
+    background: var(--cult-coal);
+    border: 1px solid var(--ham-line);
+    display: flex;
+    flex-direction: column;
+    min-height: 8.5rem;
+    padding: 1.25rem;
+}
+
+.ham-stat-grid span {
+    color: var(--cult-muted);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.ham-stat-grid strong {
+    font-family: "Instrument Serif", Georgia, serif;
+    font-size: 3.6rem;
+    font-weight: 400;
+    line-height: 1;
+    margin-top: auto;
+}
+
+.ham-workspace,
+.ham-panel,
+.ham-archive {
+    padding: clamp(1rem, 2.5vw, 2rem);
+}
+
+.ham-section-heading {
+    align-items: end;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.ham-section-heading h2 {
+    font-size: clamp(2.4rem, 5vw, 3.75rem);
+    margin: 0;
+}
+
+.ham-map-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: end;
+}
+
+.ham-map-filters .btn {
+    font-size: 0.78rem;
+    padding: 0.5rem 0.75rem;
+}
+
+.ham-map-filters .active {
+    background: var(--cult-red);
+    border-color: var(--cult-red-bright);
+    color: #fff;
+}
+
+.ham-map-layout {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(0, 1.65fr) minmax(20rem, 0.75fr);
+}
+
+.ham-map-panel,
+.ham-dossier {
+    background: var(--ham-panel-deep);
+    border: 1px solid var(--ham-line);
+    min-width: 0;
+}
+
+.ham-map {
+    background:
+        linear-gradient(rgba(120, 13, 25, 0.14), rgba(8, 8, 9, 0.32)),
+        var(--cult-black);
+    height: 46rem;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    z-index: 0;
+}
+
+.ham-map .leaflet-pane,
+.ham-map .leaflet-map-pane,
+.ham-map .leaflet-control-container {
+    position: absolute;
+}
+
+.ham-map > p {
+    color: var(--cult-muted);
+    margin: 0;
+    padding: 1.25rem;
+}
+
+.ham-map-notice {
+    border-top: 1px solid var(--ham-line);
+    color: var(--cult-muted);
+    margin: 0;
+    padding: 0.8rem 1rem;
+}
+
+.ham-map .leaflet-tile-pane {
+    filter: grayscale(1) invert(0.9) sepia(0.25) hue-rotate(315deg) saturate(0.8) brightness(0.5) contrast(1.45);
+}
+
+.ham-map .leaflet-control-zoom a,
+.ham-map .leaflet-control-attribution {
+    background: var(--cult-coal);
+    border-radius: 0;
+    color: var(--cult-bone);
+}
+
+.ham-map .leaflet-control-zoom {
+    border: 1px solid rgba(243, 241, 237, 0.7);
+    border-radius: 0;
+}
+
+.ham-map .leaflet-control-zoom a {
+    border-color: var(--ham-line);
+}
+
+.ham-map .leaflet-control-zoom a:hover,
+.ham-map .leaflet-control-zoom a:focus-visible {
+    background: var(--cult-steel);
+}
+
+.ham-map .leaflet-control-attribution,
+.ham-map .leaflet-control-attribution a {
+    color: var(--cult-muted);
+}
+
+.ham-marker-shell {
+    background: transparent;
+    border: 0;
+}
+
+.ham-map-marker {
+    background: var(--cult-red);
+    border: 2px solid var(--cult-bone);
+    display: block;
+    height: 1.1rem;
+    transform: rotate(45deg);
+    transition: background-color 120ms, border-color 120ms;
+    width: 1.1rem;
+}
+
+.ham-map-marker.status-silent,
+.ham-map-marker.status-misplaced,
+.ham-map-marker.status-disputed {
+    background: var(--cult-black);
+    border-color: var(--cult-red-bright);
+}
+
+.ham-map-marker.status-on_break {
+    background: var(--cult-steel);
+}
+
+.ham-map-marker.selected {
+    background: var(--cult-bone);
+    border-color: var(--cult-red-bright);
+    height: 1.4rem;
+    width: 1.4rem;
+}
+
+.ham-map .leaflet-tooltip {
+    background: var(--cult-coal);
+    border: 1px solid var(--cult-bone);
+    border-radius: 0;
+    color: var(--cult-bone);
+    font-family: "Nunito Sans", sans-serif;
+    font-weight: 800;
+}
+
+.ham-map .leaflet-tooltip::before {
+    border-top-color: var(--cult-bone);
+}
+
+.ham-dossier {
+    height: calc(46rem + 2.6rem);
+    overflow-y: auto;
+}
+
+.ham-dossier-image-wrap {
+    aspect-ratio: 1;
+    border-bottom: 1px solid var(--ham-line);
+    position: relative;
+}
+
+.ham-dossier-image-wrap::after {
+    background: linear-gradient(transparent 55%, rgba(8, 8, 9, 0.82));
+    content: "";
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
+}
+
+.ham-dossier-image-wrap img {
+    filter: grayscale(0.8) contrast(1.1);
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+}
+
+.ham-dossier-image-wrap > span {
+    background: var(--cult-black);
+    border: 1px solid var(--cult-bone);
+    bottom: 1rem;
+    color: var(--cult-bone);
+    font-size: 0.75rem;
+    font-weight: 800;
+    left: 1rem;
+    letter-spacing: 0.1em;
+    padding: 0.4rem 0.55rem;
+    position: absolute;
+    text-transform: uppercase;
+    z-index: 1;
+}
+
+.ham-dossier-body {
+    padding: 1.25rem;
+}
+
+.ham-status {
+    border-left: 0.35rem solid var(--cult-red-bright);
+    color: var(--cult-muted);
+    margin: 0 0 0.65rem;
+    padding-left: 0.55rem;
+}
+
+.ham-status-active {
+    border-left-color: #27845a;
+}
+
+.ham-status-on_break {
+    border-left-color: #ffc857;
+}
+
+.ham-dossier h3 {
+    font-size: 2.7rem;
+    line-height: 0.95;
+    margin: 0;
+}
+
+.ham-alias {
+    color: var(--cult-red-bright);
+    margin: 0.55rem 0 1.25rem;
+}
+
+.ham-facts {
+    border-bottom: 1px solid var(--ham-line);
+    border-top: 1px solid var(--ham-line);
+    margin: 1.5rem 0;
+}
+
+.ham-facts > div {
+    border-bottom: 1px solid var(--ham-line);
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    padding: 0.8rem 0;
+}
+
+.ham-facts > div:last-child {
+    border-bottom: 0;
+}
+
+.ham-facts dt {
+    color: var(--cult-muted);
+}
+
+.ham-facts dd {
+    margin: 0;
+}
+
+.ham-dossier-note {
+    background: var(--cult-coal);
+    border: 1px solid var(--ham-line);
+    margin-top: 0.75rem;
+    padding: 1rem;
+}
+
+.ham-dossier-note h4,
+.ham-dossier-observations h4 {
+    font-family: "Nunito Sans", sans-serif;
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.ham-dossier-note p {
+    margin: 0;
+}
+
+.ham-dossier-observations {
+    margin-top: 1.5rem;
+}
+
+.ham-dossier-observations ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.ham-dossier-observations li {
+    border-top: 1px solid var(--ham-line);
+    padding: 0.85rem 0;
+}
+
+.ham-dossier-observations li span {
+    color: var(--cult-muted);
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+}
+
+.ham-directory {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-top: 1rem;
+}
+
+.ham-directory-item {
+    align-items: center;
+    background: var(--cult-coal);
+    border: 1px solid var(--ham-line);
+    color: var(--cult-bone);
+    display: flex;
+    gap: 0.8rem;
+    min-width: 0;
+    padding: 0.55rem;
+    text-decoration: none;
+}
+
+.ham-directory-item:hover,
+.ham-directory-item:focus-visible,
+.ham-directory-item.active {
+    background: var(--cult-steel);
+    border-color: var(--cult-red-bright);
+    color: #fff;
+}
+
+.ham-directory-item[hidden] {
+    display: none;
+}
+
+.ham-directory-item img {
+    filter: grayscale(1);
+    flex: 0 0 auto;
+    height: 3.2rem;
+    object-fit: cover;
+    width: 3.2rem;
+}
+
+.ham-directory-item span {
+    min-width: 0;
+}
+
+.ham-directory-item strong,
+.ham-directory-item small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ham-directory-item small {
+    color: var(--cult-muted);
+    font-size: 0.68rem;
+    margin-top: 0.2rem;
+}
+
+.ham-secondary-grid {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ham-count {
+    color: var(--cult-muted);
+}
+
+.ham-directive-list,
+.ham-ledger {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.ham-directive-list article,
+.ham-ledger li {
+    background: var(--cult-coal);
+    border: 1px solid var(--ham-line);
+    padding: 1.1rem;
+}
+
+.ham-directive-list article > div,
+.ham-ledger li > div {
+    color: var(--cult-muted);
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.ham-directive-list h3 {
+    font-family: "Nunito Sans", sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.35;
+    margin: 0.85rem 0 0.45rem;
+}
+
+.ham-directive-list p {
+    color: var(--cult-muted);
+    margin-bottom: 0.75rem;
+}
+
+.ham-directive-list small {
+    color: var(--cult-red-bright);
+}
+
+.ham-ledger {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.ham-ledger p {
+    margin: 0.75rem 0 0.45rem;
+}
+
+.ham-ledger a {
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+
+.ham-archive-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ham-archive details {
+    background: var(--cult-coal);
+    border: 1px solid var(--ham-line);
+}
+
+.ham-archive details[open] {
+    border-color: var(--cult-red-bright);
+}
+
+.ham-archive summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 1.25rem;
+}
+
+.ham-archive summary::-webkit-details-marker {
+    display: none;
+}
+
+.ham-archive summary::before {
+    color: var(--cult-red-bright);
+    content: "+";
+    float: right;
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-left: 1rem;
+}
+
+.ham-archive details[open] summary::before {
+    content: "−";
+}
+
+.ham-archive summary > span,
+.ham-archive summary > strong,
+.ham-archive summary > small {
+    display: block;
+}
+
+.ham-archive summary > span {
+    color: var(--cult-red-bright);
+}
+
+.ham-archive summary > strong {
+    font-family: "Instrument Serif", Georgia, serif;
+    font-size: 1.8rem;
+    font-weight: 400;
+    line-height: 1;
+    margin: 0.7rem 0;
+}
+
+.ham-archive summary > small {
+    color: var(--cult-muted);
+}
+
+.ham-archive details > div {
+    border-top: 1px solid var(--ham-line);
+    padding: 1.25rem;
+}
+
+.ham-redaction {
+    display: grid;
+    gap: 0.35rem;
+    margin: 1.25rem 0;
+    max-width: 18rem;
+}
+
+.ham-redaction span {
+    background: var(--cult-black);
+    display: block;
+    height: 0.65rem;
+}
+
+.ham-redaction span:nth-child(even) {
+    width: 72%;
+}
+
+.ham-archive time {
+    color: var(--cult-muted);
+}
+
+@media (max-width: 1199.98px) {
+    .ham-map-layout {
+        grid-template-columns: minmax(0, 1.4fr) minmax(18rem, 0.8fr);
+    }
+
+    .ham-directory {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 991.98px) {
+    .ham-intro,
+    .ham-section-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .ham-map-filters {
+        justify-content: start;
+    }
+
+    .ham-map-layout,
+    .ham-secondary-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ham-dossier {
+        display: grid;
+        grid-template-columns: minmax(15rem, 0.75fr) minmax(0, 1.25fr);
+        height: auto;
+        max-height: none;
+    }
+
+    .ham-dossier-image-wrap {
+        align-self: start;
+        border-bottom: 0;
+        border-right: 1px solid var(--ham-line);
+        position: sticky;
+        top: 0;
+    }
+
+    .ham-directory {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 767.98px) {
+    .ham-stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ham-map {
+        height: 31rem;
+    }
+
+    .ham-dossier {
+        display: block;
+    }
+
+    .ham-dossier-image-wrap {
+        border-bottom: 1px solid var(--ham-line);
+        border-right: 0;
+        position: relative;
+    }
+
+    .ham-archive-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 575.98px) {
+    .ham-shell {
+        gap: 1.25rem;
+    }
+
+    .ham-intro,
+    .ham-workspace,
+    .ham-panel,
+    .ham-archive {
+        margin-left: -0.25rem;
+        margin-right: -0.25rem;
+    }
+
+    .ham-stat-grid,
+    .ham-directory {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ham-stat-grid article {
+        min-height: 6.5rem;
+    }
+
+    .ham-map {
+        height: 26rem;
+    }
+
+    .ham-facts > div {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ham-map-filters .btn {
+        flex: 1 1 auto;
+    }
+}

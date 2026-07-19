@@ -1,0 +1,206 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}HAM | Cult Records{% endblock %}
+
+{% block styles %}
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIINfQ3ynhUhXg2V+9iiP4AIr6FktUnu7s0="
+        crossorigin=""
+    >
+    <link href="{% static 'ham/css/ham.css' %}?v=1" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <div class="ham-shell">
+        <header class="ham-intro" aria-labelledby="ham-title">
+            <div>
+                <p class="ham-eyebrow">HAM // Human Assets Manager</p>
+                <h1 id="ham-title">Nobody is in charge.</h1>
+                <p class="lead mb-0">
+                    A decentralized register of useful people, unresolved incidents, and shared administrative dread.
+                </p>
+            </div>
+            <p class="ham-network-state">
+                <span aria-hidden="true"></span>
+                Network consensus: functional enough
+            </p>
+        </header>
+
+        <section class="ham-stat-grid" aria-label="Network summary">
+            <article>
+                <span>Known assets</span>
+                <strong>{{ asset_stats.total }}</strong>
+            </article>
+            <article>
+                <span>Reporting normally</span>
+                <strong>{{ asset_stats.active }}</strong>
+            </article>
+            <article>
+                <span>Location or existence unclear</span>
+                <strong>{{ asset_stats.uncertain }}</strong>
+            </article>
+            <article>
+                <span>Recognized fax machines</span>
+                <strong>3</strong>
+            </article>
+        </section>
+
+        <section class="ham-workspace" aria-labelledby="network-map-heading">
+            <div class="ham-section-heading">
+                <div>
+                    <p class="ham-eyebrow">Distributed observation surface</p>
+                    <h2 id="network-map-heading">Network map</h2>
+                </div>
+                <div class="ham-map-filters" aria-label="Filter assets by status">
+                    <button class="btn btn-secondary active" type="button" data-ham-filter="all" aria-pressed="true">All nodes</button>
+                    <button class="btn btn-secondary" type="button" data-ham-filter="active" aria-pressed="false">Active</button>
+                    <button class="btn btn-secondary" type="button" data-ham-filter="uncertain" aria-pressed="false">Uncertain</button>
+                </div>
+            </div>
+
+            <div class="ham-map-layout">
+                <div class="ham-map-panel">
+                    <div id="ham-map" class="ham-map" role="application" aria-label="Interactive world map of human asset locations">
+                        <p>Map interface loading. The dossier directory remains available below.</p>
+                    </div>
+                    <p class="ham-map-notice">Positions are approximate. Accuracy encourages paperwork.</p>
+                </div>
+
+                {% if selected_asset %}
+                    <article id="asset-dossier" class="ham-dossier" aria-live="polite">
+                        <div class="ham-dossier-image-wrap">
+                            <img
+                                id="dossier-portrait"
+                                src="{% static selected_asset.portrait %}"
+                                width="768"
+                                height="768"
+                                alt="Portrait of {{ selected_asset.name }}"
+                            >
+                            <span id="dossier-code">{{ selected_asset.asset_code }}</span>
+                        </div>
+                        <div class="ham-dossier-body">
+                            <p id="dossier-status" class="ham-status ham-status-{{ selected_asset.status }}">{{ selected_asset.get_status_display }}</p>
+                            <h3 id="dossier-name">{{ selected_asset.name }}</h3>
+                            <p id="dossier-alias" class="ham-alias">Known as “{{ selected_asset.alias }}”</p>
+                            <p id="dossier-summary">{{ selected_asset.summary }}</p>
+                            <dl class="ham-facts">
+                                <div><dt>Approximate node</dt><dd id="dossier-location">{{ selected_asset.location_label }}</dd></div>
+                                <div><dt>Network function</dt><dd id="dossier-role">{{ selected_asset.network_role }}</dd></div>
+                                <div><dt>Civilian cover</dt><dd id="dossier-cover">{{ selected_asset.civilian_cover }}</dd></div>
+                                <div><dt>Connected</dt><dd id="dossier-joined">{{ selected_asset.joined_on|date:"d F Y" }}</dd></div>
+                                <div><dt>Last contact</dt><dd id="dossier-contact">{{ selected_asset.last_contact|date:"d F Y" }}</dd></div>
+                                <div><dt>Peer consensus</dt><dd id="dossier-consensus">{{ selected_asset.get_consensus_display }}</dd></div>
+                                <div><dt>Exposure</dt><dd id="dossier-exposure">{{ selected_asset.get_exposure_display }}</dd></div>
+                            </dl>
+                            <div class="ham-dossier-note">
+                                <h4>Known irregularity</h4>
+                                <p id="dossier-irregularity">{{ selected_asset.known_irregularity }}</p>
+                            </div>
+                            <div class="ham-dossier-note">
+                                <h4>Peer notes</h4>
+                                <p id="dossier-notes">{{ selected_asset.network_notes }}</p>
+                            </div>
+                            <div class="ham-dossier-observations">
+                                <h4>Recent observations</h4>
+                                <ul id="dossier-observations">
+                                    {% for observation in selected_asset.observations.all|slice:":3" %}
+                                        <li><span>{{ observation.reference }} · {{ observation.observed_on|date:"d M Y" }}</span>{{ observation.summary }}</li>
+                                    {% empty %}
+                                        <li><span>No records</span>Silence is not evidence. It is also not helpful.</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </article>
+                {% endif %}
+            </div>
+
+            <nav class="ham-directory" aria-label="Human asset directory">
+                {% for asset in assets %}
+                    <a
+                        href="?asset={{ asset.asset_code|urlencode }}#asset-dossier"
+                        class="ham-directory-item{% if asset == selected_asset %} active{% endif %}"
+                        data-ham-asset="{{ asset.asset_code }}"
+                        aria-current="{% if asset == selected_asset %}true{% else %}false{% endif %}"
+                    >
+                        <img src="{% static asset.portrait %}" width="72" height="72" alt="">
+                        <span><strong>{{ asset.alias }}</strong><small>{{ asset.asset_code }} · {{ asset.location_label }}</small></span>
+                    </a>
+                {% endfor %}
+            </nav>
+        </section>
+
+        <div class="ham-secondary-grid">
+            <section class="ham-panel" aria-labelledby="directives-heading">
+                <div class="ham-section-heading">
+                    <div><p class="ham-eyebrow">Peer requests</p><h2 id="directives-heading">Directives</h2></div>
+                    <span class="ham-count">{{ directives|length }} unresolved</span>
+                </div>
+                <div class="ham-directive-list">
+                    {% for directive in directives %}
+                        <article>
+                            <div><span>{{ directive.code }}</span><span>{{ directive.get_priority_display }}</span></div>
+                            <h3>{{ directive.instruction }}</h3>
+                            <p>{{ directive.rationale }}</p>
+                            <small>{{ directive.status_line }}</small>
+                        </article>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="ham-panel" aria-labelledby="ledger-heading">
+                <div class="ham-section-heading">
+                    <div><p class="ham-eyebrow">Unverified but neatly formatted</p><h2 id="ledger-heading">Observation ledger</h2></div>
+                </div>
+                <ol class="ham-ledger">
+                    {% for observation in observations %}
+                        <li>
+                            <div><span>{{ observation.reference }}</span><time datetime="{{ observation.observed_on|date:'Y-m-d' }}">{{ observation.observed_on|date:"d M Y" }}</time></div>
+                            <p>{{ observation.summary }}</p>
+                            {% if observation.asset %}<a href="?asset={{ observation.asset_id|urlencode }}#asset-dossier" data-ham-asset="{{ observation.asset_id }}">{{ observation.asset.alias }}</a>{% endif %}
+                        </li>
+                    {% endfor %}
+                </ol>
+            </section>
+        </div>
+
+        <section class="ham-archive" aria-labelledby="archive-heading">
+            <div class="ham-section-heading">
+                <div><p class="ham-eyebrow">Documents retained against advice</p><h2 id="archive-heading">Distributed archive</h2></div>
+            </div>
+            <div class="ham-archive-grid">
+                {% for document in archive_documents %}
+                    <details>
+                        <summary>
+                            <span>{{ document.code }} · {{ document.classification }}</span>
+                            <strong>{{ document.title }}</strong>
+                            <small>{{ document.summary }}</small>
+                        </summary>
+                        <div>
+                            <p>{{ document.excerpt }}</p>
+                            <p class="ham-redaction" aria-label="{{ document.redaction_level }} additional lines redacted">
+                                {% for _ in "12345"|make_list %}{% if forloop.counter <= document.redaction_level %}<span aria-hidden="true"></span>{% endif %}{% endfor %}
+                            </p>
+                            <time datetime="{{ document.filed_on|date:'Y-m-d' }}">Filed {{ document.filed_on|date:"d F Y" }}</time>
+                        </div>
+                    </details>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+
+    {{ map_assets|json_script:"ham-assets-data" }}
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""
+    ></script>
+    <script src="{% static 'ham/js/ham.js' %}?v=1"></script>
+{% endblock %}
