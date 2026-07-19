@@ -75,7 +75,7 @@
                         <div class="ham-dossier-image-wrap">
                             <img
                                 id="dossier-portrait"
-                                src="{% static selected_asset.portrait %}"
+                                src="{% if selected_asset.uploaded_portrait %}{{ selected_asset.uploaded_portrait.url }}{% else %}{% static selected_asset.portrait %}{% endif %}"
                                 width="768"
                                 height="768"
                                 alt="Portrait of {{ selected_asset.name }}"
@@ -127,7 +127,7 @@
                         data-ham-asset="{{ asset.asset_code }}"
                         aria-current="{% if asset == selected_asset %}true{% else %}false{% endif %}"
                     >
-                        <img src="{% static asset.portrait %}" width="72" height="72" alt="">
+                        <img src="{% if asset.uploaded_portrait %}{{ asset.uploaded_portrait.url }}{% else %}{% static asset.portrait %}{% endif %}" width="72" height="72" alt="">
                         <span><strong>{{ asset.alias }}</strong><small>{{ asset.asset_code }} · {{ asset.location_label }}</small></span>
                     </a>
                 {% endfor %}

@@ -6,6 +6,12 @@ from .access import enlightened_required
 from .models import ArchiveDocument, AssetObservation, Directive, HumanAsset
 
 
+def _portrait_url(asset):
+    if asset.uploaded_portrait:
+        return asset.uploaded_portrait.url
+    return static(asset.portrait)
+
+
 @enlightened_required
 def dashboard(request):
     assets = list(
@@ -39,7 +45,7 @@ def dashboard(request):
             "location": asset.location_label,
             "latitude": float(asset.latitude),
             "longitude": float(asset.longitude),
-            "portrait": static(asset.portrait),
+            "portrait": _portrait_url(asset),
             "role": asset.network_role,
             "cover": asset.civilian_cover,
             "joined": asset.joined_on.strftime("%d %B %Y"),

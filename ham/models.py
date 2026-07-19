@@ -1,6 +1,14 @@
+from pathlib import Path
+from uuid import uuid4
+
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
+
+def human_asset_portrait_upload_path(instance, filename):
+    extension = Path(filename).suffix.lower()
+    return f"ham/assets/{instance.asset_code}/{uuid4().hex}{extension}"
 
 
 class HamClearance(models.Model):
@@ -64,7 +72,11 @@ class HumanAsset(models.Model):
         decimal_places=6,
         validators=[MinValueValidator(-180), MaxValueValidator(180)],
     )
-    portrait = models.CharField(max_length=255)
+    portrait = models.CharField(max_length=255, blank=True)
+    uploaded_portrait = models.ImageField(
+        upload_to=human_asset_portrait_upload_path,
+        blank=True,
+    )
     network_role = models.CharField(max_length=180)
     civilian_cover = models.CharField(max_length=180)
     joined_on = models.DateField()
