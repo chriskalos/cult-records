@@ -1,13 +1,14 @@
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
+from django.contrib.staticfiles import finders
 from django.test import TestCase
 
 from cart.checkout import confirm_paid_order
 from cart.models import Order, OrderItem
 from home.models import Product
 
-from .models import HamClearance
+from .models import ArchiveDocument, Directive, HamClearance, HumanAsset
 from .services import grant_enlightenment_for_order
 
 
@@ -115,3 +116,23 @@ class EnlightenmentTests(TestCase):
         clearance = HamClearance.objects.get(user=self.user)
         self.assertEqual(clearance.source_order, first_order)
         self.assertEqual(clearance.enlightened_at, first_granted_at)
+
+
+class NetworkSeedTests(TestCase):
+    def test_initial_network_has_complete_local_dossiers(self):
+        assets = HumanAsset.objects.all()
+
+        self.assertEqual(assets.count(), 12)
+        for asset in assets:
+            with self.subTest(asset=asset.asset_code):
+                self.assertTrue(asset.summary)
+                self.assertTrue(asset.network_notes)
+                self.assertGreaterEqual(asset.latitude, -90)
+                self.assertLessEqual(asset.latitude, 90)
+                self.assertGreaterEqual(asset.longitude, -180)
+                self.assertLessEqual(asset.longitude, 180)
+                self.assertIsNotNone(finders.find(asset.portrait))
+
+    def test_initial_network_includes_directives_and_archive_records(self):
+        self.assertEqual(Directive.objects.filter(is_active=True).count(), 4)
+        self.assertEqual(ArchiveDocument.objects.filter(is_visible=True).count(), 4)
