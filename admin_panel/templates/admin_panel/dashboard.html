@@ -17,23 +17,31 @@
     <section class="admin-stat-grid" aria-label="Website overview">
         <article class="admin-stat-card">
             <p class="admin-stat-label">Catalogue</p>
-            <p class="admin-stat-value">{{ total_products }}</p>
-            <p class="admin-stat-detail">Products across all categories</p>
-        </article>
-        <article class="admin-stat-card">
-            <p class="admin-stat-label">Accounts</p>
-            <p class="admin-stat-value">{{ total_users }}</p>
-            <p class="admin-stat-detail">{{ active_users }} active users</p>
+            <p class="admin-stat-value">{{ product_stats.total }}</p>
+            <p class="admin-stat-detail">{{ product_stats.visible }} visible · {{ product_stats.hidden }} hidden</p>
         </article>
         <article class="admin-stat-card">
             <p class="admin-stat-label">Moderation queue</p>
             <p class="admin-stat-value">{{ review_queue_count }}</p>
-            <p class="admin-stat-detail">Reviews awaiting a decision</p>
+            <p class="admin-stat-detail">{{ review_stats.approved }} approved · {{ review_stats.rejected }} rejected</p>
         </article>
+        {% if admin_can_manage_users %}
+            <article class="admin-stat-card">
+                <p class="admin-stat-label">Accounts</p>
+                <p class="admin-stat-value">{{ total_users }}</p>
+                <p class="admin-stat-detail">{{ active_users }} active · {{ admin_count }} admin{{ admin_count|pluralize }} · {{ editor_count }} editor{{ editor_count|pluralize }}</p>
+            </article>
+        {% else %}
+            <article class="admin-stat-card">
+                <p class="admin-stat-label">Live reviews</p>
+                <p class="admin-stat-value">{{ review_stats.approved }}</p>
+                <p class="admin-stat-detail">Approved reviews visible to customers</p>
+            </article>
+        {% endif %}
         <article class="admin-stat-card admin-stat-card-muted">
             <p class="admin-stat-label">Purchases</p>
-            <p class="admin-stat-value">&mdash;</p>
-            <p class="admin-stat-detail">Ready for simulated purchase data</p>
+            <p class="admin-stat-value">0</p>
+            <p class="admin-stat-detail">Simulated purchase tracking not connected</p>
         </article>
     </section>
 
@@ -64,7 +72,7 @@
                                 <tr>
                                     <td><code>{{ product.product_id }}</code></td>
                                     <td>
-                                        <strong>{{ product.title }}</strong>
+                                        <strong><a href="{% url 'admin_panel:product_edit' product.product_id %}">{{ product.title }}</a></strong>
                                         <span class="admin-table-secondary">{{ product.artist }}</span>
                                     </td>
                                     <td><span class="badge admin-badge-info">{{ product.get_product_type_display }}</span></td>
@@ -119,6 +127,77 @@
         </section>
     </div>
 
+    <div class="admin-dashboard-grid mt-4">
+        <section class="admin-panel" aria-labelledby="pending-reviews-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Requires attention</p>
+                    <h2 id="pending-reviews-heading">Pending reviews</h2>
+                </div>
+                <a href="{% url 'admin_panel:reviews' %}">Open queue</a>
+            </div>
+            {% if pending_reviews %}
+                <div class="admin-operation-list">
+                    {% for review in pending_reviews %}
+                        <a href="{% url 'admin_panel:review_detail' review.pk %}" class="admin-operation">
+                            <span>
+                                <strong>{{ review.author.username }} · {{ review.rating }} / 5</strong>
+                                <small>{{ review.product.title }} · {{ review.comment|default:"No written comment"|truncatechars:72 }}</small>
+                            </span>
+                            <span aria-hidden="true">→</span>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="admin-empty-state admin-empty-state-compact">
+                    <h3>The queue is clear</h3>
+                    <p>There are no customer reviews awaiting a decision.</p>
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="admin-panel" aria-labelledby="catalogue-health-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Content health</p>
+                    <h2 id="catalogue-health-heading">Catalogue status</h2>
+                </div>
+            </div>
+            <dl class="admin-metric-list">
+                {% for category in category_breakdown %}
+                    <div>
+                        <dt>{{ category.label }}</dt>
+                        <dd>{{ category.count }}</dd>
+                    </div>
+                {% endfor %}
+                <div>
+                    <dt>Missing artwork</dt>
+                    <dd>{{ product_stats.missing_artwork }}</dd>
+                </div>
+                <div>
+                    <dt>Bundles blocked by hidden contents</dt>
+                    <dd>{{ bundles_blocked_from_storefront }}</dd>
+                </div>
+            </dl>
+        </section>
+    </div>
+
+    <section class="admin-panel mt-4" aria-labelledby="purchase-overview-heading">
+        <div class="admin-panel-header">
+            <div>
+                <p class="admin-panel-eyebrow">Reserved module</p>
+                <h2 id="purchase-overview-heading">Simulated purchase overview</h2>
+            </div>
+            <span class="badge admin-badge-neutral">Not connected</span>
+        </div>
+        <div class="admin-purchase-skeleton">
+            <div><span>Orders</span><strong>0</strong></div>
+            <div><span>Simulated revenue</span><strong>0.00€</strong></div>
+            <div><span>Average order value</span><strong>0.00€</strong></div>
+            <p>This module is ready to receive data when the storefront gains its simulated checkout flow. No payment processing will be connected.</p>
+        </div>
+    </section>
+
     {% if admin_can_manage_users %}
         <section class="admin-panel mt-4" aria-labelledby="recent-users-heading">
             <div class="admin-panel-header">
@@ -134,7 +213,7 @@
                         <span class="admin-user-initial" aria-hidden="true">{{ user.username|first|upper }}</span>
                         <span>
                             <strong>{{ user.username }}</strong>
-                            <small>{% if user.is_superuser %}Admin{% elif user.is_active %}Active user{% else %}Inactive user{% endif %}</small>
+                            <small>{{ user.admin_role }} · {% if user.is_active %}Active{% else %}Inactive{% endif %}</small>
                         </span>
                     </div>
                 {% empty %}

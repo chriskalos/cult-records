@@ -122,7 +122,47 @@ class AdminPanelPresentationTests(TestCase):
         self.assertContains(response, "Cult Records")
         self.assertContains(response, "Admin panel")
         self.assertContains(response, "Moderation queue")
-        self.assertContains(response, "Ready for simulated purchase data")
+        self.assertContains(response, "Simulated purchase overview")
+        self.assertContains(response, "No payment processing will be connected")
+
+    def test_dashboard_reports_catalogue_and_review_health(self):
+        product = Product.objects.get(product_id="MDEVCTRYLP")
+        product.is_visible = False
+        product.save(update_fields=("is_visible",))
+        Review.objects.create(
+            product=product,
+            author=self.user,
+            rating=4,
+            comment="Dashboard queue item.",
+        )
+        self.client.force_login(self.admin)
+
+        response = self.client.get(reverse("admin_panel:dashboard"))
+
+        self.assertEqual(response.context["product_stats"]["total"], Product.objects.count())
+        self.assertEqual(response.context["product_stats"]["hidden"], 1)
+        self.assertEqual(response.context["review_stats"]["pending"], 1)
+        self.assertContains(response, "Dashboard queue item.")
+        self.assertContains(response, "Missing artwork")
+        self.assertContains(response, "Bundles blocked by hidden contents")
+
+    def test_editor_dashboard_omits_user_data_and_bundle_work(self):
+        bundle = Product.objects.create(
+            product_id="DASHBOARDADMINBUNDLE",
+            artist="Cult Records",
+            title="Admin dashboard bundle",
+            description="Admin-only work.",
+            product_type=Product.ProductType.BUNDLE,
+            price="20.00",
+        )
+        self.client.force_login(self.editor)
+
+        response = self.client.get(reverse("admin_panel:dashboard"))
+
+        self.assertNotIn("total_users", response.context)
+        self.assertNotIn("recent_users", response.context)
+        self.assertNotContains(response, bundle.title)
+        self.assertContains(response, "Live reviews")
 
     def test_component_gallery_contains_the_shared_admin_controls(self):
         self.client.force_login(self.admin)

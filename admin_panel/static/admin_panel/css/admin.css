@@ -519,6 +519,67 @@ code {
     color: var(--admin-muted);
 }
 
+.admin-metric-list {
+    display: grid;
+    margin: 0;
+}
+
+.admin-metric-list > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-metric-list > div:last-child {
+    border-bottom: 0;
+}
+
+.admin-metric-list dt {
+    font-weight: 700;
+}
+
+.admin-metric-list dd {
+    margin: 0;
+    color: var(--admin-cyan);
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+.admin-purchase-skeleton {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--admin-border);
+}
+
+.admin-purchase-skeleton > div {
+    display: grid;
+    gap: 0.35rem;
+    padding: 1.25rem 1.35rem;
+    background: var(--admin-panel);
+}
+
+.admin-purchase-skeleton span,
+.admin-purchase-skeleton p {
+    color: var(--admin-muted);
+}
+
+.admin-purchase-skeleton strong {
+    font-family: "Instrument Serif", Georgia, serif;
+    font-size: 2rem;
+    font-weight: 400;
+}
+
+.admin-purchase-skeleton p {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 1rem 1.35rem;
+    background: #0f2031;
+}
+
 .admin-activity-list {
     display: grid;
 }
@@ -1020,20 +1081,6 @@ code {
     right: 0.5rem;
 }
 
-.admin-placeholder {
-    max-width: 62rem;
-    padding: clamp(1.5rem, 4vw, 3rem);
-}
-
-.admin-placeholder h2 {
-    max-width: 48rem;
-}
-
-.admin-placeholder p:not(.admin-panel-eyebrow) {
-    max-width: 48rem;
-    color: var(--admin-muted);
-}
-
 .admin-gallery-section {
     margin-bottom: 1.5rem;
 }
@@ -1115,6 +1162,11 @@ code {
     color: var(--admin-muted);
 }
 
+.admin-empty-state-compact {
+    padding: 1.5rem;
+    text-align: left;
+}
+
 .modal-content {
     border: 1px solid var(--admin-border);
     background: var(--admin-panel);
@@ -1179,6 +1231,14 @@ code {
 
     .admin-review-layout {
         grid-template-columns: 1fr;
+    }
+
+    .admin-purchase-skeleton {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-purchase-skeleton p {
+        grid-column: auto;
     }
 }
 

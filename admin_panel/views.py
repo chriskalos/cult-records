@@ -3,8 +3,7 @@ from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.core.paginator import Paginator
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.db.models import Q
-from django.db.models import Count, Sum
+from django.db.models import Count, Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
@@ -46,21 +45,83 @@ def _visible_activity(user):
 @admin_panel_access_required
 def dashboard(request):
     User = get_user_model()
+    product_stats = Product.objects.aggregate(
+        total=Count("pk"),
+        visible=Count("pk", filter=Q(is_visible=True)),
+        hidden=Count("pk", filter=Q(is_visible=False)),
+        bundles=Count(
+            "pk",
+            filter=Q(product_type=Product.ProductType.BUNDLE),
+        ),
+        missing_artwork=Count(
+            "pk",
+            filter=Q(uploaded_image="", image=""),
+        ),
+    )
+    review_stats = Review.objects.aggregate(
+        pending=Count("pk", filter=Q(status=Review.Status.PENDING)),
+        approved=Count("pk", filter=Q(status=Review.Status.APPROVED)),
+        rejected=Count("pk", filter=Q(status=Review.Status.REJECTED)),
+    )
+    category_counts = {
+        item["product_type"]: item["count"]
+        for item in Product.objects.values("product_type").annotate(count=Count("pk"))
+    }
+    recent_products = Product.objects.all()
+    if not request.user.is_superuser:
+        recent_products = recent_products.exclude(
+            product_type=Product.ProductType.BUNDLE
+        )
+
+    dashboard_context = {
+        "active_section": "dashboard",
+        "product_stats": product_stats,
+        "review_stats": review_stats,
+        "review_queue_count": review_stats["pending"],
+        "category_breakdown": [
+            {
+                "value": value,
+                "label": label,
+                "count": category_counts.get(value, 0),
+            }
+            for value, label in Product.ProductType.choices
+        ],
+        "bundles_blocked_from_storefront": Product.objects.filter(
+            product_type=Product.ProductType.BUNDLE,
+            is_visible=True,
+            bundle_items__component__is_visible=False,
+        )
+        .distinct()
+        .count(),
+        "recent_products": recent_products.order_by("-product_id")[:5],
+        "pending_reviews": Review.objects.filter(status=Review.Status.PENDING)
+        .select_related("product", "author")
+        .order_by("-updated_at", "-pk")[:5],
+        "recent_activity": _visible_activity(request.user)[:6],
+    }
+    if request.user.is_superuser:
+        recent_users = list(User.objects.order_by("-date_joined", "-pk")[:5])
+        for recent_user in recent_users:
+            recent_user.admin_role = role_for_user(recent_user)
+        dashboard_context.update(
+            {
+                "total_users": User.objects.count(),
+                "active_users": User.objects.filter(is_active=True).count(),
+                "admin_count": User.objects.filter(is_superuser=True).count(),
+                "editor_count": User.objects.filter(
+                    is_superuser=False,
+                    groups__name=EDITOR_GROUP_NAME,
+                )
+                .distinct()
+                .count(),
+                "recent_users": recent_users,
+            }
+        )
+
     return render(
         request,
         "admin_panel/dashboard.html",
-        {
-            "active_section": "dashboard",
-            "total_users": User.objects.count(),
-            "active_users": User.objects.filter(is_active=True).count(),
-            "total_products": Product.objects.count(),
-            "review_queue_count": Review.objects.filter(
-                status=Review.Status.PENDING
-            ).count(),
-            "recent_products": Product.objects.order_by("-product_id")[:5],
-            "recent_users": User.objects.order_by("-date_joined", "-pk")[:5],
-            "recent_activity": _visible_activity(request.user)[:6],
-        },
+        dashboard_context,
     )
 
 
