@@ -273,6 +273,7 @@ class ReviewPageTests(TestCase):
             username="other-user",
             password="test-password",
         )
+        self.ajax_headers = {"HTTP_X_REQUESTED_WITH": "XMLHttpRequest"}
 
     def test_anonymous_page_shows_empty_state_and_inactive_form(self):
         response = self.client.get(self.detail_url)
@@ -315,6 +316,20 @@ class ReviewPageTests(TestCase):
         )
         self.assertFalse(Review.objects.exists())
 
+    def test_anonymous_ajax_submission_returns_the_sign_in_location(self):
+        response = self.client.post(
+            self.create_url,
+            {"rating": "5", "comment": "Excellent."},
+            **self.ajax_headers,
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(
+            response.json()["redirect_url"],
+            "/accounts/login/?next=%2Fproducts%2FMDEVCTRYLP%2Freviews%2F",
+        )
+        self.assertFalse(Review.objects.exists())
+
     def test_authenticated_user_can_submit_a_review(self):
         self.client.force_login(self.user)
 
@@ -339,6 +354,27 @@ class ReviewPageTests(TestCase):
         )
         self.assertContains(response, "Pending approval")
 
+    def test_ajax_submission_returns_the_refreshed_review_section(self):
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            self.create_url,
+            {"rating": "5", "comment": "  Excellent.  "},
+            **self.ajax_headers,
+        )
+
+        review = Review.objects.get(product=self.product, author=self.user)
+        payload = response.json()
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(review.comment, "Excellent.")
+        self.assertEqual(review.status, Review.Status.PENDING)
+        self.assertIn('id="reviews"', payload["html"])
+        self.assertIn("Pending approval", payload["html"])
+        self.assertEqual(
+            payload["message"],
+            "Your review was submitted and will go live once it is approved.",
+        )
+
     def test_invalid_review_redisplays_the_bound_form(self):
         self.client.force_login(self.user)
 
@@ -349,6 +385,22 @@ class ReviewPageTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Select a valid choice")
+        self.assertFalse(Review.objects.exists())
+
+    def test_invalid_ajax_submission_returns_form_errors(self):
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            self.create_url,
+            {"rating": "6", "comment": "Invalid rating."},
+            **self.ajax_headers,
+        )
+
+        payload = response.json()
+        self.assertEqual(response.status_code, 422)
+        self.assertIn("Select a valid choice", payload["html"])
+        self.assertIn("Invalid rating.", payload["html"])
+        self.assertEqual(payload["message"], "")
         self.assertFalse(Review.objects.exists())
 
     def test_creation_endpoint_does_not_create_a_second_review(self):
@@ -367,6 +419,28 @@ class ReviewPageTests(TestCase):
         )
         self.assertEqual(Review.objects.filter(author=self.user).count(), 1)
         self.assertEqual(Review.objects.get(author=self.user).rating, 3)
+
+    def test_duplicate_ajax_submission_returns_the_existing_review(self):
+        Review.objects.create(
+            product=self.product,
+            author=self.user,
+            rating=3,
+            comment="Existing review.",
+        )
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            self.create_url,
+            {"rating": "5", "comment": "Replacement."},
+            **self.ajax_headers,
+        )
+
+        payload = response.json()
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(payload["message"], "You have already reviewed this product.")
+        self.assertIn("Existing review.", payload["html"])
+        self.assertNotIn("Replacement.", payload["html"])
+        self.assertEqual(Review.objects.filter(author=self.user).count(), 1)
 
     def test_existing_review_becomes_your_review_section(self):
         review = Review.objects.create(
@@ -414,6 +488,29 @@ class ReviewPageTests(TestCase):
             ),
         )
 
+    def test_ajax_detail_request_returns_the_editable_review_section(self):
+        Review.objects.create(
+            product=self.product,
+            author=self.user,
+            rating=4,
+            comment="Original review.",
+        )
+        self.client.force_login(self.user)
+
+        response = self.client.get(
+            self.detail_url,
+            {"edit_review": "1"},
+            **self.ajax_headers,
+        )
+
+        payload = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('id="reviews"', payload["html"])
+        self.assertIn("Original review.", payload["html"])
+        self.assertIn("Save changes", payload["html"])
+        self.assertNotIn("<!doctype html>", payload["html"])
+        self.assertIn("X-Requested-With", response.headers["Vary"])
+
     def test_user_can_edit_every_review_field(self):
         review = Review.objects.create(
             product=self.product,
@@ -447,6 +544,37 @@ class ReviewPageTests(TestCase):
         self.assertEqual(review.rejection_reason, "")
         self.assertContains(
             response,
+            "Your review was updated and will go live again once it is approved.",
+        )
+
+    def test_ajax_edit_refreshes_public_rating_statistics(self):
+        review = Review.objects.create(
+            product=self.product,
+            author=self.user,
+            rating=5,
+            comment="Previously live.",
+            status=Review.Status.APPROVED,
+        )
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            reverse(
+                "product_page:review_edit",
+                args=[self.product.product_id, review.pk],
+            ),
+            {"rating": "2", "comment": "Edited and pending."},
+            **self.ajax_headers,
+        )
+
+        review.refresh_from_db()
+        payload = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(review.status, Review.Status.PENDING)
+        self.assertIn("Edited and pending.", payload["html"])
+        self.assertIn("Pending approval", payload["html"])
+        self.assertNotIn("from 1 review", payload["html"])
+        self.assertEqual(
+            payload["message"],
             "Your review was updated and will go live again once it is approved.",
         )
 
@@ -509,6 +637,29 @@ class ReviewPageTests(TestCase):
             fetch_redirect_response=False,
         )
         self.assertFalse(Review.objects.filter(pk=review.pk).exists())
+
+    def test_ajax_delete_returns_the_empty_review_form(self):
+        review = Review.objects.create(
+            product=self.product,
+            author=self.user,
+            rating=4,
+        )
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            reverse(
+                "product_page:review_delete",
+                args=[self.product.product_id, review.pk],
+            ),
+            **self.ajax_headers,
+        )
+
+        payload = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Review.objects.filter(pk=review.pk).exists())
+        self.assertIn("Submit review", payload["html"])
+        self.assertNotIn("Delete review", payload["html"])
+        self.assertEqual(payload["message"], "Your review was deleted.")
 
     def test_user_cannot_delete_someone_elses_review(self):
         review = Review.objects.create(
