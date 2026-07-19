@@ -2,7 +2,7 @@
 
 {% block title %}Admin dashboard{% endblock %}
 {% block page_title %}Dashboard{% endblock %}
-{% block page_description %}A working overview frame for catalogue, account, moderation, and simulated purchase activity.{% endblock %}
+{% block page_description %}A working overview of catalogue, account, moderation, and purchase activity.{% endblock %}
 
 {% block page_actions %}
     {% if admin_can_manage_users %}
@@ -185,16 +185,16 @@
     <section class="admin-panel mt-4" aria-labelledby="purchase-overview-heading">
         <div class="admin-panel-header">
             <div>
-                <p class="admin-panel-eyebrow">Stripe sandbox</p>
-                <h2 id="purchase-overview-heading">Simulated purchase overview</h2>
+                <p class="admin-panel-eyebrow">Orders</p>
+                <h2 id="purchase-overview-heading">Purchase overview</h2>
             </div>
-            <span class="badge admin-badge-success">Test mode</span>
+            <span class="badge admin-badge-neutral">Sandbox</span>
         </div>
         <div class="admin-purchase-skeleton">
             <div><span>Orders</span><strong>{{ order_stats.total }}</strong></div>
-            <div><span>Simulated revenue</span><strong>{{ order_stats.simulated_revenue|floatformat:2 }}€</strong></div>
+            <div><span>Revenue</span><strong>{{ order_stats.revenue|floatformat:2 }}€</strong></div>
             <div><span>Average order value</span><strong>{{ order_stats.average_value|floatformat:2 }}€</strong></div>
-            <p>These figures only include Stripe test-mode orders. No live payments are accepted by the storefront.</p>
+            <p>Paid, pending, and expired Stripe checkout activity.</p>
         </div>
     </section>
 

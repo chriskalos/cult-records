@@ -69,11 +69,11 @@ def dashboard(request):
         paid=Count("pk", filter=Q(status=Order.Status.PAID)),
         pending=Count("pk", filter=Q(status=Order.Status.PENDING)),
         expired=Count("pk", filter=Q(status=Order.Status.EXPIRED)),
-        simulated_revenue=Sum("subtotal", filter=Q(status=Order.Status.PAID)),
+        revenue=Sum("subtotal", filter=Q(status=Order.Status.PAID)),
     )
-    order_stats["simulated_revenue"] = order_stats["simulated_revenue"] or 0
+    order_stats["revenue"] = order_stats["revenue"] or 0
     order_stats["average_value"] = (
-        order_stats["simulated_revenue"] / order_stats["paid"]
+        order_stats["revenue"] / order_stats["paid"]
         if order_stats["paid"]
         else 0
     )

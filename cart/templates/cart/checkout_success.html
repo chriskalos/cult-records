@@ -12,17 +12,17 @@
     </nav>
 
     {% if order.status == "paid" %}
-        <h1>Payment simulated</h1>
+        <h1>Payment confirmed</h1>
         <div class="alert alert-success mt-4" role="status">
-            Stripe confirmed this test-mode payment. No real money was transferred.
+            Thank you. Your payment has been confirmed and your order is on its way.
         </div>
     {% else %}
         <h1>Confirmation pending</h1>
         <div class="alert alert-danger mt-4" role="alert">
             {% if confirmation_unavailable %}
-                Stripe could not be reached to confirm this simulated payment. Refresh this page after checking the connection.
+                Your payment could not be confirmed. Refresh this page after checking your connection.
             {% else %}
-                Stripe has not confirmed this simulated payment. Your cart has not been changed.
+                Your payment has not been confirmed. Your cart has not been changed.
             {% endif %}
         </div>
     {% endif %}

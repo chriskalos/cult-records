@@ -123,8 +123,8 @@ class AdminPanelPresentationTests(TestCase):
         self.assertContains(response, "Cult Records")
         self.assertContains(response, "Admin panel")
         self.assertContains(response, "Moderation queue")
-        self.assertContains(response, "Simulated purchase overview")
-        self.assertContains(response, "No live payments are accepted")
+        self.assertContains(response, "Purchase overview")
+        self.assertContains(response, "Stripe checkout activity")
 
     def test_dashboard_reports_catalogue_and_review_health(self):
         product = Product.objects.get(product_id="MDEVCTRYLP")
@@ -147,7 +147,7 @@ class AdminPanelPresentationTests(TestCase):
         self.assertContains(response, "Missing artwork")
         self.assertContains(response, "Bundles blocked by hidden contents")
 
-    def test_dashboard_reports_simulated_order_totals(self):
+    def test_dashboard_reports_order_totals(self):
         Order.objects.create(
             status=Order.Status.PAID,
             currency="eur",

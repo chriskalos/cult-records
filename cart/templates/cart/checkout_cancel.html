@@ -12,7 +12,7 @@
     </nav>
 
     <h1>Checkout cancelled</h1>
-    <p class="lead mt-4">Nothing was paid, and the products are still in your cart.</p>
+    <p class="lead mt-4">Your payment was not completed, and the products are still in your cart.</p>
     <p class="text-body-secondary">Order reference: {{ order.pk }}</p>
     <a href="{% url 'cart:detail' %}" class="btn btn-primary">Return to your cart</a>
 {% endblock %}

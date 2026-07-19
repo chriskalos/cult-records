@@ -34,7 +34,7 @@ def detail(request):
         {
             "cart": cart,
             "cart_lines": cart.lines,
-            "stripe_test_mode_ready": has_stripe_test_key(),
+            "checkout_ready": has_stripe_test_key(),
         },
     )
 
@@ -88,10 +88,7 @@ def checkout_start(request):
         messages.error(request, "Add at least one product before checkout.")
         return redirect("cart:detail")
     if not has_stripe_test_key():
-        messages.error(
-            request,
-            "Stripe test mode is not configured. Add a test secret key first.",
-        )
+        messages.error(request, "Checkout is currently unavailable.")
         return redirect("cart:detail")
 
     order = create_order(cart, request.user)
@@ -101,7 +98,7 @@ def checkout_start(request):
         order.delete()
         messages.error(
             request,
-            "Stripe could not start the simulated checkout. Please try again.",
+            "Checkout could not be started. Please try again.",
         )
         return redirect("cart:detail")
 

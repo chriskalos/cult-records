@@ -351,7 +351,7 @@ class CheckoutTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Payment simulated")
+        self.assertContains(response, "Payment confirmed")
         order.refresh_from_db()
         self.assertEqual(order.status, Order.Status.PAID)
         self.assertEqual(order.stripe_payment_intent_id, "pi_test_123")

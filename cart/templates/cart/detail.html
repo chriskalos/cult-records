@@ -75,16 +75,16 @@
                             <dd class="mb-0 fw-bold">{{ cart.subtotal|floatformat:2 }}€</dd>
                         </dl>
                         <div class="checkout-notice mb-3">
-                            <strong class="d-block">Stripe test mode</strong>
-                            {% if stripe_test_mode_ready %}
-                                <span>No real payment will be taken.</span>
+                            <strong class="d-block">Secure checkout</strong>
+                            {% if checkout_ready %}
+                                <span>You will continue to Stripe to complete your payment.</span>
                             {% else %}
-                                <span>A Stripe test secret key is required before checkout.</span>
+                                <span>Checkout is currently unavailable.</span>
                             {% endif %}
                         </div>
                         <form action="{% url 'cart:checkout_start' %}" method="post">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-primary w-100" {% if not stripe_test_mode_ready %}disabled{% endif %}>Simulated checkout</button>
+                            <button type="submit" class="btn btn-primary w-100" {% if not checkout_ready %}disabled{% endif %}>Checkout</button>
                         </form>
                     </div>
                 </aside>
