@@ -1,0 +1,36 @@
+{% extends "admin_panel/base.html" %}
+
+{% block title %}Delete {{ asset.asset_code }}{% endblock %}
+{% block page_kicker %}Permanent action{% endblock %}
+{% block page_title %}Delete human asset{% endblock %}
+{% block page_description %}Permanently remove {{ asset.alias }} from the decentralized register.{% endblock %}
+
+{% block page_actions %}
+    <a href="{% url 'admin_panel:human_asset_edit' asset.asset_code %}" class="btn btn-secondary">Cancel</a>
+{% endblock %}
+
+{% block content %}
+    <section class="admin-panel admin-danger-zone admin-confirmation" aria-labelledby="asset-delete-confirmation-heading">
+        <div class="admin-panel-header">
+            <div>
+                <p class="admin-panel-eyebrow">Cannot be undone</p>
+                <h2 id="asset-delete-confirmation-heading">Confirm permanent deletion</h2>
+            </div>
+        </div>
+        <div class="admin-confirmation-body">
+            <p>
+                Deleting <strong>{{ asset.asset_code }}</strong> also removes its stored portrait and
+                <strong>{{ observation_count }} observation{{ observation_count|pluralize }}</strong>.
+            </p>
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% if form.non_field_errors %}<div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+                {% include "admin_panel/includes/form_field.html" with field=form.confirm_asset_code %}
+                <div class="admin-form-actions admin-form-actions-inline">
+                    <button type="submit" class="btn btn-danger">Delete permanently</button>
+                    <a href="{% url 'admin_panel:human_asset_edit' asset.asset_code %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </section>
+{% endblock %}

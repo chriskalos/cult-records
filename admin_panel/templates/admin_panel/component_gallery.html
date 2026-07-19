@@ -1,4 +1,5 @@
 {% extends "admin_panel/base.html" %}
+{% load static %}
 
 {% block title %}Admin components{% endblock %}
 {% block page_kicker %}Blueprint identity review{% endblock %}
@@ -106,6 +107,18 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <tr>
+                        <td>
+                            <div class="admin-asset-cell">
+                                <img class="admin-asset-thumb" src="{% static 'home/images/brand/cult-records-logo-64.png' %}" width="52" height="52" alt="">
+                                <span><strong>Record with thumbnail</strong><small>Secondary identity · <code>REF-001</code></small></span>
+                            </div>
+                        </td>
+                        <td>Reference</td>
+                        <td><span class="badge admin-badge-success">Active</span></td>
+                        <td class="text-end">0.00€</td>
+                        <td class="text-end"><a href="#">Edit</a></td>
+                    </tr>
                     <tr>
                         <td><strong>Random Access Memories</strong><span class="admin-table-secondary">Daft Punk</span></td>
                         <td>LP</td>

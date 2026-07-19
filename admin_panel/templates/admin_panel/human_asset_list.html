@@ -1,0 +1,149 @@
+{% extends "admin_panel/base.html" %}
+{% load static %}
+
+{% block title %}Manage human assets{% endblock %}
+{% block page_kicker %}Restricted network records{% endblock %}
+{% block page_title %}Human assets{% endblock %}
+{% block page_description %}Maintain dossiers, approximate coordinates, portraits, status, and HAM visibility.{% endblock %}
+
+{% block page_actions %}
+    <a href="{% url 'ham:dashboard' %}" class="btn btn-secondary">View HAM</a>
+    <a href="{% url 'admin_panel:human_asset_create' %}" class="btn btn-primary">Add human asset</a>
+{% endblock %}
+
+{% block content %}
+    <section class="admin-panel" aria-labelledby="asset-filters-heading">
+        <div class="admin-panel-header">
+            <div>
+                <p class="admin-panel-eyebrow">Network filters</p>
+                <h2 id="asset-filters-heading">Find human assets</h2>
+            </div>
+        </div>
+        <form method="get" class="admin-filter-form admin-filter-form-products">
+            <div>
+                <label for="asset-query" class="form-label">Search</label>
+                <input id="asset-query" name="query" type="search" value="{{ query }}" class="form-control" placeholder="Code, name, alias, role, or node">
+            </div>
+            <div>
+                <label for="asset-status" class="form-label">Status</label>
+                <select id="asset-status" name="status" class="form-select">
+                    <option value="">All statuses</option>
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}"{% if selected_status == value %} selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="asset-exposure" class="form-label">Exposure</label>
+                <select id="asset-exposure" name="exposure" class="form-select">
+                    <option value="">All exposure levels</option>
+                    {% for value, label in exposure_choices %}
+                        <option value="{{ value }}"{% if selected_exposure == value %} selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="asset-visibility" class="form-label">Visibility</label>
+                <select id="asset-visibility" name="visibility" class="form-select">
+                    <option value="">Any visibility</option>
+                    <option value="visible"{% if selected_visibility == "visible" %} selected{% endif %}>Visible</option>
+                    <option value="hidden"{% if selected_visibility == "hidden" %} selected{% endif %}>Hidden</option>
+                </select>
+            </div>
+            <div>
+                <label for="asset-sort" class="form-label">Sort</label>
+                <select id="asset-sort" name="sort" class="form-select">
+                    <option value="alias"{% if selected_sort == "alias" %} selected{% endif %}>Alias A to Z</option>
+                    <option value="-alias"{% if selected_sort == "-alias" %} selected{% endif %}>Alias Z to A</option>
+                    <option value="location"{% if selected_sort == "location" %} selected{% endif %}>Node A to Z</option>
+                    <option value="-location"{% if selected_sort == "-location" %} selected{% endif %}>Node Z to A</option>
+                    <option value="-contact"{% if selected_sort == "-contact" %} selected{% endif %}>Newest contact</option>
+                    <option value="contact"{% if selected_sort == "contact" %} selected{% endif %}>Oldest contact</option>
+                </select>
+            </div>
+            <div class="admin-filter-actions">
+                <button type="submit" class="btn btn-primary">Apply filters</button>
+                <a href="{% url 'admin_panel:human_assets' %}" class="btn btn-secondary">Clear</a>
+            </div>
+        </form>
+    </section>
+
+    <section class="admin-panel mt-4" aria-labelledby="asset-results-heading">
+        <div class="admin-panel-header">
+            <div>
+                <p class="admin-panel-eyebrow">Decentralized register</p>
+                <h2 id="asset-results-heading">{{ asset_page.paginator.count }} human asset{{ asset_page.paginator.count|pluralize }}</h2>
+            </div>
+        </div>
+        {% if asset_page %}
+            <div class="table-responsive">
+                <table class="table admin-table mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Human asset</th>
+                            <th scope="col">Approximate node</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Exposure</th>
+                            <th scope="col">Last contact</th>
+                            <th scope="col">Visibility</th>
+                            <th scope="col"><span class="visually-hidden">Actions</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for asset in asset_page %}
+                            <tr>
+                                <td>
+                                    <div class="admin-asset-cell">
+                                        {% if asset.uploaded_portrait %}
+                                            <img class="admin-asset-thumb" src="{{ asset.uploaded_portrait.url }}" width="52" height="52" alt="">
+                                        {% elif asset.portrait %}
+                                            <img class="admin-asset-thumb" src="{% static asset.portrait %}" width="52" height="52" alt="">
+                                        {% endif %}
+                                        <span>
+                                            <strong>{{ asset.alias }}</strong>
+                                            <small>{{ asset.name }} · <code>{{ asset.asset_code }}</code></small>
+                                        </span>
+                                    </div>
+                                </td>
+                                <td>{{ asset.location_label }}</td>
+                                <td><span class="badge admin-badge-info">{{ asset.get_status_display }}</span></td>
+                                <td>{{ asset.get_exposure_display }}</td>
+                                <td>{{ asset.last_contact|date:"j M Y" }}</td>
+                                <td>
+                                    {% if asset.is_visible %}
+                                        <span class="badge admin-badge-success">Visible</span>
+                                    {% else %}
+                                        <span class="badge admin-badge-warning">Hidden</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="admin-table-actions">
+                                        <a href="{% url 'admin_panel:human_asset_edit' asset.asset_code %}">Edit</a>
+                                        <form action="{% url 'admin_panel:human_asset_visibility' asset.asset_code %}" method="post">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                            {% if asset.is_visible %}
+                                                <input type="hidden" name="action" value="hide">
+                                                <button type="submit" class="admin-text-button">Hide</button>
+                                            {% else %}
+                                                <input type="hidden" name="action" value="show">
+                                                <button type="submit" class="admin-text-button">Show</button>
+                                            {% endif %}
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% include "admin_panel/includes/pagination.html" with page_obj=asset_page %}
+        {% else %}
+            <div class="admin-empty-state">
+                <h3>No matching human assets</h3>
+                <p>The register has achieved a rare and suspicious silence.</p>
+                <a href="{% url 'admin_panel:human_asset_create' %}" class="btn btn-primary">Add human asset</a>
+            </div>
+        {% endif %}
+    </section>
+{% endblock %}

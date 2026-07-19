@@ -1,0 +1,121 @@
+{% extends "admin_panel/base.html" %}
+{% load static %}
+
+{% block title %}{{ form_title }}{% endblock %}
+{% block page_kicker %}Restricted network records{% endblock %}
+{% block page_title %}{{ form_title }}{% endblock %}
+{% block page_description %}{{ form_description }}{% endblock %}
+
+{% block page_actions %}
+    <a href="{% url 'admin_panel:human_assets' %}" class="btn btn-secondary">Back to human assets</a>
+    {% if asset and asset.is_visible %}<a href="{% url 'ham:dashboard' %}?asset={{ asset.asset_code|urlencode }}#asset-dossier" class="btn btn-outline-primary">View dossier</a>{% endif %}
+{% endblock %}
+
+{% block content %}
+    <form method="post" enctype="multipart/form-data" class="admin-product-form" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <section class="admin-panel" aria-labelledby="asset-core-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Dossier identity</p>
+                    <h2 id="asset-core-heading">Core record</h2>
+                </div>
+            </div>
+            <div class="admin-form-grid">
+                {% include "admin_panel/includes/form_field.html" with field=form.asset_code %}
+                {% include "admin_panel/includes/form_field.html" with field=form.status %}
+                {% include "admin_panel/includes/form_field.html" with field=form.name %}
+                {% include "admin_panel/includes/form_field.html" with field=form.alias %}
+                {% include "admin_panel/includes/form_field.html" with field=form.network_role %}
+                {% include "admin_panel/includes/form_field.html" with field=form.civilian_cover %}
+                <div class="admin-form-full">{% include "admin_panel/includes/form_field.html" with field=form.is_visible %}</div>
+            </div>
+        </section>
+
+        <section class="admin-panel mt-4" aria-labelledby="asset-location-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Approximate by policy</p>
+                    <h2 id="asset-location-heading">Location and condition</h2>
+                </div>
+            </div>
+            <div class="admin-form-grid">
+                <div class="admin-form-full">{% include "admin_panel/includes/form_field.html" with field=form.location_label %}</div>
+                {% include "admin_panel/includes/form_field.html" with field=form.latitude %}
+                {% include "admin_panel/includes/form_field.html" with field=form.longitude %}
+                {% include "admin_panel/includes/form_field.html" with field=form.joined_on %}
+                {% include "admin_panel/includes/form_field.html" with field=form.last_contact %}
+                {% include "admin_panel/includes/form_field.html" with field=form.consensus %}
+                {% include "admin_panel/includes/form_field.html" with field=form.exposure %}
+            </div>
+        </section>
+
+        <section class="admin-panel mt-4" aria-labelledby="asset-portrait-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Locally retained evidence</p>
+                    <h2 id="asset-portrait-heading">Portrait</h2>
+                </div>
+            </div>
+            <div class="admin-media-form">
+                <div class="admin-image-preview">
+                    {% if asset.uploaded_portrait %}
+                        <img src="{{ asset.uploaded_portrait.url }}" alt="Current portrait of {{ asset.name }}">
+                    {% elif asset.portrait %}
+                        <img src="{% static asset.portrait %}" alt="Current portrait of {{ asset.name }}">
+                    {% else %}
+                        <span>No portrait filed</span>
+                    {% endif %}
+                </div>
+                <div class="admin-media-fields">
+                    {% include "admin_panel/includes/form_field.html" with field=form.uploaded_portrait %}
+                    {% if form.remove_uploaded_portrait %}
+                        {% include "admin_panel/includes/form_field.html" with field=form.remove_uploaded_portrait %}
+                    {% endif %}
+                    {% include "admin_panel/includes/form_field.html" with field=form.portrait %}
+                    <p class="form-text mb-0">Use only an adult portrait previously saved from This Person Does Not Exist. JPEG, PNG, or WebP, maximum 8 MB.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="admin-panel mt-4" aria-labelledby="asset-notes-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Peer-approved uncertainty</p>
+                    <h2 id="asset-notes-heading">Dossier notes</h2>
+                </div>
+            </div>
+            <div class="admin-form-grid">
+                <div class="admin-form-full">{% include "admin_panel/includes/form_field.html" with field=form.summary %}</div>
+                <div class="admin-form-full">{% include "admin_panel/includes/form_field.html" with field=form.known_irregularity %}</div>
+                <div class="admin-form-full">{% include "admin_panel/includes/form_field.html" with field=form.network_notes %}</div>
+            </div>
+            <div class="admin-form-actions">
+                <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
+                <a href="{% url 'admin_panel:human_assets' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </section>
+    </form>
+
+    {% if asset %}
+        <section class="admin-panel admin-danger-zone mt-4" aria-labelledby="delete-asset-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Permanent action</p>
+                    <h2 id="delete-asset-heading">Delete human asset</h2>
+                </div>
+            </div>
+            <div class="admin-action-row">
+                <div>
+                    <strong>Permanently delete {{ asset.asset_code }}</strong>
+                    <p>The dossier, stored portrait, and connected observations will also be deleted.</p>
+                </div>
+                <a href="{% url 'admin_panel:human_asset_delete' asset.asset_code %}" class="btn btn-danger">Delete human asset</a>
+            </div>
+        </section>
+    {% endif %}
+{% endblock %}
