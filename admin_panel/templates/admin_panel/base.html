@@ -113,6 +113,17 @@
                                     </a>
                                 </li>
                             {% endif %}
+                            {% if admin_can_manage_human_assets %}
+                                <li>
+                                    <a
+                                        href="{% url 'admin_panel:human_assets' %}"
+                                        class="admin-nav-link{% if active_section == 'human_assets' %} active{% endif %}"
+                                        {% if active_section == 'human_assets' %}aria-current="page"{% endif %}
+                                    >
+                                        Human assets
+                                    </a>
+                                </li>
+                            {% endif %}
                         </ul>
 
                         <p class="admin-nav-heading">Design system</p>

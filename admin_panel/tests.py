@@ -11,6 +11,7 @@ from PIL import Image
 
 from accounts.roles import EDITOR_GROUP_NAME, UserRole, role_for_user
 from cart.models import Order
+from ham.models import AssetObservation, HamClearance, HumanAsset
 from home.models import BundleItem, Product
 from product_page.models import ProductPage, Review
 
@@ -804,6 +805,187 @@ class AdminProductManagementTests(TestCase):
         self.assertRedirects(response, reverse("admin_panel:products"))
         self.assertFalse(ProductPage.objects.filter(pk=page_pk).exists())
         self.assertFalse(Review.objects.filter(pk=review.pk).exists())
+
+
+class AdminHumanAssetManagementTests(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.admin = User.objects.get(username="admin")
+        self.editor = User.objects.get(username="editor")
+        self.user = User.objects.get(username="user1")
+        self.list_url = reverse("admin_panel:human_assets")
+        self.media_directory = TemporaryDirectory()
+        self.addCleanup(self.media_directory.cleanup)
+        self.media_override = override_settings(MEDIA_ROOT=self.media_directory.name)
+        self.media_override.enable()
+        self.addCleanup(self.media_override.disable)
+
+    def _grant_clearance(self, user):
+        return HamClearance.objects.create(user=user, is_enlightened=True)
+
+    def _asset_data(self, **overrides):
+        data = {
+            "asset_code": "HAM-TST-404",
+            "name": "Morgan Ledger",
+            "alias": "Receipt Ghost",
+            "status": HumanAsset.Status.ACTIVE,
+            "location_label": "Thessaloniki, Greece",
+            "latitude": "40.640063",
+            "longitude": "22.944419",
+            "portrait": "",
+            "network_role": "Counts doors in buildings that have no rooms",
+            "civilian_cover": "Freelance queue consultant",
+            "joined_on": "2024-02-29",
+            "last_contact": "2026-07-18",
+            "consensus": HumanAsset.Consensus.MAJORITY,
+            "exposure": HumanAsset.Exposure.PAPERWORK,
+            "summary": "A reliable node whenever the receipt printer is facing north.",
+            "network_notes": "The stapler has issued a formal objection.",
+            "known_irregularity": "Leaves a duplicate receipt in unopened drawers.",
+            "is_visible": "on",
+        }
+        data.update(overrides)
+        return data
+
+    def _portrait_upload(self, name="portrait.png"):
+        image_bytes = BytesIO()
+        Image.new("RGB", (24, 24), color=(70, 50, 45)).save(
+            image_bytes,
+            format="PNG",
+        )
+        return SimpleUploadedFile(
+            name,
+            image_bytes.getvalue(),
+            content_type="image/png",
+        )
+
+    def test_management_requires_both_admin_role_and_enlightenment(self):
+        self.client.force_login(self.admin)
+        admin_response = self.client.get(self.list_url)
+
+        self._grant_clearance(self.editor)
+        self.client.force_login(self.editor)
+        editor_response = self.client.get(self.list_url)
+
+        self._grant_clearance(self.user)
+        self.client.force_login(self.user)
+        user_response = self.client.get(self.list_url)
+        ham_response = self.client.get(reverse("ham:dashboard"))
+
+        self.assertEqual(admin_response.status_code, 404)
+        self.assertEqual(editor_response.status_code, 404)
+        self.assertEqual(user_response.status_code, 404)
+        self.assertEqual(ham_response.status_code, 200)
+
+    def test_sidebar_only_reveals_management_to_enlightened_admins(self):
+        self.client.force_login(self.admin)
+        hidden_response = self.client.get(reverse("admin_panel:dashboard"))
+
+        self._grant_clearance(self.admin)
+        visible_response = self.client.get(reverse("admin_panel:dashboard"))
+
+        self.assertNotContains(hidden_response, self.list_url)
+        self.assertContains(visible_response, self.list_url)
+        self.assertTrue(visible_response.context["admin_can_manage_human_assets"])
+
+    def test_enlightened_admin_can_create_an_asset_with_a_portrait(self):
+        self._grant_clearance(self.admin)
+        self.client.force_login(self.admin)
+        data = self._asset_data()
+        data["uploaded_portrait"] = self._portrait_upload()
+
+        response = self.client.post(
+            reverse("admin_panel:human_asset_create"),
+            data,
+        )
+
+        asset = HumanAsset.objects.get(pk="HAM-TST-404")
+        self.assertRedirects(
+            response,
+            reverse("admin_panel:human_asset_edit", args=[asset.asset_code]),
+        )
+        self.assertTrue(asset.uploaded_portrait.name.startswith("ham/assets/HAM-TST-404/"))
+        self.assertTrue(asset.uploaded_portrait.storage.exists(asset.uploaded_portrait.name))
+        self.assertTrue(
+            AdminActivity.objects.filter(
+                action=AdminActivity.Action.CREATE,
+                target_type="Human asset",
+                target_identifier=asset.asset_code,
+            ).exists()
+        )
+
+        ham_response = self.client.get(reverse("ham:dashboard"))
+        self.assertContains(ham_response, asset.uploaded_portrait.url)
+
+    def test_enlightened_admin_can_edit_hide_and_delete_an_asset(self):
+        self._grant_clearance(self.admin)
+        self.client.force_login(self.admin)
+        create_data = self._asset_data()
+        create_data["uploaded_portrait"] = self._portrait_upload()
+        self.client.post(reverse("admin_panel:human_asset_create"), create_data)
+        asset = HumanAsset.objects.get(pk="HAM-TST-404")
+        portrait_name = asset.uploaded_portrait.name
+        storage = asset.uploaded_portrait.storage
+        AssetObservation.objects.create(
+            reference="OBS-TEST-404",
+            asset=asset,
+            observed_on="2026-07-18",
+            kind=AssetObservation.Kind.ADMINISTRATIVE,
+            summary="Clipboard observed completing its own form.",
+        )
+
+        edit_data = self._asset_data(alias="Receipt Apparition")
+        edit_response = self.client.post(
+            reverse("admin_panel:human_asset_edit", args=[asset.asset_code]),
+            edit_data,
+        )
+        visibility_url = reverse(
+            "admin_panel:human_asset_visibility",
+            args=[asset.asset_code],
+        )
+        get_visibility_response = self.client.get(visibility_url)
+        hide_response = self.client.post(visibility_url, {"action": "hide"})
+
+        asset.refresh_from_db()
+        self.assertRedirects(
+            edit_response,
+            reverse("admin_panel:human_asset_edit", args=[asset.asset_code]),
+        )
+        self.assertEqual(asset.alias, "Receipt Apparition")
+        self.assertEqual(get_visibility_response.status_code, 405)
+        self.assertRedirects(hide_response, self.list_url)
+        self.assertFalse(asset.is_visible)
+
+        with self.captureOnCommitCallbacks(execute=True):
+            delete_response = self.client.post(
+                reverse("admin_panel:human_asset_delete", args=[asset.asset_code]),
+                {"confirm_asset_code": asset.asset_code},
+            )
+
+        self.assertRedirects(delete_response, self.list_url)
+        self.assertFalse(HumanAsset.objects.filter(pk=asset.asset_code).exists())
+        self.assertFalse(storage.exists(portrait_name))
+        self.assertFalse(AssetObservation.objects.filter(reference="OBS-TEST-404").exists())
+
+    def test_ham_activity_is_concealed_when_admin_clearance_is_removed(self):
+        clearance = self._grant_clearance(self.admin)
+        record_admin_activity(
+            actor=self.admin,
+            action=AdminActivity.Action.UPDATE,
+            target_type="Human asset",
+            target_identifier="HAM-HUSH-001",
+            target_label="HAM-HUSH-001: Hush",
+            summary="Updated a concealed human asset.",
+        )
+        self.client.force_login(self.admin)
+
+        visible_response = self.client.get(reverse("admin_panel:activity"))
+        clearance.is_enlightened = False
+        clearance.save(update_fields=("is_enlightened",))
+        hidden_response = self.client.get(reverse("admin_panel:activity"))
+
+        self.assertContains(visible_response, "HAM-HUSH-001")
+        self.assertNotContains(hidden_response, "HAM-HUSH-001")
 
 
 class AdminBundleManagementTests(TestCase):

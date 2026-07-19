@@ -56,6 +56,27 @@ urlpatterns = [
         views.review_delete,
         name="review_delete",
     ),
+    path("human-assets/", views.human_assets, name="human_assets"),
+    path(
+        "human-assets/add/",
+        views.human_asset_create,
+        name="human_asset_create",
+    ),
+    path(
+        "human-assets/<str:asset_code>/edit/",
+        views.human_asset_edit,
+        name="human_asset_edit",
+    ),
+    path(
+        "human-assets/<str:asset_code>/visibility/",
+        views.human_asset_visibility,
+        name="human_asset_visibility",
+    ),
+    path(
+        "human-assets/<str:asset_code>/delete/",
+        views.human_asset_delete,
+        name="human_asset_delete",
+    ),
     path("activity/", views.activity, name="activity"),
     path("visuals/", views.visuals, name="visuals"),
 ]

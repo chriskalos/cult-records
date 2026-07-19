@@ -9,24 +9,29 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from cart.models import Order
+from ham.models import HumanAsset
 from home.models import Product
 from product_page.models import Review
 
 from .access import (
     admin_only_required,
     admin_panel_access_required,
+    can_manage_human_assets,
+    enlightened_admin_required,
     product_editor_required,
     review_moderator_required,
 )
 from .audit import record_admin_activity
 from .forms import (
     AdminBundleForm,
+    AdminHumanAssetForm,
     AdminProductForm,
     AdminSetPasswordForm,
     AdminUserCreationForm,
     AdminUserUpdateForm,
     BulkReviewModerationForm,
     BundleItemFormSet,
+    HumanAssetDeleteConfirmationForm,
     ProductDeleteConfirmationForm,
     ReviewDeleteConfirmationForm,
     ReviewModerationForm,
@@ -38,6 +43,8 @@ from accounts.roles import EDITOR_GROUP_NAME, UserRole, role_for_user
 
 def _visible_activity(user):
     activity = AdminActivity.objects.select_related("actor")
+    if not can_manage_human_assets(user):
+        activity = activity.exclude(target_type="Human asset")
     if user.is_superuser:
         return activity
     return activity.filter(actor=user)
@@ -536,6 +543,14 @@ def _remove_product_file(product):
         product.uploaded_image.delete(save=False)
 
 
+def _schedule_human_asset_file_removal(asset):
+    if not asset.uploaded_portrait:
+        return
+    storage = asset.uploaded_portrait.storage
+    portrait_name = asset.uploaded_portrait.name
+    transaction.on_commit(lambda: storage.delete(portrait_name))
+
+
 @admin_only_required
 def product_delete(request, product_id):
     product = get_object_or_404(Product, product_id=product_id)
@@ -588,6 +603,198 @@ def product_delete(request, product_id):
             "product": product,
             "related_bundles": related_bundles,
             "review_count": product.reviews.count(),
+        },
+    )
+
+
+@enlightened_admin_required
+def human_assets(request):
+    asset_list = HumanAsset.objects.all()
+    query = request.GET.get("query", "").strip()
+    status = request.GET.get("status", "").strip()
+    exposure = request.GET.get("exposure", "").strip()
+    visibility = request.GET.get("visibility", "").strip()
+    sort = request.GET.get("sort", "alias")
+    sort_fields = {
+        "alias": ("alias", "asset_code"),
+        "-alias": ("-alias", "asset_code"),
+        "location": ("location_label", "alias"),
+        "-location": ("-location_label", "alias"),
+        "contact": ("last_contact", "alias"),
+        "-contact": ("-last_contact", "alias"),
+    }
+
+    if query:
+        asset_list = asset_list.filter(
+            Q(asset_code__icontains=query)
+            | Q(name__icontains=query)
+            | Q(alias__icontains=query)
+            | Q(location_label__icontains=query)
+            | Q(network_role__icontains=query)
+        )
+    if status in HumanAsset.Status.values:
+        asset_list = asset_list.filter(status=status)
+    if exposure in HumanAsset.Exposure.values:
+        asset_list = asset_list.filter(exposure=exposure)
+    if visibility == "visible":
+        asset_list = asset_list.filter(is_visible=True)
+    elif visibility == "hidden":
+        asset_list = asset_list.filter(is_visible=False)
+
+    page = Paginator(
+        asset_list.order_by(*sort_fields.get(sort, sort_fields["alias"])),
+        25,
+    ).get_page(request.GET.get("page"))
+    return render(
+        request,
+        "admin_panel/human_asset_list.html",
+        {
+            "active_section": "human_assets",
+            "asset_page": page,
+            "query": query,
+            "selected_status": status,
+            "selected_exposure": exposure,
+            "selected_visibility": visibility,
+            "selected_sort": sort,
+            "status_choices": HumanAsset.Status.choices,
+            "exposure_choices": HumanAsset.Exposure.choices,
+        },
+    )
+
+
+@enlightened_admin_required
+def human_asset_create(request):
+    form = AdminHumanAssetForm(request.POST or None, request.FILES or None)
+    if request.method == "POST" and form.is_valid():
+        with transaction.atomic():
+            asset = form.save()
+            record_admin_activity(
+                actor=request.user,
+                action=AdminActivity.Action.CREATE,
+                target_type="Human asset",
+                target_identifier=asset.asset_code,
+                target_label=str(asset),
+                summary=f"Created human asset {asset.asset_code}.",
+                metadata={"status": asset.status},
+            )
+        messages.success(request, f"Human asset {asset.asset_code} has been created.")
+        return redirect("admin_panel:human_asset_edit", asset_code=asset.asset_code)
+
+    return render(
+        request,
+        "admin_panel/human_asset_form.html",
+        {
+            "active_section": "human_assets",
+            "form": form,
+            "form_title": "Add human asset",
+            "form_description": "Add a node to the decentralized register and place its approximate map position.",
+            "submit_label": "Create human asset",
+        },
+    )
+
+
+@enlightened_admin_required
+def human_asset_edit(request, asset_code):
+    asset = get_object_or_404(HumanAsset, asset_code=asset_code)
+    form = AdminHumanAssetForm(
+        request.POST or None,
+        request.FILES or None,
+        instance=asset,
+    )
+    if request.method == "POST" and form.is_valid():
+        changed_fields = list(form.changed_data)
+        with transaction.atomic():
+            asset = form.save()
+            record_admin_activity(
+                actor=request.user,
+                action=AdminActivity.Action.UPDATE,
+                target_type="Human asset",
+                target_identifier=asset.asset_code,
+                target_label=str(asset),
+                summary=f"Updated human asset {asset.asset_code}.",
+                metadata={"changed_fields": changed_fields},
+            )
+        messages.success(request, f"Human asset {asset.asset_code} has been updated.")
+        return redirect("admin_panel:human_asset_edit", asset_code=asset.asset_code)
+
+    return render(
+        request,
+        "admin_panel/human_asset_form.html",
+        {
+            "active_section": "human_assets",
+            "asset": asset,
+            "form": form,
+            "form_title": f"Edit {asset.alias}",
+            "form_description": f"Update {asset.asset_code} without changing its immutable asset code.",
+            "submit_label": "Save human asset",
+        },
+    )
+
+
+@enlightened_admin_required
+@require_POST
+def human_asset_visibility(request, asset_code):
+    asset = get_object_or_404(HumanAsset, asset_code=asset_code)
+    action = request.POST.get("action")
+    if action not in {"hide", "show"}:
+        raise PermissionDenied("Unknown visibility action.")
+    asset.is_visible = action == "show"
+    asset.save(update_fields=("is_visible",))
+    action_word = "Showed" if asset.is_visible else "Hid"
+    record_admin_activity(
+        actor=request.user,
+        action=AdminActivity.Action.VISIBILITY,
+        target_type="Human asset",
+        target_identifier=asset.asset_code,
+        target_label=str(asset),
+        summary=f"{action_word} human asset {asset.asset_code}.",
+        metadata={"is_visible": asset.is_visible},
+    )
+    messages.success(
+        request,
+        f"Human asset {asset.asset_code} is now {'visible' if asset.is_visible else 'hidden'}.",
+    )
+    next_url = request.POST.get("next", "")
+    if url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return redirect(next_url)
+    return redirect("admin_panel:human_assets")
+
+
+@enlightened_admin_required
+def human_asset_delete(request, asset_code):
+    asset = get_object_or_404(HumanAsset, asset_code=asset_code)
+    form = HumanAssetDeleteConfirmationForm(request.POST or None, asset=asset)
+    if request.method == "POST" and form.is_valid():
+        identifier = asset.asset_code
+        label = str(asset)
+        observation_count = asset.observations.count()
+        with transaction.atomic():
+            _schedule_human_asset_file_removal(asset)
+            asset.delete()
+            record_admin_activity(
+                actor=request.user,
+                action=AdminActivity.Action.DELETE,
+                target_type="Human asset",
+                target_identifier=identifier,
+                target_label=label,
+                summary=f"Permanently deleted human asset {identifier}.",
+                metadata={"deleted_observation_count": observation_count},
+            )
+        messages.success(request, f"Human asset {identifier} has been permanently deleted.")
+        return redirect("admin_panel:human_assets")
+
+    return render(
+        request,
+        "admin_panel/human_asset_confirm_delete.html",
+        {
+            "active_section": "human_assets",
+            "asset": asset,
+            "form": form,
+            "observation_count": asset.observations.count(),
         },
     )
 
