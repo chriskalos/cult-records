@@ -8,4 +8,5 @@ dependencies = [
     "django>=6.0.7",
     "pillow>=12.3.0",
     "rapidfuzz>=3.14.5",
+    "stripe>=15.3.1",
 ]
