@@ -53,11 +53,12 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 ### Ratings and reviews
 
 - Product pages display the average rating, review count, and approved reviews in newest-first order.
-- Authenticated users can submit one review per product with a rating from one to five and an optional comment of up to 2,000 characters.
+- Authenticated users select a rating through an accessible five-star control and can submit one review per product with an optional comment of up to 2,000 characters.
 - Review authors can edit or delete their own reviews.
+- Creating, editing, and deleting a review updates the review section with AJAX. The same forms and links continue to work through normal page requests when JavaScript is unavailable.
 - New and edited reviews return to pending moderation. The user receives a confirmation that the review will become public after approval.
 - Rejected reviews remain visible to their author with an optional editorial reason. Editing a rejected or approved review clears its previous moderation decision and returns it to pending.
-- A small JavaScript enhancement asks for confirmation before a review is deleted.
+- Review deletion requires confirmation in the browser.
 
 ## Technologies
 
@@ -71,7 +72,7 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 | HTML and Django templates | Page structure and server-rendered content | Produce semantic pages while allowing shared layouts and reusable components. |
 | CSS | Visual identity, responsive refinements, and CD/LP artwork presentation | Applies the Cult Records design system and packaging effects without an external 3D library. |
 | Bootstrap 5.3.3 | Responsive grid, navigation, forms, cards, dropdowns, modal behavior, and utility classes | Provides an accessible responsive component baseline that is customized by the project stylesheet. |
-| Vanilla JavaScript | Search filter behavior, product artwork movement, dynamic bundle rows, bulk review selection, and delete confirmation | Adds small browser interactions without a JavaScript framework or build process. |
+| Vanilla JavaScript | Search filter behavior, product artwork movement, interactive star ratings, AJAX review updates, dynamic bundle rows, bulk review selection, and delete confirmation | Adds browser interactions without a JavaScript framework or build process. |
 
 The Python project declares Django, RapidFuzz, and Pillow as direct dependencies in `pyproject.toml`. Exact direct and transitive versions are recorded in `uv.lock` and exported to `requirements.txt`. Bootstrap's CSS and JavaScript bundle are loaded from jsDelivr, so the project does not require npm.
 
