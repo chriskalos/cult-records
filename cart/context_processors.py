@@ -2,4 +2,7 @@ from .cart import Cart
 
 
 def cart_summary(request):
-    return {"cart_item_count": Cart(request.session).quantity}
+    cart = Cart(request.session)
+    if cart.quantity:
+        _ = cart.lines
+    return {"cart_item_count": cart.quantity}

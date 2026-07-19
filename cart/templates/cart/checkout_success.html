@@ -1,0 +1,67 @@
+{% extends "home/base.html" %}
+
+{% block title %}Checkout confirmation | Cult Records{% endblock %}
+
+{% block content %}
+    <nav aria-label="Breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'cart:detail' %}">Cart</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Confirmation</li>
+        </ol>
+    </nav>
+
+    {% if order.status == "paid" %}
+        <h1>Payment simulated</h1>
+        <div class="alert alert-success mt-4" role="status">
+            Stripe confirmed this test-mode payment. No real money was transferred.
+        </div>
+    {% else %}
+        <h1>Confirmation pending</h1>
+        <div class="alert alert-danger mt-4" role="alert">
+            {% if confirmation_unavailable %}
+                Stripe could not be reached to confirm this simulated payment. Refresh this page after checking the connection.
+            {% else %}
+                Stripe has not confirmed this simulated payment. Your cart has not been changed.
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <section class="mt-5" aria-labelledby="order-summary-heading">
+        <h2 id="order-summary-heading">Order summary</h2>
+        <p class="text-body-secondary">Order {{ order.pk }}</p>
+        <div class="table-responsive cart-table-wrap">
+            <table class="table align-middle cart-table checkout-order-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Product</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Quantity</th>
+                        <th scope="col">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items.all %}
+                        <tr>
+                            <td>
+                                <strong>{{ item.title }}</strong>
+                                <span class="d-block text-body-secondary">{{ item.artist }} · {{ item.get_product_type_display }}</span>
+                            </td>
+                            <td>{{ item.unit_price|floatformat:2 }}€</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>{{ item.total_price|floatformat:2 }}€</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th scope="row" colspan="3">Total</th>
+                        <td class="fw-bold">{{ order.subtotal|floatformat:2 }}€</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </section>
+
+    <a href="{% url 'home' %}" class="btn btn-primary mt-4">Return to the catalogue</a>
+{% endblock %}

@@ -929,6 +929,16 @@ a:focus-visible {
     top: 1.5rem;
 }
 
+.checkout-notice {
+    border-left: 3px solid var(--cult-red-bright);
+    color: var(--cult-muted);
+    padding-left: 0.85rem;
+}
+
+.checkout-order-table {
+    min-width: 38rem;
+}
+
 .cart-empty {
     max-width: 48rem;
 }

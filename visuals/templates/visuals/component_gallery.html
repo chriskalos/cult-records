@@ -244,6 +244,59 @@
         </nav>
     </section>
 
+    <section class="mb-5" aria-labelledby="commerce-heading">
+        <h2 id="commerce-heading" class="mb-3">Cart and checkout</h2>
+        <div class="row g-4 align-items-start">
+            <div class="col-12 col-lg-7">
+                <div class="table-responsive cart-table-wrap">
+                    <table class="table align-middle cart-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Product</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Quantity</th>
+                                <th scope="col">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <a href="#" class="cart-product-link">Victory</a>
+                                    <span class="d-block text-body-secondary">Madeon · LP</span>
+                                </td>
+                                <td>14.99€</td>
+                                <td>
+                                    <div class="cart-quantity-form">
+                                        <label for="visual-cart-quantity" class="visually-hidden">Quantity of Victory</label>
+                                        <input id="visual-cart-quantity" type="number" min="1" max="99" value="2" class="form-control">
+                                        <button type="button" class="btn btn-secondary">Update</button>
+                                    </div>
+                                </td>
+                                <td>29.98€</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-12 col-lg-5">
+                <aside class="card cart-summary" aria-labelledby="visual-cart-summary-heading">
+                    <div class="card-body">
+                        <h3 id="visual-cart-summary-heading">Summary</h3>
+                        <dl class="d-flex justify-content-between gap-3 mb-4">
+                            <dt>Subtotal (2 items)</dt>
+                            <dd class="mb-0 fw-bold">29.98€</dd>
+                        </dl>
+                        <div class="checkout-notice mb-3">
+                            <strong class="d-block">Stripe test mode</strong>
+                            <span>No real payment will be taken.</span>
+                        </div>
+                        <button type="button" class="btn btn-primary w-100">Simulated checkout</button>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </section>
+
     <section aria-labelledby="overlay-heading">
         <h2 id="overlay-heading" class="mb-3">Overlay</h2>
         <p>Use the modal to review elevated surfaces, focus treatment, and close controls.</p>

@@ -23,7 +23,7 @@
                                 <th scope="col">Price</th>
                                 <th scope="col">Quantity</th>
                                 <th scope="col">Total</th>
-                                <th scope="col"><span class="visually-hidden">Remove</span></th>
+                                <th scope="col">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -74,7 +74,18 @@
                             <dt>Subtotal ({{ cart.quantity }} item{{ cart.quantity|pluralize }})</dt>
                             <dd class="mb-0 fw-bold">{{ cart.subtotal|floatformat:2 }}€</dd>
                         </dl>
-                        <button type="button" class="btn btn-primary w-100" disabled>Simulated checkout</button>
+                        <div class="checkout-notice mb-3">
+                            <strong class="d-block">Stripe test mode</strong>
+                            {% if stripe_test_mode_ready %}
+                                <span>No real payment will be taken.</span>
+                            {% else %}
+                                <span>A Stripe test secret key is required before checkout.</span>
+                            {% endif %}
+                        </div>
+                        <form action="{% url 'cart:checkout_start' %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary w-100" {% if not stripe_test_mode_ready %}disabled{% endif %}>Simulated checkout</button>
+                        </form>
                     </div>
                 </aside>
             </div>

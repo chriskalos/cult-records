@@ -57,6 +57,17 @@ class Cart:
         self._quantities.clear()
         self._save()
 
+    def remove_purchased_quantities(self, purchased_quantities):
+        for product_id, purchased_quantity in purchased_quantities.items():
+            product_id = str(product_id)
+            current_quantity = self._quantities.get(product_id, 0)
+            remaining_quantity = current_quantity - purchased_quantity
+            if remaining_quantity > 0:
+                self._quantities[product_id] = remaining_quantity
+            else:
+                self._quantities.pop(product_id, None)
+        self._save()
+
     @property
     def lines(self):
         products = Product.objects.public().filter(pk__in=self._quantities)
