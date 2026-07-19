@@ -6,6 +6,8 @@ from django.db import transaction
 from django.urls import reverse
 from django.utils import timezone
 
+from ham.services import grant_enlightenment_for_order
+
 from .models import Order, OrderItem
 
 
@@ -134,6 +136,7 @@ def confirm_paid_order(checkout_session):
             )
         )
 
+    grant_enlightenment_for_order(order)
     return order
 
 

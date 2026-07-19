@@ -34,6 +34,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'admin_panel',
     'cart',
+    'ham',
     'home',
     'product_page',
     'search',
@@ -70,6 +71,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'admin_panel.context_processors.admin_capabilities',
                 'cart.context_processors.cart_summary',
+                'ham.context_processors.ham_clearance',
             ],
         },
     },
