@@ -184,7 +184,11 @@
     if (window.L) {
         mapNode.replaceChildren();
         map = window.L.map(mapNode, {
+            bounceAtZoomLimits: false,
             center: [18, 10],
+            inertia: false,
+            maxBounds: [[-85, -180], [85, 180]],
+            maxBoundsViscosity: 1,
             zoom: 2,
             minZoom: 2,
             maxZoom: 16,

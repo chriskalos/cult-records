@@ -262,7 +262,7 @@
     background:
         linear-gradient(rgba(120, 13, 25, 0.14), rgba(8, 8, 9, 0.32)),
         var(--cult-black);
-    height: 46rem;
+    height: 32rem;
     overflow: hidden;
     position: relative;
     width: 100%;
@@ -365,7 +365,7 @@
 }
 
 .ham-dossier {
-    height: calc(46rem + 2.6rem);
+    height: calc(32rem + 2.6rem);
     overflow-y: auto;
 }
 
@@ -739,6 +739,10 @@
         grid-template-columns: minmax(0, 1fr);
     }
 
+    .ham-map {
+        height: clamp(26rem, 56vw, 32rem);
+    }
+
     .ham-dossier {
         display: grid;
         grid-template-columns: minmax(15rem, 0.75fr) minmax(0, 1.25fr);
@@ -765,7 +769,7 @@
     }
 
     .ham-map {
-        height: 31rem;
+        height: 25rem;
     }
 
     .ham-dossier {
@@ -806,7 +810,7 @@
     }
 
     .ham-map {
-        height: 26rem;
+        height: 21rem;
     }
 
     .ham-facts > div {
