@@ -9,7 +9,10 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 - A responsive catalogue presents products as CD or LP packaging with artwork, artist, title, format, description, genre, and price information.
 - Every product links to a detail page with an optional release date, long description, and ordered track list.
 - CD and LP artwork uses CSS-based packaging geometry and subtle pointer-driven movement. The interaction is disabled for touch input and when the browser reports a reduced-motion preference.
-- Product IDs are manually assigned uppercase alphanumeric codes. The catalogue supports LP, CD, bundle, and merchandise product types.
+- Product IDs are manually assigned uppercase alphanumeric codes. LP, CD, Bundle, and Merch are controlled product categories rather than free-text values.
+- Product artwork can use existing static catalogue assets or uploaded JPEG, PNG, and WebP files. Uploaded files are validated as images and limited to 8 MB.
+- Hidden products are removed from the home page, search results, and direct public product URLs.
+- Bundle pages list their component products, quantities, formats, and individual prices.
 
 ### Search and filtering
 
@@ -33,17 +36,27 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 
 - The custom panel is available at `/admin/` and does not use Django's built-in admin interface.
 - Anonymous visitors are redirected to sign in, regular users receive no panel access, and every panel route applies its role check on the server.
-- The dashboard foundation shows live product, account, and review-queue counts, recent catalogue data, recent users for administrators, and a reserved purchase metric for the future simulated purchase system.
+- The dashboard shows live catalogue, visibility, account, and review-state totals; catalogue health; the pending moderation queue; recent administrative activity; and recent users for administrators.
+- A reserved dashboard module defines the future simulated purchase overview without connecting payment processing.
 - Role-aware navigation exposes only the sections available to the current administrator or editor.
 - The responsive admin shell uses a separate dark blueprint identity with a desktop sidebar and a mobile off-canvas menu.
 - `/admin/visuals/` provides the review surface for admin colors, typography, buttons, forms, badges, tables, empty states, and confirmation dialogs.
-- User, product, bundle, review, and activity routes currently provide protected implementation placeholders while their management workflows are built in focused slices.
+- Administrators can search, filter, add, edit, deactivate, change the fixed application role of, replace the password of, and permanently delete users. Administrators cannot change their own role, deactivate themselves, or delete themselves.
+- Product management supports searching, filtering, sorting, creation, editing, image uploads, visibility changes, supplementary product-page fields, and permanent deletion. Product IDs become immutable after creation.
+- Editors can edit and hide LP, CD, and merchandise products. They cannot add products, delete products, or view and manage bundle records.
+- The bundle builder creates an independently priced product from ordered quantities of existing LP, CD, and merchandise products. Nested bundles are rejected in both forms and the data model.
+- A component product that belongs to a bundle cannot be deleted by itself. Administrators may explicitly delete every related bundle in the same confirmed action, or cancel the deletion.
+- Review moderation provides searchable pending, approved, and rejected queues, individual decisions, and bulk approval or rejection. Editors and administrators can moderate; only administrators can permanently delete reviews.
+- Every successful management mutation records the actor, action, target, summary, timestamp, and relevant metadata in an audit trail. Administrators see all activity, while Editors see their own actions.
+- Permanent user, product, bundle, and review deletion requires typed confirmation where an identifier is available. There is no soft-delete state.
 
 ### Ratings and reviews
 
 - Product pages display the average rating, review count, and approved reviews in newest-first order.
 - Authenticated users can submit one review per product with a rating from one to five and an optional comment of up to 2,000 characters.
 - Review authors can edit or delete their own reviews.
+- New and edited reviews return to pending moderation. The user receives a confirmation that the review will become public after approval.
+- Rejected reviews remain visible to their author with an optional editorial reason. Editing a rejected or approved review clears its previous moderation decision and returns it to pending.
 - A small JavaScript enhancement asks for confirmation before a review is deleted.
 
 ## Technologies
@@ -54,12 +67,13 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 | Django 6.0 | Routing, views, templates, forms, authentication, authorization, ORM, migrations, and testing | Supplies an integrated web framework with built-in security and data-management features. |
 | SQLite | Development database | Keeps local setup simple while supporting Django's relational models and migrations. |
 | RapidFuzz | Search relevance scoring | Provides efficient fuzzy string comparison for misspelling-tolerant catalogue search. |
+| Pillow | Uploaded image validation | Lets Django verify and store real catalogue artwork uploads. |
 | HTML and Django templates | Page structure and server-rendered content | Produce semantic pages while allowing shared layouts and reusable components. |
 | CSS | Visual identity, responsive refinements, and CD/LP artwork presentation | Applies the Cult Records design system and packaging effects without an external 3D library. |
 | Bootstrap 5.3.3 | Responsive grid, navigation, forms, cards, dropdowns, modal behavior, and utility classes | Provides an accessible responsive component baseline that is customized by the project stylesheet. |
-| Vanilla JavaScript | Search filter behavior, product artwork movement, and delete confirmation | Adds small browser interactions without a JavaScript framework or build process. |
+| Vanilla JavaScript | Search filter behavior, product artwork movement, dynamic bundle rows, bulk review selection, and delete confirmation | Adds small browser interactions without a JavaScript framework or build process. |
 
-The Python project declares Django and RapidFuzz as its direct dependencies in `pyproject.toml`. Exact direct and transitive versions are recorded in `uv.lock` and exported to `requirements.txt`. Bootstrap's CSS and JavaScript bundle are loaded from jsDelivr, so the project does not require npm.
+The Python project declares Django, RapidFuzz, and Pillow as direct dependencies in `pyproject.toml`. Exact direct and transitive versions are recorded in `uv.lock` and exported to `requirements.txt`. Bootstrap's CSS and JavaScript bundle are loaded from jsDelivr, so the project does not require npm.
 
 ## Visual design and accessibility
 
@@ -74,17 +88,19 @@ Bootstrap supplies the responsive foundation, while the global stylesheet applie
 - CSRF middleware and form tokens protect state-changing form submissions.
 - Authentication middleware, `login_required` checks, and server-side ownership queries protect account and review actions.
 - Custom admin-panel access checks enforce administrator and editor capabilities on every protected route.
+- Admin forms expose fixed application roles instead of Django permission records. Administrators cannot remove their own Admin role or deactivate their own account.
 - Passwords use Django's password hashing system and configured password validators.
-- Review ratings, comment length, product IDs, prices, and track data are validated on the server.
+- Review ratings, comment length, moderation state, product IDs, prices, image files, bundle components, quantities, ordering, and track data are validated on the server.
 - Review ownership is enforced when editing or deleting, and database constraints allow only one review per user and product.
-- Sign-out and review mutations accept POST requests rather than GET requests.
+- Sign-out, visibility changes, bulk moderation, and public review mutations accept POST requests rather than GET requests.
+- Uploaded filenames are generated by the application and stored below the configured media root rather than trusting a client path.
 
 ## Project structure
 
 | Django app | Responsibility |
 | --- | --- |
-| `admin_panel` | Custom administration dashboard, access controls, blueprint interface, and management workflows |
-| `home` | Catalogue data, home page, shared templates, global styles, and product artwork presentation |
+| `admin_panel` | Custom administration dashboard, access controls, audit trail, blueprint interface, and user, catalogue, bundle, and review workflows |
+| `home` | Catalogue and bundle data, uploaded artwork, home page, shared templates, global styles, and product artwork presentation |
 | `search` | Search form, catalogue filters, fuzzy relevance scoring, and filter interactions |
 | `product_page` | Product details, supplementary product information, ratings, and reviews |
 | `accounts` | Registration, authentication, dashboard, profile editing, roles, and seeded demonstration users |
