@@ -191,10 +191,14 @@
             scrollWheelZoom: false,
             worldCopyJump: true,
         });
-        window.L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            maxZoom: 19,
-        }).addTo(map);
+        if (window.L.maplibreGL) {
+            window.L.maplibreGL({
+                style: "https://tiles.openfreemap.org/styles/dark",
+            }).addTo(map);
+            map.attributionControl.addAttribution(
+                '<a href="https://openfreemap.org">OpenFreeMap</a> &copy; OpenMapTiles Data from <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            );
+        }
 
         assets.forEach((asset) => {
             const icon = window.L.divIcon({

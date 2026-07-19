@@ -10,6 +10,7 @@
         integrity="sha256-p4NxAoJBhIINfQ3ynhUhXg2V+9iiP4AIr6FktUnu7s0="
         crossorigin=""
     >
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css">
     <link href="{% static 'ham/css/ham.css' %}?v=1" rel="stylesheet">
 {% endblock %}
 
@@ -202,5 +203,7 @@
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
         crossorigin=""
     ></script>
-    <script src="{% static 'ham/js/ham.js' %}?v=1"></script>
+    <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
+    <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet/leaflet-maplibre-gl.js"></script>
+    <script src="{% static 'ham/js/ham.js' %}?v=2"></script>
 {% endblock %}

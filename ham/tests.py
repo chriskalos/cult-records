@@ -1,4 +1,5 @@
 from decimal import Decimal
+from pathlib import Path
 
 from django.contrib.auth import get_user_model
 from django.contrib.staticfiles import finders
@@ -170,6 +171,11 @@ class HamAccessTests(TestCase):
         self.assertContains(response, "Nobody is in charge.")
         self.assertContains(response, "HAM-ATH-042")
         self.assertContains(response, "The Spoon Protocol")
+        self.assertContains(response, "maplibre-gl-leaflet")
+
+        map_script = Path(finders.find("ham/js/ham.js")).read_text()
+        self.assertIn("tiles.openfreemap.org/styles/dark", map_script)
+        self.assertNotIn("tile.openstreetmap.org", map_script)
 
     def test_asset_query_selects_a_visible_dossier(self):
         HamClearance.objects.create(user=self.user, is_enlightened=True)
