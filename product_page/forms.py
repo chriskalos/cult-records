@@ -7,7 +7,7 @@ class ReviewForm(forms.ModelForm):
     rating = forms.TypedChoiceField(
         choices=[(rating, f"{rating} star{'s' if rating != 1 else ''}") for rating in range(1, 6)],
         coerce=int,
-        widget=forms.RadioSelect(attrs={"class": "form-check-input"}),
+        widget=forms.RadioSelect(attrs={"class": "review-rating__input"}),
     )
     comment = forms.CharField(
         required=False,

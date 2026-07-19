@@ -1,0 +1,22 @@
+<fieldset class="mb-3">
+    <legend class="form-label fs-6">{{ rating_field.label }}</legend>
+    <div class="review-rating" data-star-rating>
+        {% for option in rating_field %}
+            <span class="review-rating__choice">
+                {{ option.tag }}
+                <label class="review-rating__label" for="{{ option.id_for_label }}">
+                    <svg class="review-star" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M12 2.6l2.84 5.76 6.36.92-4.6 4.48 1.09 6.33L12 17.1l-5.69 2.99 1.09-6.33-4.6-4.48 6.36-.92L12 2.6Z"></path>
+                    </svg>
+                    <span class="visually-hidden">{{ option.choice_label }}</span>
+                </label>
+            </span>
+        {% endfor %}
+    </div>
+    <p class="review-rating__value form-text mb-0" data-rating-value aria-live="polite">
+        {% if rating_field.value %}{{ rating_field.value }} out of 5 stars selected{% else %}Choose a rating from 1 to 5 stars{% endif %}
+    </p>
+    {% for error in rating_field.errors %}
+        <div class="text-danger mt-1">{{ error }}</div>
+    {% endfor %}
+</fieldset>

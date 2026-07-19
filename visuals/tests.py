@@ -32,6 +32,9 @@ class ComponentGalleryTests(TestCase):
         self.assertContains(response, "css/style.css")
         self.assertContains(response, "Account")
         self.assertContains(response, 'data-bs-toggle="dropdown"')
+        self.assertContains(response, "data-star-rating")
+        self.assertContains(response, "4 out of 5 stars selected")
+        self.assertContains(response, "product_page/js/reviews.js")
         self.assertContains(response, "#780D19")
         self.assertContains(
             response,

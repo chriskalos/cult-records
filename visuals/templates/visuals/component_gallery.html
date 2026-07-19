@@ -1,4 +1,5 @@
 {% extends "home/base.html" %}
+{% load static %}
 
 {% block title %}Visual test | Cult Records{% endblock %}
 
@@ -164,6 +165,9 @@
                 <label for="visual-comment" class="form-label">Comment</label>
                 <textarea id="visual-comment" class="form-control" rows="3" placeholder="Share your thoughts"></textarea>
             </div>
+            <div class="col-12">
+                {% include "product_page/includes/rating_input.html" with rating_field=review_form.rating %}
+            </div>
             <fieldset class="col-12 col-md-6">
                 <legend class="h6">Format</legend>
                 <div class="form-check">
@@ -261,4 +265,8 @@
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'product_page/js/reviews.js' %}"></script>
 {% endblock %}

@@ -303,6 +303,18 @@ class ReviewPageTests(TestCase):
             fetch_redirect_response=False,
         )
 
+    def test_authenticated_review_form_uses_the_star_rating_control(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(self.detail_url)
+
+        self.assertContains(response, "data-star-rating")
+        self.assertContains(response, "review-rating__input", count=5)
+        self.assertContains(response, "review-rating__label", count=5)
+        self.assertContains(response, "Choose a rating from 1 to 5 stars")
+        self.assertContains(response, "data-review-form")
+        self.assertNotContains(response, "form-check form-check-inline")
+
     def test_anonymous_user_cannot_submit_a_review(self):
         response = self.client.post(
             self.create_url,
@@ -477,6 +489,7 @@ class ReviewPageTests(TestCase):
         response = self.client.get(self.detail_url, {"edit_review": "1"})
 
         self.assertContains(response, "Original review.")
+        self.assertContains(response, "4 out of 5 stars selected")
         self.assertContains(response, "Save changes")
         self.assertContains(response, "Cancel")
         self.assertContains(response, "Delete review")
