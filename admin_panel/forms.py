@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth.password_validation import validate_password
 from django.core.validators import MinValueValidator
+from django.db import transaction
 from django.forms import BaseInlineFormSet, inlineformset_factory
 
 from accounts.roles import UserRole, role_for_user, set_user_role
@@ -240,6 +241,12 @@ class AdminProductForm(forms.ModelForm):
         }
 
     def __init__(self, *args, allow_bundle=False, **kwargs):
+        instance = kwargs.get("instance")
+        self._original_uploaded_image_name = (
+            instance.uploaded_image.name
+            if instance and instance.uploaded_image
+            else ""
+        )
         super().__init__(*args, **kwargs)
         self.allow_bundle = allow_bundle
         if self.instance and self.instance.pk:
@@ -275,7 +282,7 @@ class AdminProductForm(forms.ModelForm):
 
     def clean_uploaded_image(self):
         image = self.cleaned_data.get("uploaded_image")
-        if not image:
+        if not image or "uploaded_image" not in self.changed_data:
             return image
         if image.size > 8 * 1024 * 1024:
             raise forms.ValidationError("Upload an image no larger than 8 MB.")
@@ -293,13 +300,36 @@ class AdminProductForm(forms.ModelForm):
             raise forms.ValidationError("Each track name must be 255 characters or fewer.")
         return tracks
 
+    def clean(self):
+        cleaned_data = super().clean()
+        if (
+            "uploaded_image" in self.changed_data
+            and cleaned_data.get("uploaded_image")
+            and cleaned_data.get("remove_uploaded_image")
+        ):
+            self.add_error(
+                "remove_uploaded_image",
+                "Choose a replacement image or remove the current image, not both.",
+            )
+        return cleaned_data
+
     def save(self, commit=True):
         product = super().save(commit=False)
-        if self.cleaned_data.get("remove_uploaded_image") and product.uploaded_image:
-            product.uploaded_image.delete(save=False)
+        if self.cleaned_data.get("remove_uploaded_image"):
             product.uploaded_image = ""
         if commit:
             product.save()
+            current_image_name = (
+                product.uploaded_image.name if product.uploaded_image else ""
+            )
+            if (
+                self._original_uploaded_image_name
+                and self._original_uploaded_image_name != current_image_name
+            ):
+                storage = Product._meta.get_field("uploaded_image").storage
+                transaction.on_commit(
+                    lambda name=self._original_uploaded_image_name: storage.delete(name)
+                )
             page, _ = ProductPage.objects.get_or_create(product=product)
             page.long_description = self.cleaned_data["long_description"]
             page.release_date = self.cleaned_data["release_date"]

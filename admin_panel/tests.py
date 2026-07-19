@@ -580,6 +580,83 @@ class AdminProductManagementTests(TestCase):
         self.assertContains(response, "valid image")
         self.assertFalse(Product.objects.filter(product_id="ADMINTESTCD").exists())
 
+    def test_replacing_an_uploaded_image_removes_the_old_file_after_commit(self):
+        self.client.force_login(self.admin)
+        create_data = self._product_data()
+        create_data["uploaded_image"] = self._image_upload("original.png")
+        self.client.post(reverse("admin_panel:product_create"), create_data)
+        product = Product.objects.get(pk="ADMINTESTCD")
+        storage = product.uploaded_image.storage
+        original_name = product.uploaded_image.name
+        self.assertTrue(storage.exists(original_name))
+
+        edit_data = self._product_data(product_id=product.pk)
+        edit_data["uploaded_image"] = self._image_upload("replacement.png")
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.post(
+                reverse("admin_panel:product_edit", args=[product.pk]),
+                edit_data,
+            )
+
+        product.refresh_from_db()
+        self.assertRedirects(
+            response,
+            reverse("admin_panel:product_edit", args=[product.pk]),
+        )
+        self.assertNotEqual(product.uploaded_image.name, original_name)
+        self.assertFalse(storage.exists(original_name))
+        self.assertTrue(storage.exists(product.uploaded_image.name))
+
+    def test_removing_an_uploaded_image_deletes_its_file_after_commit(self):
+        self.client.force_login(self.admin)
+        create_data = self._product_data()
+        create_data["uploaded_image"] = self._image_upload()
+        self.client.post(reverse("admin_panel:product_create"), create_data)
+        product = Product.objects.get(pk="ADMINTESTCD")
+        storage = product.uploaded_image.storage
+        original_name = product.uploaded_image.name
+
+        edit_data = self._product_data(
+            product_id=product.pk,
+            remove_uploaded_image="on",
+        )
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.post(
+                reverse("admin_panel:product_edit", args=[product.pk]),
+                edit_data,
+            )
+
+        product.refresh_from_db()
+        self.assertRedirects(
+            response,
+            reverse("admin_panel:product_edit", args=[product.pk]),
+        )
+        self.assertFalse(product.uploaded_image)
+        self.assertFalse(storage.exists(original_name))
+
+    def test_image_form_rejects_replacement_and_removal_together(self):
+        self.client.force_login(self.admin)
+        create_data = self._product_data()
+        create_data["uploaded_image"] = self._image_upload("original.png")
+        self.client.post(reverse("admin_panel:product_create"), create_data)
+        product = Product.objects.get(pk="ADMINTESTCD")
+        original_name = product.uploaded_image.name
+
+        edit_data = self._product_data(
+            product_id=product.pk,
+            remove_uploaded_image="on",
+        )
+        edit_data["uploaded_image"] = self._image_upload("replacement.png")
+        response = self.client.post(
+            reverse("admin_panel:product_edit", args=[product.pk]),
+            edit_data,
+        )
+
+        product.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Choose a replacement image or remove")
+        self.assertEqual(product.uploaded_image.name, original_name)
+
     def test_editor_can_edit_and_hide_existing_product_but_cannot_change_its_id(self):
         self.client.force_login(self.editor)
         edit_data = self._product_data(
