@@ -39,6 +39,10 @@ class ComponentGalleryTests(TestCase):
         self.assertContains(response, "Cart and checkout")
         self.assertContains(response, "Secure checkout")
         self.assertContains(response, "You will continue to Stripe")
+        self.assertContains(response, "HAM interface extension")
+        self.assertContains(response, "Example HAM network summary")
+        self.assertContains(response, "Furniture remains evasive")
+        self.assertContains(response, "ham/css/ham.css")
         self.assertContains(
             response,
             "Bringing you the best of music at the best price... If you're willing to pay it.",

@@ -3,6 +3,10 @@
 
 {% block title %}Visual test | Cult Records{% endblock %}
 
+{% block styles %}
+    <link href="{% static 'ham/css/ham.css' %}?v=1" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
     <div class="mb-5">
         <p class="text-body-secondary mb-2">Cult Records visual identity</p>
@@ -242,6 +246,56 @@
                 <li class="page-item"><a class="page-link" href="#">Next</a></li>
             </ul>
         </nav>
+    </section>
+
+    <section class="mb-5" aria-labelledby="ham-components-heading">
+        <h2 id="ham-components-heading" class="mb-3">HAM interface extension</h2>
+        <p class="section-intro">
+            Representative dense data surfaces for the concealed network interface. The working map and private records remain on the protected page.
+        </p>
+        <div class="ham-stat-grid mb-4" aria-label="Example HAM network summary">
+            <article><span>Known assets</span><strong>12</strong></article>
+            <article><span>Reporting normally</span><strong>6</strong></article>
+            <article><span>Existence unclear</span><strong>3</strong></article>
+            <article><span>Fax machines</span><strong>3</strong></article>
+        </div>
+        <div class="ham-secondary-grid">
+            <div class="ham-workspace">
+                <div class="ham-section-heading">
+                    <div>
+                        <p class="ham-eyebrow">Example asset directory</p>
+                        <h3 class="mb-0">Network nodes</h3>
+                    </div>
+                    <span class="ham-count">Positions approximate</span>
+                </div>
+                <div class="ham-directory">
+                    <a href="#ham-components-heading" class="ham-directory-item active" aria-current="true">
+                        <img src="{% static 'ham/images/assets/adrian-voss.webp' %}" width="72" height="72" alt="">
+                        <span><strong>Latchkey</strong><small>HAM-ATH-042 · Athens</small></span>
+                    </a>
+                    <a href="#ham-components-heading" class="ham-directory-item">
+                        <img src="{% static 'ham/images/assets/edith-pike.webp' %}" width="72" height="72" alt="">
+                        <span><strong>Tuesday</strong><small>HAM-VAN-001 · Vancouver</small></span>
+                    </a>
+                </div>
+            </div>
+            <div class="ham-panel">
+                <div class="ham-section-heading">
+                    <div>
+                        <p class="ham-eyebrow">Example peer request</p>
+                        <h3 class="mb-0">Directive</h3>
+                    </div>
+                </div>
+                <div class="ham-directive-list">
+                    <article>
+                        <div><span>DIR-004CM</span><span>Important</span></div>
+                        <h3>Move the nearest unoccupied chair four centimetres to the left.</h3>
+                        <p>No reason has achieved network consensus. This is not the same as having no reason.</p>
+                        <small>Furniture remains evasive.</small>
+                    </article>
+                </div>
+            </div>
+        </div>
     </section>
 
     <section class="mb-5" aria-labelledby="commerce-heading">
