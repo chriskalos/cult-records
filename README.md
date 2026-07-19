@@ -75,6 +75,18 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 - Users can mark an order as delivered. An in-page confirmation modal explains that the order will disappear from the dashboard, and accepting it permanently deletes the order.
 - The custom admin dashboard reports sandbox order counts, revenue, and average order value.
 
+### Human Assets Manager
+
+- Every account begins without HAM access. A signed-in account becomes enlightened after a verified paid order contains exactly 42 copies of `chriskalos dot xyz` by cursed locale, product code `CLXYZCD`.
+- Other products may be present in the qualifying order, but quantities do not accumulate across separate orders. Anonymous, pending, expired, cancelled, and unpaid orders do not grant access.
+- Payment confirmation grants the capability idempotently, so repeated Stripe success-page checks or webhook deliveries preserve the original enlightenment record.
+- Enlightened accounts receive a `HAM` navigation link directly after Home. Anonymous visitors and authenticated users without clearance receive a normal 404 response from the protected route.
+- The Human Assets Manager presents a decentralized network rather than a personal operator dashboard. It includes a world map, status filters, a keyboard-accessible asset directory, detailed dossiers, observations, peer directives, and archive records.
+- Twelve fictional adult human assets are seeded through a data migration with approximate coordinates, network roles, civilian covers, status, consensus, exposure, notes, and irregularities.
+- Profile portraits were sourced once from This Person Does Not Exist, screened to exclude children and age-ambiguous faces, converted to local WebP files, and stripped of metadata. The application never requests portraits from the service in a visitor's browser.
+- The map uses darkened OpenStreetMap tiles through Leaflet. OpenStreetMap attribution remains visible, and the server-rendered directory and dossier links continue to work if JavaScript or the map library is unavailable.
+- The HAM interface keeps the shared Cult Records palette, typefaces, square geometry, visible focus, and shadow-free surfaces. Its denser grid, serial numbers, redactions, and deadpan administrative humor remain isolated from the public catalogue identity.
+
 ## Technologies
 
 | Technology | Use in the project | Reason for use |
@@ -88,15 +100,17 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 | HTML and Django templates | Page structure and server-rendered content | Produce semantic pages while allowing shared layouts and reusable components. |
 | CSS | Visual identity, responsive refinements, and CD/LP artwork presentation | Applies the Cult Records design system and packaging effects without an external 3D library. |
 | Bootstrap 5.3.3 | Responsive grid, navigation, forms, cards, dropdowns, modal behavior, and utility classes | Provides an accessible responsive component baseline that is customized by the project stylesheet. |
-| Vanilla JavaScript | Search filter behavior, product artwork movement, interactive star ratings, AJAX review updates, dynamic bundle rows, bulk review selection, and delete confirmation | Adds browser interactions without a JavaScript framework or build process. |
+| Leaflet 1.9.4 | HAM world map, markers, tooltips, keyboard navigation, zooming, and panning | Provides a small mobile-friendly map interface without adding a JavaScript build process. |
+| OpenStreetMap | HAM map tiles and geographic context | Supplies open map data with visible contributor attribution. |
+| Vanilla JavaScript | Search filter behavior, product artwork movement, interactive star ratings, AJAX review updates, dynamic bundle rows, bulk review selection, delete confirmation, HAM dossier selection, and HAM map filtering | Adds browser interactions without a JavaScript framework or build process. |
 
 The Python project declares Django, RapidFuzz, Pillow, and Stripe as direct dependencies in `pyproject.toml`. Exact direct and transitive versions are recorded in `uv.lock` and exported to `requirements.txt`. Bootstrap's CSS and JavaScript bundle are loaded from jsDelivr, so the project does not require npm.
 
 ## Visual design and accessibility
 
-The public interface uses a fixed dark theme built around near-black, Oxblood, red, and Bone colors. The admin panel uses a separate dark blueprint palette so management work is clearly distinguished from the storefront. Instrument Serif is used for headings and Nunito Sans for body and interface text. Both open-source typefaces are loaded from Google Fonts with local fallback families.
+The public interface uses a fixed dark theme built around near-black, Oxblood, red, and Bone colors. The admin panel uses a separate dark blueprint palette so management work is clearly distinguished from the storefront. HAM extends the public palette with a denser square grid and compact data treatments. Instrument Serif is used for headings and Nunito Sans for body and interface text. Both open-source typefaces are loaded from Google Fonts with local fallback families.
 
-Bootstrap supplies the responsive foundation, while the global stylesheet applies square controls, visible keyboard focus outlines, high-contrast text, and shadow-free surfaces. Layouts collapse for narrow screens, interactive artwork respects reduced-motion settings, and shared templates provide consistent navigation and footer landmarks. The `/visuals/` route provides a component gallery for typography, colors, controls, forms, tables, pagination, modal content, product cards, and the shared page chrome.
+Bootstrap supplies the responsive foundation, while the global stylesheet applies square controls, visible keyboard focus outlines, high-contrast text, and shadow-free surfaces. Layouts collapse for narrow screens, interactive artwork respects reduced-motion settings, and shared templates provide consistent navigation and footer landmarks. The `/visuals/` route provides a component gallery for typography, colors, controls, forms, tables, pagination, modal content, product cards, HAM data surfaces, and the shared page chrome.
 
 ## Security
 
@@ -105,6 +119,7 @@ Bootstrap supplies the responsive foundation, while the global stylesheet applie
 - CSRF middleware and form tokens protect state-changing form submissions.
 - Authentication middleware, `login_required` checks, and server-side ownership queries protect account and review actions.
 - Custom admin-panel access checks enforce administrator and editor capabilities on every protected route.
+- HAM uses a separate server-side clearance check. The navigation does not grant access, and unauthorized requests receive a 404 without revealing that the route exists.
 - Admin forms expose fixed application roles instead of Django permission records. Administrators cannot remove their own Admin role or deactivate their own account.
 - Passwords use Django's password hashing system and configured password validators.
 - Review ratings, comment length, moderation state, product IDs, prices, image files, bundle components, quantities, ordering, and track data are validated on the server.
@@ -126,6 +141,7 @@ Bootstrap supplies the responsive foundation, while the global stylesheet applie
 | `product_page` | Product details, supplementary product information, ratings, and reviews |
 | `accounts` | Registration, authentication, dashboard, profile editing, roles, and seeded demonstration users |
 | `cart` | Session-backed shopping cart, order snapshots, Stripe sandbox Checkout, payment confirmation, and webhook handling |
+| `ham` | Enlightenment capability, protected Human Assets Manager, fictional network records, OpenStreetMap interface, directives, observations, and archive |
 | `visuals` | Reusable component and visual identity gallery |
 | `cultrecords` | Project settings and root URL configuration |
 
