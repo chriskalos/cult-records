@@ -11,116 +11,81 @@
         crossorigin=""
     >
     <link rel="stylesheet" href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css">
-    <link href="{% static 'ham/css/ham.css' %}?v=3" rel="stylesheet">
+    <link href="{% static 'ham/css/ham.css' %}?v=4" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
-    <div class="ham-shell ham-overdrive">
-        <div class="ham-cinematic-frame" aria-hidden="true">
-            <span class="ham-cinematic-rail ham-cinematic-rail-left"></span>
-            <span class="ham-cinematic-rail ham-cinematic-rail-right"></span>
-            <span class="ham-screen-scanlines"></span>
-        </div>
-
+    <div class="ham-shell">
         <header class="ham-intro" aria-labelledby="ham-title">
             <div class="ham-intro-copy">
-                <p class="ham-eyebrow">HAM // Human Assets Manager // Cinema protocol engaged</p>
-                <h1 id="ham-title" aria-label="Nobody is in charge.">
-                    <span class="ham-title-kicker" aria-hidden="true">Nobody is</span><span aria-hidden="true"> in charge.</span>
-                </h1>
+                <p class="ham-eyebrow">HAM // Human Assets Manager // After-hours operations</p>
+                <h1 id="ham-title">The night shift is permanent.</h1>
                 <p class="lead mb-0">
-                    A decentralized register of useful people, unresolved incidents, and shared administrative dread.
+                    An after-hours registry of human intermediaries maintained by a decentralized vampire network with impeccable distribution.
                 </p>
-                <button
-                    class="ham-overdrive-toggle"
-                    type="button"
-                    data-ham-overdrive-toggle
-                    aria-pressed="true"
-                >Reduce theatrical output</button>
             </div>
-            <div class="ham-radar-console" aria-hidden="true">
-                <div class="ham-radar-disc">
-                    <span></span><span></span><span></span>
-                    <strong>HAM</strong>
-                </div>
-                <p>Orbital paperwork array</p>
-            </div>
-            <div class="ham-intro-status">
+            <div class="ham-intro-aside">
                 <p class="ham-network-state">
                     <span aria-hidden="true"></span>
-                    Network consensus: functional enough
+                    The network is awake
                 </p>
-                <p class="ham-threat-state"><span>Threat posture</span><strong>DEFCON MEATLOAF</strong></p>
-                <p class="ham-live-clock"><span>Consensus clock</span><time data-ham-clock>--:--:-- UTC</time></p>
-            </div>
-            <div class="ham-fireline" aria-hidden="true">
-                {% for _ in "123456789012345"|make_list %}<span style="--flame-index: {{ forloop.counter }}"></span>{% endfor %}
+                <dl class="ham-night-status">
+                    <div><dt>Dawn exposure</dt><dd>Avoidable</dd></div>
+                    <div><dt>Label operations</dt><dd>On schedule</dd></div>
+                    <div><dt>Dress code</dt><dd>Mostly formal</dd></div>
+                </dl>
             </div>
         </header>
 
-        <div class="ham-broadcast-strip" role="status" aria-label="Priority broadcast: the red telephone has denied being a telephone">
-            <div aria-hidden="true">
-                <span>PRIORITY BROADCAST</span>
-                THE RED TELEPHONE HAS DENIED BEING A TELEPHONE
-                <span>CHANNEL 13½</span>
-                ALL DRAMATIC ZOOM LENSES ARE OPERATIONAL
-                <span>PRIORITY BROADCAST</span>
-                THE RED TELEPHONE HAS DENIED BEING A TELEPHONE
-                <span>CHANNEL 13½</span>
-                ALL DRAMATIC ZOOM LENSES ARE OPERATIONAL
-            </div>
-        </div>
+        <aside class="ham-night-memo" aria-label="After-hours memorandum">
+            <span>After-hours memorandum</span>
+            <p>Distribution meeting moved to Crypt B. The room has better acoustics and fewer windows.</p>
+            <small>Filed by Night Operations · Please bring the quarterly figures</small>
+        </aside>
 
         <section class="ham-stat-grid" aria-label="Network summary">
             <article>
                 <span>Known assets</span>
                 <strong>{{ asset_stats.total }}</strong>
-                <small>Portraits facing camera: probable</small>
+                <small>Human, to current knowledge</small>
             </article>
             <article>
                 <span>Reporting normally</span>
                 <strong>{{ asset_stats.active }}</strong>
-                <small>Normal remains under appeal</small>
+                <small>Before first light</small>
             </article>
             <article>
                 <span>Location or existence unclear</span>
                 <strong>{{ asset_stats.uncertain }}</strong>
-                <small>Maps have been notified</small>
+                <small>Do not call reception</small>
             </article>
             <article>
-                <span>Recognized fax machines</span>
+                <span>Test pressings due</span>
                 <strong>3</strong>
-                <small>One is openly hostile</small>
+                <small>Two mastered, one murmuring</small>
             </article>
         </section>
 
-        <section class="ham-situation-deck" aria-label="Live network telemetry">
-            <div class="ham-situation-alert">
-                <p>Current situation</p>
-                <strong>LOUDLY UNCLEAR</strong>
-                <span>All nodes advised to look purposeful near a large glass table.</span>
+        <section class="ham-night-briefing" aria-labelledby="night-briefing-heading">
+            <div>
+                <p class="ham-eyebrow">Night office</p>
+                <h2 id="night-briefing-heading">Operational briefing</h2>
             </div>
-            <div class="ham-telemetry-stack">
-                <div><span>Bureaucratic heat</span><strong>96%</strong><i style="--meter: 96%"></i></div>
-                <div><span>Dramatic tension</span><strong>113%</strong><i style="--meter: 100%"></i></div>
-                <div><span>Goose containment</span><strong>41%</strong><i style="--meter: 41%"></i></div>
-            </div>
-            <div class="ham-waveform" aria-label="Unidentified signal: loud, rhythmic, possibly a photocopier">
-                <p>Unidentified signal // photocopier-adjacent</p>
-                <div aria-hidden="true">
-                    {% for _ in "123456789012345678901234"|make_list %}<span style="--bar-index: {{ forloop.counter }}"></span>{% endfor %}
-                </div>
-            </div>
+            <dl class="ham-night-briefing-grid">
+                <div><dt>Dawn exposure</dt><dd>Low</dd><p>All field work is due before first light.</p></div>
+                <div><dt>Label operations</dt><dd>On schedule</dd><p>Two masters approved. One is cursed only in mono.</p></div>
+                <div><dt>Formalwear</dt><dd>Negotiable</dd><p>Capes remain optional outside board meetings.</p></div>
+            </dl>
         </section>
 
         <section class="ham-workspace" aria-labelledby="network-map-heading">
             <div class="ham-section-heading">
                 <div>
-                    <p class="ham-eyebrow">Distributed observation surface // live // allegedly</p>
+                    <p class="ham-eyebrow">After-hours network // approximate positions</p>
                     <h2 id="network-map-heading">Network map</h2>
                 </div>
                 <div class="ham-map-controls">
-                    <span class="ham-live-chip"><i aria-hidden="true"></i>Satellite theatre live</span>
+                    <span class="ham-night-shift"><i aria-hidden="true"></i>Night registry active</span>
                     <div class="ham-map-filters" aria-label="Filter assets by status">
                         <button class="btn btn-secondary active" type="button" data-ham-filter="all" aria-pressed="true">All nodes</button>
                         <button class="btn btn-secondary" type="button" data-ham-filter="active" aria-pressed="false">Active</button>
@@ -136,13 +101,7 @@
                             <p>Map interface loading. The dossier directory remains available below.</p>
                         </div>
                         <div class="ham-map-hud" aria-hidden="true">
-                            <span class="ham-map-corner ham-map-corner-tl"></span>
-                            <span class="ham-map-corner ham-map-corner-tr"></span>
-                            <span class="ham-map-corner ham-map-corner-bl"></span>
-                            <span class="ham-map-corner ham-map-corner-br"></span>
-                            <span class="ham-map-reticle"></span>
-                            <span class="ham-map-sweep"></span>
-                            <p>GEO-DRAMA ARRAY // 12 plausible signals // accuracy classified as decorative</p>
+                            <p>Locations approximate // last reviewed after sundown</p>
                         </div>
                     </div>
                     <p class="ham-map-notice">Positions are approximate. Accuracy encourages paperwork.</p>
@@ -150,7 +109,7 @@
 
                 {% if selected_asset %}
                     <article id="asset-dossier" class="ham-dossier" aria-live="polite">
-                        <p class="ham-dossier-banner">Dossier acquired // subject probably facing north</p>
+                        <p class="ham-dossier-banner">Human intermediary // confidential file</p>
                         <div class="ham-dossier-image-wrap">
                             <img
                                 id="dossier-portrait"
@@ -284,5 +243,5 @@
     ></script>
     <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
     <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet/leaflet-maplibre-gl.js"></script>
-    <script src="{% static 'ham/js/ham.js' %}?v=5"></script>
+    <script src="{% static 'ham/js/ham.js' %}?v=6"></script>
 {% endblock %}
