@@ -47,8 +47,10 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 - The bundle builder creates an independently priced product from ordered quantities of existing LP, CD, and merchandise products. Nested bundles are rejected in both forms and the data model.
 - A component product that belongs to a bundle cannot be deleted by itself. Administrators may explicitly delete every related bundle in the same confirmed action, or cancel the deletion.
 - Review moderation provides searchable pending, approved, and rejected queues, individual decisions, and bulk approval or rejection. Editors and administrators can moderate; only administrators can permanently delete reviews.
+- Administrators with active HAM enlightenment can search, filter, create, edit, hide, show, and permanently delete Human Asset records. The editor includes approximate coordinates, status, exposure, dossier text, and locally stored portrait uploads.
+- Human Asset management requires both the Admin role and active enlightenment. Editors and ordinary enlightened users remain read-only, and Human Asset audit entries stay hidden from panel users without active enlightenment.
 - Every successful management mutation records the actor, action, target, summary, timestamp, and relevant metadata in an audit trail. Administrators see all activity, while Editors see their own actions.
-- Permanent user, product, bundle, and review deletion requires typed confirmation where an identifier is available. There is no soft-delete state.
+- Permanent user, product, bundle, review, and Human Asset deletion requires typed confirmation where an identifier is available. There is no soft-delete state.
 
 ### Ratings and reviews
 
@@ -84,7 +86,7 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 - The Human Assets Manager presents a decentralized network rather than a personal operator dashboard. It includes a world map, status filters, a keyboard-accessible asset directory, detailed dossiers, observations, peer directives, and archive records.
 - Twelve fictional adult human assets are seeded through a data migration with approximate coordinates, network roles, civilian covers, status, consensus, exposure, notes, and irregularities.
 - Profile portraits were sourced once from This Person Does Not Exist, screened to exclude children and age-ambiguous faces, converted to local WebP files, and stripped of metadata. The application never requests portraits from the service in a visitor's browser.
-- The map uses darkened OpenStreetMap tiles through Leaflet. OpenStreetMap attribution remains visible, and the server-rendered directory and dossier links continue to work if JavaScript or the map library is unavailable.
+- The map uses OpenFreeMap's dark vector basemap, built from OpenStreetMap data, through Leaflet and the MapLibre GL Leaflet bridge. Provider and OpenStreetMap attribution remain visible, and the server-rendered directory and dossier links continue to work if JavaScript or the map library is unavailable.
 - The HAM interface keeps the shared Cult Records palette, typefaces, square geometry, visible focus, and shadow-free surfaces. Its denser grid, serial numbers, redactions, and deadpan administrative humor remain isolated from the public catalogue identity.
 
 ## Technologies
@@ -95,13 +97,15 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 | Django 6.0 | Routing, views, templates, forms, authentication, authorization, ORM, migrations, and testing | Supplies an integrated web framework with built-in security and data-management features. |
 | SQLite | Development database | Keeps local setup simple while supporting Django's relational models and migrations. |
 | RapidFuzz | Search relevance scoring | Provides efficient fuzzy string comparison for misspelling-tolerant catalogue search. |
-| Pillow | Uploaded image validation | Lets Django verify and store real catalogue artwork uploads. |
+| Pillow | Uploaded image validation | Lets Django verify and store real catalogue artwork and Human Asset portrait uploads. |
 | Stripe Python library | Test-mode Checkout Session creation, retrieval, and webhook signature verification | Connects the Django server to Stripe's hosted sandbox checkout without handling card details locally. |
 | HTML and Django templates | Page structure and server-rendered content | Produce semantic pages while allowing shared layouts and reusable components. |
 | CSS | Visual identity, responsive refinements, and CD/LP artwork presentation | Applies the Cult Records design system and packaging effects without an external 3D library. |
 | Bootstrap 5.3.3 | Responsive grid, navigation, forms, cards, dropdowns, modal behavior, and utility classes | Provides an accessible responsive component baseline that is customized by the project stylesheet. |
 | Leaflet 1.9.4 | HAM world map, markers, tooltips, keyboard navigation, zooming, and panning | Provides a small mobile-friendly map interface without adding a JavaScript build process. |
-| OpenStreetMap | HAM map tiles and geographic context | Supplies open map data with visible contributor attribution. |
+| MapLibre GL JS and MapLibre GL Leaflet | Vector rendering inside the HAM Leaflet map | Lets Leaflet use a styled vector basemap while preserving the existing marker and navigation behavior. |
+| OpenFreeMap | Hosted HAM dark vector basemap | Provides a keyless OpenStreetMap-derived basemap intended for website integration. |
+| OpenStreetMap | HAM geographic data and context | Supplies open map data with visible contributor attribution. |
 | Vanilla JavaScript | Search filter behavior, product artwork movement, interactive star ratings, AJAX review updates, dynamic bundle rows, bulk review selection, delete confirmation, HAM dossier selection, and HAM map filtering | Adds browser interactions without a JavaScript framework or build process. |
 
 The Python project declares Django, RapidFuzz, Pillow, and Stripe as direct dependencies in `pyproject.toml`. Exact direct and transitive versions are recorded in `uv.lock` and exported to `requirements.txt`. Bootstrap's CSS and JavaScript bundle are loaded from jsDelivr, so the project does not require npm.
@@ -120,6 +124,7 @@ Bootstrap supplies the responsive foundation, while the global stylesheet applie
 - Authentication middleware, `login_required` checks, and server-side ownership queries protect account and review actions.
 - Custom admin-panel access checks enforce administrator and editor capabilities on every protected route.
 - HAM uses a separate server-side clearance check. The navigation does not grant access, and unauthorized requests receive a 404 without revealing that the route exists.
+- Human Asset management combines the administrator role check with the HAM clearance check on every list and mutation route. Audit entries for those records are excluded when the viewer does not have both capabilities.
 - Admin forms expose fixed application roles instead of Django permission records. Administrators cannot remove their own Admin role or deactivate their own account.
 - Passwords use Django's password hashing system and configured password validators.
 - Review ratings, comment length, moderation state, product IDs, prices, image files, bundle components, quantities, ordering, and track data are validated on the server.
@@ -135,13 +140,13 @@ Bootstrap supplies the responsive foundation, while the global stylesheet applie
 
 | Django app | Responsibility |
 | --- | --- |
-| `admin_panel` | Custom administration dashboard, access controls, audit trail, blueprint interface, and user, catalogue, bundle, and review workflows |
+| `admin_panel` | Custom administration dashboard, access controls, audit trail, blueprint interface, and user, catalogue, bundle, review, and restricted Human Asset workflows |
 | `home` | Catalogue and bundle data, uploaded artwork, home page, shared templates, global styles, and product artwork presentation |
 | `search` | Search form, catalogue filters, fuzzy relevance scoring, and filter interactions |
 | `product_page` | Product details, supplementary product information, ratings, and reviews |
 | `accounts` | Registration, authentication, dashboard, profile editing, roles, and seeded demonstration users |
 | `cart` | Session-backed shopping cart, order snapshots, Stripe sandbox Checkout, payment confirmation, and webhook handling |
-| `ham` | Enlightenment capability, protected Human Assets Manager, fictional network records, OpenStreetMap interface, directives, observations, and archive |
+| `ham` | Enlightenment capability, protected Human Assets Manager, fictional network records, local portraits, OpenFreeMap and OpenStreetMap interface, directives, observations, and archive |
 | `visuals` | Reusable component and visual identity gallery |
 | `cultrecords` | Project settings and root URL configuration |
 
