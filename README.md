@@ -1,6 +1,6 @@
 # Cult Records
 
-Cult Records is a Django web application for browsing a record catalogue, finding products through fuzzy search and filters, sharing product ratings and reviews, and completing simulated purchases through Stripe test mode. It provides a multi-product shopping cart, account registration, authentication, profile management, role-based permissions, and a custom administrative workspace alongside a responsive catalogue interface.
+Cult Records is a Django web application for browsing a record catalogue, finding products through fuzzy search and filters, sharing product ratings and reviews, and completing purchases through Stripe's sandbox. It provides a multi-product shopping cart, account registration, authentication, profile management, role-based permissions, and a custom administrative workspace alongside a responsive catalogue interface.
 
 ## Features
 
@@ -37,7 +37,7 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 - The custom panel is available at `/admin/` and does not use Django's built-in admin interface.
 - Anonymous visitors are redirected to sign in, regular users receive no panel access, and every panel route applies its role check on the server.
 - The dashboard shows live catalogue, visibility, account, and review-state totals; catalogue health; the pending moderation queue; recent administrative activity; and recent users for administrators.
-- The dashboard reports Stripe test-order counts, pending and expired sessions, simulated revenue, and average simulated order value.
+- The dashboard reports Stripe sandbox order counts, pending and expired sessions, revenue, and average order value.
 - Role-aware navigation exposes only the sections available to the current administrator or editor.
 - The responsive admin shell uses a separate dark blueprint identity with a desktop sidebar and a mobile off-canvas menu.
 - `/admin/visuals/` provides the review surface for admin colors, typography, buttons, forms, badges, tables, empty states, and confirmation dialogs.
@@ -60,18 +60,20 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 - Rejected reviews remain visible to their author with an optional editorial reason. Editing a rejected or approved review clears its previous moderation decision and returns it to pending.
 - Review deletion requires confirmation in the browser.
 
-### Shopping cart and simulated checkout
+### Shopping cart and checkout
 
 - Visitors can add multiple catalogue products to a session-backed cart without signing in.
 - Each cart line supports a quantity from 1 to 99. Visitors can add more units, replace a quantity, or remove the line.
 - The shared header reports the total number of units in the cart.
 - Products that become hidden are removed from the cart before they can be purchased.
-- A non-empty cart can open a Stripe-hosted Checkout page using a Stripe test or restricted-test secret key. Live Stripe keys are deliberately rejected.
-- Checkout accepts test card payments in euros. Card details are entered on Stripe's hosted page and never pass through the Django application.
+- A non-empty cart opens a Stripe-hosted Checkout page using a Stripe sandbox or restricted sandbox secret key. Live Stripe keys are deliberately rejected.
+- Checkout accepts Stripe test card payments in euros. Card details are entered on Stripe's hosted page and never pass through the Django application.
 - Every checkout attempt snapshots its product names, formats, prices, and quantities into an order before redirecting to Stripe.
 - Successful returns verify the Checkout Session, paid status, amount, and currency before marking the order as paid. Purchased quantities are removed once, while products added after checkout remain in the cart.
 - A signed webhook handles completed, asynchronously completed, and expired Checkout Sessions. The success page also retrieves the session directly as a fallback for local testing.
-- The custom admin dashboard reports test-order counts, simulated revenue, and average simulated order value. The storefront never accepts live payments.
+- Paid purchases appear on the account dashboard with their placed date, order reference, status, total, and product lines.
+- Users can mark an order as delivered. A confirmation popup explains that the order will disappear from the dashboard, and accepting it permanently deletes the order.
+- The custom admin dashboard reports sandbox order counts, revenue, and average order value.
 
 ## Technologies
 
@@ -123,7 +125,7 @@ Bootstrap supplies the responsive foundation, while the global stylesheet applie
 | `search` | Search form, catalogue filters, fuzzy relevance scoring, and filter interactions |
 | `product_page` | Product details, supplementary product information, ratings, and reviews |
 | `accounts` | Registration, authentication, dashboard, profile editing, roles, and seeded demonstration users |
-| `cart` | Session-backed shopping cart, order snapshots, Stripe test-mode Checkout, payment confirmation, and webhook handling |
+| `cart` | Session-backed shopping cart, order snapshots, Stripe sandbox Checkout, payment confirmation, and webhook handling |
 | `visuals` | Reusable component and visual identity gallery |
 | `cultrecords` | Project settings and root URL configuration |
 
@@ -183,9 +185,9 @@ uv run python manage.py runserver
 
 `uv` creates the virtual environment and installs the versions recorded in `uv.lock`. The standard Python instructions install the same resolved dependency versions from `requirements.txt`.
 
-## Stripe test-mode setup
+## Stripe sandbox setup
 
-The cart works without Stripe credentials. Starting simulated checkout requires a Stripe sandbox secret key.
+The cart works without Stripe credentials. Starting checkout requires a Stripe sandbox secret key.
 
 1. Create or sign in to a Stripe account and open a sandbox from the account picker.
 2. Copy the sandbox secret key from Stripe's API keys page. It begins with `sk_test_`. A restricted sandbox key beginning with `rk_test_` also works if it has permission to create and retrieve Checkout Sessions.
@@ -228,9 +230,9 @@ uv run python manage.py runserver
 
 For a deployed HTTPS site, create a Stripe sandbox webhook endpoint for `/cart/stripe/webhook/` and subscribe it to `checkout.session.completed`, `checkout.session.async_payment_succeeded`, and `checkout.session.expired`.
 
-### Simulating a card payment
+### Testing a card payment
 
-Open a product, add it to the cart, and choose **Simulated checkout**. On Stripe's hosted test page, use:
+Open a product, add it to the cart, and choose **Checkout**. On Stripe's hosted sandbox page, use:
 
 - Card number: `4242 4242 4242 4242`
 - Expiry: any future date, such as `12/34`
