@@ -220,7 +220,11 @@ class DashboardTests(TestCase):
         self.assertContains(response, product.title)
         self.assertContains(response, product.artist)
         self.assertContains(response, "My dashboard review.")
-        self.assertContains(response, "5 / 5 stars")
+        self.assertContains(response, 'class="list-group account-review-list"')
+        self.assertContains(response, "account-review-item")
+        self.assertContains(response, "accounts/css/dashboard.css")
+        self.assertContains(response, 'aria-label="5 out of 5 stars"')
+        self.assertContains(response, "review-star is-filled", count=5)
         self.assertContains(
             response,
             f'{product.get_absolute_url()}#your-review',

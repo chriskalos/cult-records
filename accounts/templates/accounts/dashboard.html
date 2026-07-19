@@ -1,6 +1,11 @@
 {% extends "home/base.html" %}
+{% load static %}
 
 {% block title %}Dashboard | Cult Records{% endblock %}
+
+{% block styles %}
+    <link href="{% static 'accounts/css/dashboard.css' %}" rel="stylesheet">
+{% endblock %}
 
 {% block content %}
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
@@ -29,18 +34,18 @@
     <section aria-labelledby="recent-reviews-heading">
         <h2 id="recent-reviews-heading" class="h4">Recent reviews</h2>
         {% if reviews %}
-            <div class="list-group">
+            <div class="list-group account-review-list">
                 {% for review in reviews %}
                     <a
                         href="{% url 'product_page:detail' review.product.product_id %}#your-review"
-                        class="list-group-item list-group-item-action"
+                        class="list-group-item list-group-item-action account-review-item"
                     >
                         <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
                             <div>
                                 <h3 class="h6 mb-1">{{ review.product.title }}</h3>
                                 <p class="mb-1 text-body-secondary">{{ review.product.artist }}</p>
                             </div>
-                            <span class="fw-semibold">{{ review.rating }} / 5 stars</span>
+                            {% include "product_page/includes/rating_stars.html" with rating=review.rating %}
                         </div>
                         {% if review.comment %}
                             <p class="mb-1">{{ review.comment|truncatechars:180 }}</p>

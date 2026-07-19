@@ -1,0 +1,28 @@
+.account-review-list {
+    --bs-list-group-border-radius: 0;
+    border-radius: 0;
+}
+
+.account-review-item {
+    --bs-list-group-action-active-bg: #1c1c1f;
+    --bs-list-group-action-active-color: var(--cult-bone);
+    --bs-list-group-action-hover-bg: var(--cult-steel);
+    --bs-list-group-action-hover-color: var(--cult-bone);
+    --bs-list-group-bg: #1b1b1e;
+    --bs-list-group-border-color: var(--cult-border);
+    --bs-list-group-color: var(--cult-bone);
+    background-color: #1b1b1e;
+    border-color: var(--cult-border);
+    border-radius: 0 !important;
+    color: var(--cult-bone);
+}
+
+.account-review-item:hover,
+.account-review-item:focus-visible {
+    background-color: var(--cult-steel);
+    color: var(--cult-bone);
+}
+
+.account-review-item h3 {
+    color: inherit;
+}
