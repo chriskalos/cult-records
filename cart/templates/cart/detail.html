@@ -1,0 +1,89 @@
+{% extends "home/base.html" %}
+
+{% block title %}Your cart | Cult Records{% endblock %}
+
+{% block content %}
+    <nav aria-label="Breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Cart</li>
+        </ol>
+    </nav>
+
+    <h1>Your cart</h1>
+
+    {% if cart_lines %}
+        <div class="row g-4 align-items-start mt-2">
+            <div class="col-12 col-lg-8">
+                <div class="table-responsive cart-table-wrap">
+                    <table class="table align-middle cart-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Product</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Quantity</th>
+                                <th scope="col">Total</th>
+                                <th scope="col"><span class="visually-hidden">Remove</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for line in cart_lines %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ line.product.get_absolute_url }}" class="cart-product-link">{{ line.product.title }}</a>
+                                        <span class="d-block text-body-secondary">{{ line.product.artist }} · {{ line.product.get_product_type_display }}</span>
+                                    </td>
+                                    <td>{{ line.product.price|floatformat:2 }}€</td>
+                                    <td>
+                                        <form action="{% url 'cart:update' line.product.product_id %}" method="post" class="cart-quantity-form">
+                                            {% csrf_token %}
+                                            <label for="quantity-{{ line.product.product_id }}" class="visually-hidden">Quantity of {{ line.product.title }}</label>
+                                            <input
+                                                id="quantity-{{ line.product.product_id }}"
+                                                name="quantity"
+                                                type="number"
+                                                min="1"
+                                                max="99"
+                                                value="{{ line.quantity }}"
+                                                class="form-control"
+                                                inputmode="numeric"
+                                                required
+                                            >
+                                            <button type="submit" class="btn btn-secondary">Update</button>
+                                        </form>
+                                    </td>
+                                    <td>{{ line.total_price|floatformat:2 }}€</td>
+                                    <td class="text-end">
+                                        <form action="{% url 'cart:remove' line.product.product_id %}" method="post">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger">Remove</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-4">
+                <aside class="card cart-summary" aria-labelledby="cart-summary-heading">
+                    <div class="card-body">
+                        <h2 id="cart-summary-heading" class="h3">Summary</h2>
+                        <dl class="d-flex justify-content-between gap-3 mb-4">
+                            <dt>Subtotal ({{ cart.quantity }} item{{ cart.quantity|pluralize }})</dt>
+                            <dd class="mb-0 fw-bold">{{ cart.subtotal|floatformat:2 }}€</dd>
+                        </dl>
+                        <button type="button" class="btn btn-primary w-100" disabled>Simulated checkout</button>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    {% else %}
+        <section class="cart-empty mt-4" aria-labelledby="empty-cart-heading">
+            <h2 id="empty-cart-heading">Your cart is empty</h2>
+            <p class="text-body-secondary">Choose something from the catalogue before continuing to checkout.</p>
+            <a href="{% url 'home' %}" class="btn btn-primary">Browse the catalogue</a>
+        </section>
+    {% endif %}
+{% endblock %}

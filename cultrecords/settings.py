@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'admin_panel',
+    'cart',
     'home',
     'product_page',
     'search',
@@ -68,6 +69,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'admin_panel.context_processors.admin_capabilities',
+                'cart.context_processors.cart_summary',
             ],
         },
     },

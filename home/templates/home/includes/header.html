@@ -37,6 +37,12 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'home' %}">Home</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'cart:detail' %}">
+                            Cart <span aria-hidden="true">({{ cart_item_count }})</span>
+                            <span class="visually-hidden">with {{ cart_item_count }} item{{ cart_item_count|pluralize }}</span>
+                        </a>
+                    </li>
                 </ul>
 
                 <form action="{% url 'search:results' %}" method="get" class="d-flex my-3 my-lg-0 me-lg-3" role="search">

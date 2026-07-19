@@ -164,6 +164,10 @@ header .nav-link:focus-visible {
     background: var(--cult-steel);
 }
 
+header .navbar-nav {
+    gap: 0.75rem;
+}
+
 header .btn-primary {
     --bs-btn-bg: var(--cult-coal);
     --bs-btn-border-color: rgba(243, 241, 237, 0.7);
@@ -882,6 +886,53 @@ a:focus-visible {
     --bs-table-striped-color: var(--cult-bone);
 }
 
+.add-to-cart-form {
+    max-width: 24rem;
+}
+
+.add-to-cart-form .form-control,
+.cart-quantity-form .form-control {
+    width: 6rem;
+}
+
+.cart-table-wrap {
+    border: 1px solid var(--cult-border);
+}
+
+.cart-table {
+    margin-bottom: 0;
+    min-width: 48rem;
+}
+
+.cart-table th,
+.cart-table td {
+    padding: 1rem;
+}
+
+.cart-product-link {
+    color: var(--cult-bone);
+    font-weight: 800;
+}
+
+.cart-product-link:hover {
+    color: var(--cult-red-bright);
+}
+
+.cart-quantity-form {
+    align-items: center;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.cart-summary {
+    position: sticky;
+    top: 1.5rem;
+}
+
+.cart-empty {
+    max-width: 48rem;
+}
+
 .page-link {
     background: var(--cult-coal);
     border-color: var(--cult-border);
@@ -997,7 +1048,7 @@ body > footer.bg-body-tertiary {
         padding-top: 1.5rem;
     }
 
-    header .navbar-nav {
+header .navbar-nav {
         gap: 0.75rem;
     }
 
