@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
+from cart.models import Order
 from home.models import Product
 from product_page.models import Review
 
@@ -63,6 +64,19 @@ def dashboard(request):
         approved=Count("pk", filter=Q(status=Review.Status.APPROVED)),
         rejected=Count("pk", filter=Q(status=Review.Status.REJECTED)),
     )
+    order_stats = Order.objects.aggregate(
+        total=Count("pk"),
+        paid=Count("pk", filter=Q(status=Order.Status.PAID)),
+        pending=Count("pk", filter=Q(status=Order.Status.PENDING)),
+        expired=Count("pk", filter=Q(status=Order.Status.EXPIRED)),
+        simulated_revenue=Sum("subtotal", filter=Q(status=Order.Status.PAID)),
+    )
+    order_stats["simulated_revenue"] = order_stats["simulated_revenue"] or 0
+    order_stats["average_value"] = (
+        order_stats["simulated_revenue"] / order_stats["paid"]
+        if order_stats["paid"]
+        else 0
+    )
     category_counts = {
         item["product_type"]: item["count"]
         for item in Product.objects.values("product_type").annotate(count=Count("pk"))
@@ -78,6 +92,7 @@ def dashboard(request):
         "product_stats": product_stats,
         "review_stats": review_stats,
         "review_queue_count": review_stats["pending"],
+        "order_stats": order_stats,
         "category_breakdown": [
             {
                 "value": value,

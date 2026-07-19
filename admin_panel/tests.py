@@ -10,6 +10,7 @@ from django.urls import reverse
 from PIL import Image
 
 from accounts.roles import EDITOR_GROUP_NAME, UserRole, role_for_user
+from cart.models import Order
 from home.models import BundleItem, Product
 from product_page.models import ProductPage, Review
 
@@ -123,7 +124,7 @@ class AdminPanelPresentationTests(TestCase):
         self.assertContains(response, "Admin panel")
         self.assertContains(response, "Moderation queue")
         self.assertContains(response, "Simulated purchase overview")
-        self.assertContains(response, "No payment processing will be connected")
+        self.assertContains(response, "No live payments are accepted")
 
     def test_dashboard_reports_catalogue_and_review_health(self):
         product = Product.objects.get(product_id="MDEVCTRYLP")
@@ -145,6 +146,32 @@ class AdminPanelPresentationTests(TestCase):
         self.assertContains(response, "Dashboard queue item.")
         self.assertContains(response, "Missing artwork")
         self.assertContains(response, "Bundles blocked by hidden contents")
+
+    def test_dashboard_reports_simulated_order_totals(self):
+        Order.objects.create(
+            status=Order.Status.PAID,
+            currency="eur",
+            subtotal="20.00",
+        )
+        Order.objects.create(
+            status=Order.Status.PAID,
+            currency="eur",
+            subtotal="10.00",
+        )
+        Order.objects.create(
+            status=Order.Status.PENDING,
+            currency="eur",
+            subtotal="5.00",
+        )
+        self.client.force_login(self.admin)
+
+        response = self.client.get(reverse("admin_panel:dashboard"))
+
+        self.assertEqual(response.context["order_stats"]["total"], 3)
+        self.assertEqual(response.context["order_stats"]["paid"], 2)
+        self.assertEqual(response.context["order_stats"]["pending"], 1)
+        self.assertContains(response, "30.00€")
+        self.assertContains(response, "15.00€")
 
     def test_editor_dashboard_omits_user_data_and_bundle_work(self):
         bundle = Product.objects.create(
