@@ -1,8 +1,11 @@
+from decimal import Decimal
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser, Group
 from django.test import TestCase
 from django.urls import reverse
 
+from cart.models import Order, OrderItem
 from home.models import Product
 from product_page.models import Review
 
@@ -252,6 +255,111 @@ class DashboardTests(TestCase):
         response = self.client.get(self.dashboard_url)
 
         self.assertContains(response, "You have not reviewed any products yet.")
+
+    def test_dashboard_displays_paid_purchases(self):
+        product = Product.objects.get(product_id="MDEVCTRYLP")
+        paid_order = Order.objects.create(
+            user=self.user,
+            status=Order.Status.PAID,
+            currency="eur",
+            subtotal=Decimal("29.98"),
+        )
+        OrderItem.objects.create(
+            order=paid_order,
+            product=product,
+            product_code=product.pk,
+            artist=product.artist,
+            title=product.title,
+            product_type=product.product_type,
+            unit_price=Decimal("14.99"),
+            quantity=2,
+        )
+        pending_order = Order.objects.create(
+            user=self.user,
+            status=Order.Status.PENDING,
+            currency="eur",
+            subtotal=Decimal("6.99"),
+        )
+        other_order = Order.objects.create(
+            user=get_user_model().objects.get(username="user2"),
+            status=Order.Status.PAID,
+            currency="eur",
+            subtotal=Decimal("6.99"),
+        )
+        self.client.force_login(self.user)
+
+        response = self.client.get(self.dashboard_url)
+
+        self.assertContains(response, "Your purchases")
+        self.assertContains(response, str(paid_order.pk))
+        self.assertContains(response, "2 × Victory")
+        self.assertContains(response, "29.98€")
+        self.assertContains(response, "On its way")
+        self.assertContains(response, "Mark as delivered")
+        self.assertContains(response, "accounts/js/dashboard.js")
+        self.assertContains(response, "data-delivery-confirmation")
+        self.assertNotContains(response, str(pending_order.pk))
+        self.assertNotContains(response, str(other_order.pk))
+
+    def test_dashboard_has_a_purchase_empty_state(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(self.dashboard_url)
+
+        self.assertContains(response, "You do not have any current purchases.")
+
+    def test_marking_paid_order_delivered_deletes_it(self):
+        order = Order.objects.create(
+            user=self.user,
+            status=Order.Status.PAID,
+            currency="eur",
+            subtotal=Decimal("14.99"),
+        )
+        delivered_url = reverse("accounts:mark_order_delivered", args=[order.pk])
+        self.client.force_login(self.user)
+
+        get_response = self.client.get(delivered_url)
+        post_response = self.client.post(delivered_url, follow=True)
+
+        self.assertEqual(get_response.status_code, 405)
+        self.assertRedirects(post_response, self.dashboard_url)
+        self.assertContains(
+            post_response,
+            "Order marked as delivered and removed from your dashboard.",
+        )
+        self.assertFalse(Order.objects.filter(pk=order.pk).exists())
+
+    def test_user_cannot_delete_another_users_order(self):
+        order = Order.objects.create(
+            user=get_user_model().objects.get(username="user2"),
+            status=Order.Status.PAID,
+            currency="eur",
+            subtotal=Decimal("14.99"),
+        )
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            reverse("accounts:mark_order_delivered", args=[order.pk])
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(Order.objects.filter(pk=order.pk).exists())
+
+    def test_pending_order_cannot_be_marked_delivered(self):
+        order = Order.objects.create(
+            user=self.user,
+            status=Order.Status.PENDING,
+            currency="eur",
+            subtotal=Decimal("14.99"),
+        )
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            reverse("accounts:mark_order_delivered", args=[order.pk])
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(Order.objects.filter(pk=order.pk).exists())
 
 
 class ProfileEditingTests(TestCase):

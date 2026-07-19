@@ -26,3 +26,75 @@
 .account-review-item h3 {
     color: inherit;
 }
+
+.account-purchase-list {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.account-purchase-header,
+.account-purchase-footer,
+.account-order-item {
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.account-purchase-header,
+.account-purchase-footer {
+    padding: 1rem;
+}
+
+.account-purchase-total {
+    align-items: flex-end;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    text-align: right;
+}
+
+.account-purchase-total strong {
+    font-size: 1.25rem;
+}
+
+.account-order-reference {
+    color: var(--cult-muted);
+    overflow-wrap: anywhere;
+}
+
+.account-order-items {
+    --bs-list-group-border-radius: 0;
+}
+
+.account-order-item {
+    background-color: var(--cult-coal);
+    padding: 1rem;
+}
+
+.account-order-product {
+    color: var(--cult-bone);
+    font-weight: 800;
+}
+
+.account-order-product:hover {
+    color: var(--cult-red-bright);
+}
+
+@media (max-width: 575.98px) {
+    .account-purchase-header,
+    .account-purchase-footer,
+    .account-order-item {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .account-purchase-total {
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .account-purchase-footer .btn {
+        width: 100%;
+    }
+}

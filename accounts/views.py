@@ -2,8 +2,10 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
+
+from cart.models import Order
 
 from .forms import LoginForm, RegistrationForm, UsernameUpdateForm
 from .roles import role_for_user
@@ -48,14 +50,37 @@ def dashboard(request):
         "-updated_at",
         "-pk",
     )[:10]
+    purchases = (
+        request.user.orders.filter(status=Order.Status.PAID)
+        .prefetch_related("items__product")
+        .order_by("-paid_at", "-created_at")
+    )
     return render(
         request,
         "accounts/dashboard.html",
         {
             "account_role": role_for_user(request.user),
+            "purchases": purchases,
             "reviews": reviews,
         },
     )
+
+
+@login_required
+@require_POST
+def mark_order_delivered(request, order_id):
+    order = get_object_or_404(
+        Order,
+        pk=order_id,
+        user=request.user,
+        status=Order.Status.PAID,
+    )
+    order.delete()
+    messages.success(
+        request,
+        "Order marked as delivered and removed from your dashboard.",
+    )
+    return redirect("accounts:dashboard")
 
 
 @login_required

@@ -4,7 +4,7 @@
 {% block title %}Dashboard | Cult Records{% endblock %}
 
 {% block styles %}
-    <link href="{% static 'accounts/css/dashboard.css' %}" rel="stylesheet">
+    <link href="{% static 'accounts/css/dashboard.css' %}?v=2" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -31,7 +31,61 @@
         </div>
     </section>
 
-    <section aria-labelledby="recent-reviews-heading">
+    <section class="mb-5" aria-labelledby="purchases-heading">
+        <h2 id="purchases-heading" class="h4">Your purchases</h2>
+        {% if purchases %}
+            <div class="account-purchase-list">
+                {% for order in purchases %}
+                    <article class="card account-purchase">
+                        <div class="card-header account-purchase-header">
+                            <div>
+                                <p class="small text-body-secondary mb-1">Order placed</p>
+                                <time datetime="{% if order.paid_at %}{{ order.paid_at|date:'c' }}{% else %}{{ order.created_at|date:'c' }}{% endif %}">
+                                    {% if order.paid_at %}{{ order.paid_at|date:"j F Y" }}{% else %}{{ order.created_at|date:"j F Y" }}{% endif %}
+                                </time>
+                                <code class="account-order-reference d-block mt-1">{{ order.pk }}</code>
+                            </div>
+                            <div class="account-purchase-total">
+                                <span class="badge text-bg-success">On its way</span>
+                                <strong>{{ order.subtotal|floatformat:2 }}€</strong>
+                            </div>
+                        </div>
+                        <ul class="list-group list-group-flush account-order-items">
+                            {% for item in order.items.all %}
+                                <li class="list-group-item account-order-item">
+                                    <span>
+                                        {% if item.product %}
+                                            <a href="{{ item.product.get_absolute_url }}" class="account-order-product">{{ item.quantity }} × {{ item.title }}</a>
+                                        {% else %}
+                                            <strong>{{ item.quantity }} × {{ item.title }}</strong>
+                                        {% endif %}
+                                        <span class="d-block text-body-secondary">{{ item.artist }} · {{ item.get_product_type_display }}</span>
+                                    </span>
+                                    <span class="fw-bold">{{ item.total_price|floatformat:2 }}€</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="card-footer account-purchase-footer">
+                            <p class="small text-body-secondary mb-0">Received your order?</p>
+                            <form
+                                action="{% url 'accounts:mark_order_delivered' order.pk %}"
+                                method="post"
+                                data-delivery-confirmation
+                            >
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-secondary">Mark as delivered</button>
+                            </form>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-body-secondary">You do not have any current purchases.</p>
+            <a href="{% url 'home' %}" class="btn btn-outline-primary">Browse the catalogue</a>
+        {% endif %}
+    </section>
+
+    <section class="mb-0" aria-labelledby="recent-reviews-heading">
         <h2 id="recent-reviews-heading" class="h4">Recent reviews</h2>
         {% if reviews %}
             <div class="list-group account-review-list">
@@ -65,4 +119,8 @@
             <a href="{% url 'home' %}" class="btn btn-outline-primary">Browse the catalogue</a>
         {% endif %}
     </section>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'accounts/js/dashboard.js' %}"></script>
 {% endblock %}
