@@ -72,7 +72,7 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 - Successful returns verify the Checkout Session, paid status, amount, and currency before marking the order as paid. Purchased quantities are removed once, while products added after checkout remain in the cart.
 - A signed webhook handles completed, asynchronously completed, and expired Checkout Sessions. The success page also retrieves the session directly as a fallback for local testing.
 - Paid purchases appear on the account dashboard with their placed date, order reference, status, total, and product lines.
-- Users can mark an order as delivered. A confirmation popup explains that the order will disappear from the dashboard, and accepting it permanently deletes the order.
+- Users can mark an order as delivered. An in-page confirmation modal explains that the order will disappear from the dashboard, and accepting it permanently deletes the order.
 - The custom admin dashboard reports sandbox order counts, revenue, and average order value.
 
 ## Technologies
