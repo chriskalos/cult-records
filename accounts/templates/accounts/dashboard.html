@@ -67,16 +67,62 @@
                         </ul>
                         <div class="card-footer account-purchase-footer">
                             <p class="small text-body-secondary mb-0">Received your order?</p>
-                            <form
-                                action="{% url 'accounts:mark_order_delivered' order.pk %}"
-                                method="post"
-                                data-delivery-confirmation
+                            <button
+                                type="button"
+                                class="btn btn-secondary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#delivery-confirmation-{{ order.pk }}"
                             >
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-secondary">Mark as delivered</button>
-                            </form>
+                                Mark as delivered
+                            </button>
                         </div>
                     </article>
+
+                    <div
+                        class="modal fade"
+                        id="delivery-confirmation-{{ order.pk }}"
+                        tabindex="-1"
+                        aria-labelledby="delivery-confirmation-title-{{ order.pk }}"
+                        aria-describedby="delivery-confirmation-description-{{ order.pk }}"
+                        aria-hidden="true"
+                    >
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h2
+                                        class="modal-title fs-5"
+                                        id="delivery-confirmation-title-{{ order.pk }}"
+                                    >
+                                        Mark order as delivered?
+                                    </h2>
+                                    <button
+                                        type="button"
+                                        class="btn-close"
+                                        data-bs-dismiss="modal"
+                                        aria-label="Close"
+                                    ></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p id="delivery-confirmation-description-{{ order.pk }}" class="mb-0">
+                                        This order will disappear from your dashboard and be permanently deleted.
+                                        This cannot be undone.
+                                    </p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        Cancel
+                                    </button>
+                                    <form
+                                        action="{% url 'accounts:mark_order_delivered' order.pk %}"
+                                        method="post"
+                                    >
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger">Yes, mark as delivered</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 {% endfor %}
             </div>
         {% else %}
@@ -119,8 +165,4 @@
             <a href="{% url 'home' %}" class="btn btn-outline-primary">Browse the catalogue</a>
         {% endif %}
     </section>
-{% endblock %}
-
-{% block scripts %}
-    <script src="{% static 'accounts/js/dashboard.js' %}"></script>
 {% endblock %}

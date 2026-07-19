@@ -296,8 +296,17 @@ class DashboardTests(TestCase):
         self.assertContains(response, "29.98€")
         self.assertContains(response, "On its way")
         self.assertContains(response, "Mark as delivered")
-        self.assertContains(response, "accounts/js/dashboard.js")
-        self.assertContains(response, "data-delivery-confirmation")
+        self.assertContains(response, "modal fade")
+        self.assertContains(
+            response,
+            f'data-bs-target="#delivery-confirmation-{paid_order.pk}"',
+        )
+        self.assertContains(response, "Mark order as delivered?")
+        self.assertContains(
+            response,
+            "This order will disappear from your dashboard and be permanently deleted.",
+        )
+        self.assertContains(response, "Yes, mark as delivered")
         self.assertNotContains(response, str(pending_order.pk))
         self.assertNotContains(response, str(other_order.pk))
 
