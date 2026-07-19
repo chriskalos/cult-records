@@ -4,7 +4,7 @@
 {% block title %}Visual test | Cult Records{% endblock %}
 
 {% block styles %}
-    <link href="{% static 'ham/css/ham.css' %}?v=3" rel="stylesheet">
+    <link href="{% static 'ham/css/ham.css' %}?v=4" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -251,39 +251,30 @@
     <section class="mb-5" aria-labelledby="ham-components-heading">
         <h2 id="ham-components-heading" class="mb-3">HAM interface extension</h2>
         <p class="section-intro">
-            Representative cinematic telemetry for the concealed network interface. The working map and private records remain on the protected page.
+            Representative after-hours data surfaces for the concealed vampire network. The working map and private records remain on the protected page.
         </p>
         <div class="ham-shell">
-            <div class="ham-broadcast-strip mb-4" aria-label="Example priority broadcast">
-                <div aria-hidden="true">
-                    <span>Priority broadcast</span>
-                    THE RED TELEPHONE HAS DENIED BEING A TELEPHONE
-                    <span>Channel 13½</span>
-                    ALL DRAMATIC ZOOM LENSES ARE OPERATIONAL
-                </div>
-            </div>
-            <div class="ham-situation-deck mb-4" aria-label="Example HAM telemetry">
-                <div class="ham-situation-alert">
-                    <p>Current situation</p>
-                    <strong>Loudly unclear</strong>
-                    <span>All nodes advised to look purposeful.</span>
-                </div>
-                <div class="ham-telemetry-stack">
-                    <div><span>Bureaucratic heat</span><strong>96%</strong><i style="--meter: 96%"></i></div>
-                    <div><span>Goose containment</span><strong>41%</strong><i style="--meter: 41%"></i></div>
-                </div>
-                <div class="ham-waveform" aria-label="Example unidentified signal">
-                    <p>Unidentified signal</p>
-                    <div aria-hidden="true">
-                        {% for _ in "123456789012"|make_list %}<span style="--bar-index: {{ forloop.counter }}"></span>{% endfor %}
-                    </div>
-                </div>
-            </div>
+            <aside class="ham-night-memo" aria-label="Example after-hours memorandum">
+                <span>After-hours memorandum</span>
+                <p>Distribution meeting moved to Crypt B. The room has better acoustics and fewer windows.</p>
+                <small>Filed by Night Operations</small>
+            </aside>
             <div class="ham-stat-grid mb-4" aria-label="Example HAM network summary">
-                <article><span>Known assets</span><strong>12</strong></article>
-                <article><span>Reporting normally</span><strong>6</strong></article>
-                <article><span>Existence unclear</span><strong>3</strong></article>
-                <article><span>Fax machines</span><strong>3</strong></article>
+                <article><span>Known assets</span><strong>12</strong><small>Human, to current knowledge</small></article>
+                <article><span>Reporting normally</span><strong>6</strong><small>Before first light</small></article>
+                <article><span>Existence unclear</span><strong>3</strong><small>Do not call reception</small></article>
+                <article><span>Test pressings due</span><strong>3</strong><small>Two mastered, one murmuring</small></article>
+            </div>
+            <div class="ham-night-briefing mb-4" aria-label="Example night office briefing">
+                <div>
+                    <p class="ham-eyebrow">Night office</p>
+                    <h3 class="mb-0">Operational briefing</h3>
+                </div>
+                <dl class="ham-night-briefing-grid">
+                    <div><dt>Dawn exposure</dt><dd>Low</dd><p>All field work is due before first light.</p></div>
+                    <div><dt>Label operations</dt><dd>On schedule</dd><p>Two masters approved. One is cursed only in mono.</p></div>
+                    <div><dt>Formalwear</dt><dd>Negotiable</dd><p>Capes remain optional outside board meetings.</p></div>
+                </dl>
             </div>
             <div class="ham-secondary-grid">
                 <div class="ham-workspace">
