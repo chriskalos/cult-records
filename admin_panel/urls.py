@@ -41,6 +41,21 @@ urlpatterns = [
         name="bundle_edit",
     ),
     path("reviews/", views.reviews, name="reviews"),
+    path(
+        "reviews/bulk-moderate/",
+        views.review_bulk_moderate,
+        name="review_bulk_moderate",
+    ),
+    path(
+        "reviews/<int:review_id>/",
+        views.review_detail,
+        name="review_detail",
+    ),
+    path(
+        "reviews/<int:review_id>/delete/",
+        views.review_delete,
+        name="review_delete",
+    ),
     path("activity/", views.activity, name="activity"),
     path("visuals/", views.visuals, name="visuals"),
 ]

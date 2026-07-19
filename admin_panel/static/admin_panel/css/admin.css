@@ -923,6 +923,70 @@ code {
     padding-top: 2rem;
 }
 
+.admin-select-column {
+    width: 3rem;
+}
+
+.admin-bulk-bar {
+    display: grid;
+    grid-template-columns: minmax(12rem, 0.8fr) minmax(16rem, 2fr) auto;
+    align-items: end;
+    gap: 1rem;
+    padding: 1.25rem 1.35rem;
+    border-top: 1px solid var(--admin-border);
+    background: #0f2031;
+}
+
+.admin-review-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(20rem, 0.8fr);
+    gap: 1.5rem;
+    max-width: 82rem;
+}
+
+.admin-review-content,
+.admin-review-moderation-form {
+    padding: 1.35rem;
+}
+
+.admin-review-moderation-form {
+    display: grid;
+    align-content: start;
+    gap: 1.15rem;
+}
+
+.admin-review-moderation-form .btn {
+    justify-self: start;
+}
+
+.admin-definition-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    margin: 0 0 1.5rem;
+    background: var(--admin-border);
+}
+
+.admin-definition-list > div {
+    padding: 0.85rem 1rem;
+    background: var(--admin-steel);
+}
+
+.admin-definition-list dt {
+    color: var(--admin-muted);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.admin-definition-list dd {
+    margin: 0.25rem 0 0;
+}
+
+.admin-review-comment h3 {
+    font-size: 1.15rem;
+}
+
 .alert {
     border-width: 1px;
 }
@@ -1112,6 +1176,10 @@ code {
     .admin-filter-form-products {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+
+    .admin-review-layout {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 767.98px) {
@@ -1195,6 +1263,11 @@ code {
 
     .admin-bundle-remove {
         padding-top: 0;
+    }
+
+    .admin-bulk-bar,
+    .admin-definition-list {
+        grid-template-columns: 1fr;
     }
 }
 

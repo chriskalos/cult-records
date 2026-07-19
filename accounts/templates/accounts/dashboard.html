@@ -47,8 +47,11 @@
                         {% endif %}
                         <p class="small text-body-secondary mb-0">
                             Updated {{ review.updated_at|date:"j F Y" }}
-                            {% if not review.is_approved %} · Hidden{% endif %}
+                            · {{ review.get_status_display }}
                         </p>
+                        {% if review.status == "rejected" and review.rejection_reason %}
+                            <p class="small text-danger mb-0">Reason: {{ review.rejection_reason }}</p>
+                        {% endif %}
                     </a>
                 {% endfor %}
             </div>

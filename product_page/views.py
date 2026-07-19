@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Count
 from django.shortcuts import get_object_or_404, redirect, render
@@ -19,7 +20,9 @@ def _detail_context(request, product, review_form=None, is_editing_review=False)
         page.long_description if page and page.long_description else product.description
     )
 
-    approved_reviews = product.reviews.filter(is_approved=True).select_related("author")
+    approved_reviews = product.reviews.filter(
+        status=Review.Status.APPROVED
+    ).select_related("author")
     review_stats = approved_reviews.aggregate(
         average=Avg("rating"),
         count=Count("id"),
@@ -86,6 +89,10 @@ def create_review(request, product_id):
         review.product = product
         review.author = request.user
         review.save()
+        messages.success(
+            request,
+            "Your review was submitted and will go live once it is approved.",
+        )
         return redirect(f"{product.get_absolute_url()}#your-review")
 
     return render(
@@ -108,7 +115,14 @@ def edit_review(request, product_id, review_id):
     form = ReviewForm(request.POST, instance=review)
 
     if form.is_valid():
-        form.save()
+        review = form.save(commit=False)
+        review.status = Review.Status.PENDING
+        review.rejection_reason = ""
+        review.save()
+        messages.success(
+            request,
+            "Your review was updated and will go live again once it is approved.",
+        )
         return redirect(f"{product.get_absolute_url()}#your-review")
 
     return render(

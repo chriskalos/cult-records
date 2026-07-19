@@ -88,7 +88,8 @@ class ReviewModelTests(TestCase):
         )
 
         self.assertEqual(review.comment, "Excellent album.")
-        self.assertTrue(review.is_approved)
+        self.assertEqual(review.status, Review.Status.PENDING)
+        self.assertEqual(review.rejection_reason, "")
         self.assertIsNotNone(review.created_at)
         self.assertIsNotNone(review.updated_at)
 
@@ -105,6 +106,17 @@ class ReviewModelTests(TestCase):
         empty_review.comment = "x" * 2001
         with self.assertRaises(ValidationError):
             empty_review.full_clean()
+
+    def test_rejection_reason_is_cleared_for_non_rejected_reviews(self):
+        review = Review.objects.create(
+            product=self.product,
+            author=self.user,
+            rating=4,
+            status=Review.Status.APPROVED,
+            rejection_reason="This should not remain.",
+        )
+
+        self.assertEqual(review.rejection_reason, "")
 
     def test_rating_must_be_between_one_and_five(self):
         for rating in (0, 6):
@@ -309,6 +321,7 @@ class ReviewPageTests(TestCase):
         response = self.client.post(
             self.create_url,
             {"rating": "5", "comment": "  Excellent.  "},
+            follow=True,
         )
 
         review = Review.objects.get(product=self.product, author=self.user)
@@ -319,6 +332,12 @@ class ReviewPageTests(TestCase):
         )
         self.assertEqual(review.rating, 5)
         self.assertEqual(review.comment, "Excellent.")
+        self.assertEqual(review.status, Review.Status.PENDING)
+        self.assertContains(
+            response,
+            "Your review was submitted and will go live once it is approved.",
+        )
+        self.assertContains(response, "Pending approval")
 
     def test_invalid_review_redisplays_the_bound_form(self):
         self.client.force_login(self.user)
@@ -401,6 +420,8 @@ class ReviewPageTests(TestCase):
             author=self.user,
             rating=2,
             comment="Original review.",
+            status=Review.Status.REJECTED,
+            rejection_reason="Add more context.",
         )
         self.client.force_login(self.user)
         edit_url = reverse(
@@ -411,6 +432,7 @@ class ReviewPageTests(TestCase):
         response = self.client.post(
             edit_url,
             {"rating": "5", "comment": "Updated review."},
+            follow=True,
         )
 
         review.refresh_from_db()
@@ -421,6 +443,29 @@ class ReviewPageTests(TestCase):
         )
         self.assertEqual(review.rating, 5)
         self.assertEqual(review.comment, "Updated review.")
+        self.assertEqual(review.status, Review.Status.PENDING)
+        self.assertEqual(review.rejection_reason, "")
+        self.assertContains(
+            response,
+            "Your review was updated and will go live again once it is approved.",
+        )
+
+    def test_rejected_review_reason_is_visible_only_in_the_owners_section(self):
+        Review.objects.create(
+            product=self.product,
+            author=self.user,
+            rating=2,
+            comment="Not for the public list.",
+            status=Review.Status.REJECTED,
+            rejection_reason="Please keep the language constructive.",
+        )
+        self.client.force_login(self.user)
+
+        response = self.client.get(self.detail_url)
+
+        self.assertContains(response, "Rejected")
+        self.assertContains(response, "Please keep the language constructive.")
+        self.assertNotContains(response, "from 1 review")
 
     def test_user_cannot_edit_someone_elses_review(self):
         review = Review.objects.create(
@@ -489,6 +534,7 @@ class ReviewPageTests(TestCase):
             author=self.other_user,
             rating=3,
             comment="Newest approved review.",
+            status=Review.Status.APPROVED,
         )
         oldest_user = get_user_model().objects.create_user(username="oldest-user")
         oldest = Review.objects.create(
@@ -496,6 +542,7 @@ class ReviewPageTests(TestCase):
             author=oldest_user,
             rating=5,
             comment="Oldest approved review.",
+            status=Review.Status.APPROVED,
         )
         hidden_user = get_user_model().objects.create_user(username="hidden-user")
         Review.objects.create(
@@ -503,7 +550,7 @@ class ReviewPageTests(TestCase):
             author=hidden_user,
             rating=1,
             comment="Unapproved review.",
-            is_approved=False,
+            status=Review.Status.PENDING,
         )
         Review.objects.filter(pk=oldest.pk).update(created_at="2026-01-01T00:00:00Z")
         Review.objects.filter(pk=newest.pk).update(created_at="2026-02-01T00:00:00Z")

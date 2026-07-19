@@ -711,6 +711,8 @@ class AdminBundleManagementTests(TestCase):
             response,
             reverse("admin_panel:bundle_edit", args=[bundle.pk]),
         )
+
+
         self.assertEqual(bundle.product_type, Product.ProductType.BUNDLE)
         self.assertEqual(
             list(
@@ -848,3 +850,170 @@ class AdminBundleManagementTests(TestCase):
             response,
             reverse("admin_panel:bundle_edit", args=[bundle.pk]),
         )
+
+
+class AdminReviewManagementTests(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.admin = User.objects.get(username="admin")
+        self.editor = User.objects.get(username="editor")
+        self.regular_user = User.objects.get(username="user1")
+        self.product = Product.objects.get(product_id="MDEVCTRYLP")
+        self.pending = Review.objects.create(
+            product=self.product,
+            author=self.regular_user,
+            rating=4,
+            comment="Pending moderation comment.",
+        )
+        self.approved = Review.objects.create(
+            product=self.product,
+            author=User.objects.get(username="user2"),
+            rating=5,
+            comment="Approved moderation comment.",
+            status=Review.Status.APPROVED,
+        )
+        self.rejected = Review.objects.create(
+            product=self.product,
+            author=User.objects.get(username="user3"),
+            rating=2,
+            comment="Rejected moderation comment.",
+            status=Review.Status.REJECTED,
+            rejection_reason="Original rejection reason.",
+        )
+
+    def test_review_list_defaults_to_the_pending_queue_and_supports_filters(self):
+        self.client.force_login(self.editor)
+
+        pending_response = self.client.get(reverse("admin_panel:reviews"))
+        approved_response = self.client.get(
+            reverse("admin_panel:reviews"),
+            {"status": Review.Status.APPROVED, "query": "Approved moderation"},
+        )
+
+        self.assertContains(pending_response, "Pending moderation comment.")
+        self.assertNotContains(pending_response, "Approved moderation comment.")
+        self.assertContains(approved_response, "Approved moderation comment.")
+        self.assertNotContains(approved_response, "Pending moderation comment.")
+
+    def test_editor_can_approve_or_reject_a_review_and_creates_an_audit_entry(self):
+        self.client.force_login(self.editor)
+
+        response = self.client.post(
+            reverse("admin_panel:review_detail", args=[self.pending.pk]),
+            {
+                "status": Review.Status.REJECTED,
+                "rejection_reason": "  Please add specific details.  ",
+            },
+        )
+
+        self.pending.refresh_from_db()
+        self.assertRedirects(
+            response,
+            reverse("admin_panel:review_detail", args=[self.pending.pk]),
+        )
+        self.assertEqual(self.pending.status, Review.Status.REJECTED)
+        self.assertEqual(
+            self.pending.rejection_reason,
+            "Please add specific details.",
+        )
+        self.assertTrue(
+            AdminActivity.objects.filter(
+                actor=self.editor,
+                action=AdminActivity.Action.MODERATION,
+                target_identifier=str(self.pending.pk),
+            ).exists()
+        )
+
+    def test_approving_a_rejected_review_clears_its_reason(self):
+        self.client.force_login(self.editor)
+
+        self.client.post(
+            reverse("admin_panel:review_detail", args=[self.rejected.pk]),
+            {
+                "status": Review.Status.APPROVED,
+                "rejection_reason": "Must be cleared.",
+            },
+        )
+
+        self.rejected.refresh_from_db()
+        self.assertEqual(self.rejected.status, Review.Status.APPROVED)
+        self.assertEqual(self.rejected.rejection_reason, "")
+
+    def test_editor_can_bulk_moderate_selected_reviews(self):
+        self.client.force_login(self.editor)
+
+        response = self.client.post(
+            reverse("admin_panel:review_bulk_moderate"),
+            {
+                "selected_reviews": [self.pending.pk, self.rejected.pk],
+                "action": Review.Status.APPROVED,
+                "rejection_reason": "Ignored for approval.",
+            },
+        )
+
+        self.pending.refresh_from_db()
+        self.rejected.refresh_from_db()
+        self.assertRedirects(response, reverse("admin_panel:reviews"))
+        self.assertEqual(self.pending.status, Review.Status.APPROVED)
+        self.assertEqual(self.rejected.status, Review.Status.APPROVED)
+        self.assertEqual(self.rejected.rejection_reason, "")
+        self.assertEqual(
+            AdminActivity.objects.filter(
+                actor=self.editor,
+                action=AdminActivity.Action.MODERATION,
+                metadata__bulk=True,
+            ).count(),
+            2,
+        )
+
+    def test_bulk_moderation_requires_a_selected_review(self):
+        self.client.force_login(self.editor)
+
+        response = self.client.post(
+            reverse("admin_panel:review_bulk_moderate"),
+            {"action": Review.Status.APPROVED},
+            follow=True,
+        )
+
+        self.pending.refresh_from_db()
+        self.assertContains(response, "Select at least one review")
+        self.assertEqual(self.pending.status, Review.Status.PENDING)
+
+    def test_only_admins_can_permanently_delete_reviews(self):
+        delete_url = reverse("admin_panel:review_delete", args=[self.pending.pk])
+        self.client.force_login(self.editor)
+
+        self.assertEqual(self.client.get(delete_url).status_code, 403)
+
+        self.client.force_login(self.admin)
+        blocked_response = self.client.post(
+            delete_url,
+            {"confirm_review_id": "wrong"},
+        )
+        self.assertEqual(blocked_response.status_code, 200)
+        self.assertContains(blocked_response, "does not match")
+        self.assertTrue(Review.objects.filter(pk=self.pending.pk).exists())
+
+        deleted_response = self.client.post(
+            delete_url,
+            {"confirm_review_id": str(self.pending.pk)},
+        )
+        self.assertRedirects(deleted_response, reverse("admin_panel:reviews"))
+        self.assertFalse(Review.objects.filter(pk=self.pending.pk).exists())
+        self.assertTrue(
+            AdminActivity.objects.filter(
+                actor=self.admin,
+                action=AdminActivity.Action.DELETE,
+                target_identifier=str(self.pending.pk),
+            ).exists()
+        )
+
+    def test_editor_review_screen_does_not_offer_deletion(self):
+        self.client.force_login(self.editor)
+
+        response = self.client.get(
+            reverse("admin_panel:review_detail", args=[self.pending.pk])
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Delete review")

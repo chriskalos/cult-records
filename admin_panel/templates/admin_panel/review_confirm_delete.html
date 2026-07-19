@@ -1,0 +1,31 @@
+{% extends "admin_panel/base.html" %}
+
+{% block title %}Delete review #{{ review.pk }}{% endblock %}
+{% block page_title %}Delete review{% endblock %}
+{% block page_description %}Permanent deletion requires typed confirmation.{% endblock %}
+
+{% block page_actions %}
+    <a href="{% url 'admin_panel:review_detail' review.pk %}" class="btn btn-secondary">Cancel</a>
+{% endblock %}
+
+{% block content %}
+    <section class="admin-panel admin-danger-zone admin-confirmation" aria-labelledby="confirm-review-delete-heading">
+        <div class="admin-panel-header">
+            <div>
+                <p class="admin-panel-eyebrow">Irreversible action</p>
+                <h2 id="confirm-review-delete-heading">Delete review #{{ review.pk }}</h2>
+            </div>
+        </div>
+        <div class="admin-confirmation-body">
+            <p>This permanently removes the {{ review.rating }} / 5 review by <strong>{{ review.author.username }}</strong> for <strong>{{ review.product.title }}</strong>.</p>
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% include "admin_panel/includes/form_field.html" with field=form.confirm_review_id %}
+                <div class="admin-form-actions admin-form-actions-inline">
+                    <button type="submit" class="btn btn-danger">Permanently delete review</button>
+                    <a href="{% url 'admin_panel:review_detail' review.pk %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </section>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "admin_panel/base.html" %}
+
+{% block title %}Review #{{ review.pk }}{% endblock %}
+{% block page_title %}Review #{{ review.pk }}{% endblock %}
+{% block page_description %}Submitted by {{ review.author.username }} for {{ review.product.title }}.{% endblock %}
+
+{% block page_actions %}
+    <a href="{% url 'admin_panel:reviews' %}" class="btn btn-secondary">Back to reviews</a>
+    {% if review.product.is_visible %}<a href="{{ review.product.get_absolute_url }}#reviews" class="btn btn-outline-primary">View product</a>{% endif %}
+{% endblock %}
+
+{% block content %}
+    <div class="admin-review-layout">
+        <section class="admin-panel" aria-labelledby="submitted-review-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Customer submission</p>
+                    <h2 id="submitted-review-heading">Review content</h2>
+                </div>
+                {% if review.status == "approved" %}
+                    <span class="badge admin-badge-success">Approved</span>
+                {% elif review.status == "rejected" %}
+                    <span class="badge admin-badge-danger">Rejected</span>
+                {% else %}
+                    <span class="badge admin-badge-warning">Pending</span>
+                {% endif %}
+            </div>
+            <div class="admin-review-content">
+                <dl class="admin-definition-list">
+                    <div><dt>Author</dt><dd>{{ review.author.username }}</dd></div>
+                    <div><dt>Product</dt><dd>{{ review.product.artist }} · {{ review.product.title }} ({{ review.product_id }})</dd></div>
+                    <div><dt>Rating</dt><dd>{{ review.rating }} / 5 stars</dd></div>
+                    <div><dt>Submitted</dt><dd>{{ review.created_at|date:"j F Y, H:i" }}</dd></div>
+                    <div><dt>Last updated</dt><dd>{{ review.updated_at|date:"j F Y, H:i" }}</dd></div>
+                </dl>
+                <div class="admin-review-comment">
+                    <h3>Comment</h3>
+                    {% if review.comment %}<p>{{ review.comment|linebreaksbr }}</p>{% else %}<p class="admin-muted">No written comment.</p>{% endif %}
+                </div>
+            </div>
+        </section>
+
+        <section class="admin-panel" aria-labelledby="moderation-decision-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Editorial decision</p>
+                    <h2 id="moderation-decision-heading">Moderation</h2>
+                </div>
+            </div>
+            <form method="post" class="admin-review-moderation-form" novalidate>
+                {% csrf_token %}
+                {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+                {% include "admin_panel/includes/form_field.html" with field=form.status %}
+                {% include "admin_panel/includes/form_field.html" with field=form.rejection_reason %}
+                <p class="form-text">A rejection reason is optional and is visible only to the reviewer. It is cleared when the review is pending or approved.</p>
+                <button type="submit" class="btn btn-primary">Save moderation</button>
+            </form>
+        </section>
+    </div>
+
+    {% if admin_can_delete_reviews %}
+        <section class="admin-panel admin-danger-zone mt-4" aria-labelledby="delete-review-heading">
+            <div class="admin-panel-header">
+                <div>
+                    <p class="admin-panel-eyebrow">Permanent action</p>
+                    <h2 id="delete-review-heading">Delete review</h2>
+                </div>
+            </div>
+            <div class="admin-action-row">
+                <div>
+                    <strong>Permanently delete review #{{ review.pk }}</strong>
+                    <p>The author cannot recover it after deletion.</p>
+                </div>
+                <a href="{% url 'admin_panel:review_delete' review.pk %}" class="btn btn-danger">Delete review</a>
+            </div>
+        </section>
+    {% endif %}
+{% endblock %}

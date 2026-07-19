@@ -1,0 +1,136 @@
+{% extends "admin_panel/base.html" %}
+{% load static %}
+
+{% block title %}Moderate reviews{% endblock %}
+{% block page_title %}Reviews{% endblock %}
+{% block page_description %}Approve, reject, or permanently remove customer reviews before they appear on the storefront.{% endblock %}
+
+{% block content %}
+    <section class="admin-panel" aria-labelledby="review-filters-heading">
+        <div class="admin-panel-header">
+            <div>
+                <p class="admin-panel-eyebrow">Moderation filters</p>
+                <h2 id="review-filters-heading">Find reviews</h2>
+            </div>
+        </div>
+        <form method="get" class="admin-filter-form admin-filter-form-wide">
+            <div>
+                <label for="review-query" class="form-label">Search</label>
+                <input id="review-query" name="query" type="search" value="{{ query }}" class="form-control" placeholder="User, product, or review text">
+            </div>
+            <div>
+                <label for="review-status" class="form-label">Status</label>
+                <select id="review-status" name="status" class="form-select">
+                    <option value="">All statuses</option>
+                    {% for value, label in review_statuses %}
+                        <option value="{{ value }}"{% if selected_status == value %} selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="review-rating" class="form-label">Rating</label>
+                <select id="review-rating" name="rating" class="form-select">
+                    <option value="">Any rating</option>
+                    {% for value in "12345" %}<option value="{{ value }}"{% if selected_rating == value %} selected{% endif %}>{{ value }} star{{ value|pluralize }}</option>{% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="review-sort" class="form-label">Sort</label>
+                <select id="review-sort" name="sort" class="form-select">
+                    <option value="-updated"{% if selected_sort == "-updated" %} selected{% endif %}>Recently updated</option>
+                    <option value="updated"{% if selected_sort == "updated" %} selected{% endif %}>Oldest update</option>
+                    <option value="-created"{% if selected_sort == "-created" %} selected{% endif %}>Newest submitted</option>
+                    <option value="-rating"{% if selected_sort == "-rating" %} selected{% endif %}>Highest rating</option>
+                    <option value="rating"{% if selected_sort == "rating" %} selected{% endif %}>Lowest rating</option>
+                </select>
+            </div>
+            <div class="admin-filter-actions">
+                <button type="submit" class="btn btn-primary">Apply filters</button>
+                <a href="{% url 'admin_panel:reviews' %}" class="btn btn-secondary">Pending queue</a>
+            </div>
+        </form>
+    </section>
+
+    <section class="admin-panel mt-4" aria-labelledby="review-results-heading">
+        <div class="admin-panel-header">
+            <div>
+                <p class="admin-panel-eyebrow">Moderation queue</p>
+                <h2 id="review-results-heading">{{ review_page.paginator.count }} review{{ review_page.paginator.count|pluralize }}</h2>
+            </div>
+        </div>
+        {% if review_page %}
+            <form method="post" action="{% url 'admin_panel:review_bulk_moderate' %}" data-review-bulk-form>
+                {% csrf_token %}
+                <div class="table-responsive">
+                    <table class="table admin-table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="admin-select-column">
+                                    <input type="checkbox" class="form-check-input" aria-label="Select every review on this page" data-select-all-reviews>
+                                </th>
+                                <th scope="col">Review</th>
+                                <th scope="col">Product</th>
+                                <th scope="col">Rating</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Updated</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for review in review_page %}
+                                <tr>
+                                    <td><input type="checkbox" class="form-check-input" name="selected_reviews" value="{{ review.pk }}" aria-label="Select review {{ review.pk }}" data-review-checkbox></td>
+                                    <td>
+                                        <strong>#{{ review.pk }} · {{ review.author.username }}</strong>
+                                        <span class="admin-table-secondary">{{ review.comment|default:"No written comment"|truncatechars:90 }}</span>
+                                    </td>
+                                    <td>
+                                        {{ review.product.title }}
+                                        <span class="admin-table-secondary">{{ review.product.product_id }}</span>
+                                    </td>
+                                    <td>{{ review.rating }} / 5</td>
+                                    <td>
+                                        {% if review.status == "approved" %}
+                                            <span class="badge admin-badge-success">Approved</span>
+                                        {% elif review.status == "rejected" %}
+                                            <span class="badge admin-badge-danger">Rejected</span>
+                                        {% else %}
+                                            <span class="badge admin-badge-warning">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td><time datetime="{{ review.updated_at|date:'c' }}">{{ review.updated_at|date:"j M Y, H:i" }}</time></td>
+                                    <td><a href="{% url 'admin_panel:review_detail' review.pk %}">Moderate</a></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="admin-bulk-bar">
+                    <div>
+                        <label for="bulk-review-action" class="form-label">Bulk action</label>
+                        <select id="bulk-review-action" name="action" class="form-select" data-review-bulk-action>
+                            <option value="approved">Approve selected</option>
+                            <option value="rejected">Reject selected</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="bulk-rejection-reason" class="form-label">Rejection reason <span class="admin-muted">(optional)</span></label>
+                        <input id="bulk-rejection-reason" name="rejection_reason" type="text" maxlength="500" class="form-control" placeholder="Shown to rejected reviewers">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Apply to selected</button>
+                </div>
+            </form>
+            {% include "admin_panel/includes/pagination.html" with page_obj=review_page %}
+        {% else %}
+            <div class="admin-empty-state">
+                <h3>The queue is clear</h3>
+                <p>No reviews match the current filters.</p>
+                <a href="{% url 'admin_panel:reviews' %}?status=" class="btn btn-secondary">View all reviews</a>
+            </div>
+        {% endif %}
+    </section>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'admin_panel/js/review-list.js' %}"></script>
+{% endblock %}

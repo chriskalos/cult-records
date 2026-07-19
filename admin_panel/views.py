@@ -25,8 +25,11 @@ from .forms import (
     AdminSetPasswordForm,
     AdminUserCreationForm,
     AdminUserUpdateForm,
+    BulkReviewModerationForm,
     BundleItemFormSet,
     ProductDeleteConfirmationForm,
+    ReviewDeleteConfirmationForm,
+    ReviewModerationForm,
     UserDeleteConfirmationForm,
 )
 from .models import AdminActivity
@@ -51,7 +54,9 @@ def dashboard(request):
             "total_users": User.objects.count(),
             "active_users": User.objects.filter(is_active=True).count(),
             "total_products": Product.objects.count(),
-            "review_queue_count": Review.objects.filter(is_approved=False).count(),
+            "review_queue_count": Review.objects.filter(
+                status=Review.Status.PENDING
+            ).count(),
             "recent_products": Product.objects.order_by("-product_id")[:5],
             "recent_users": User.objects.order_by("-date_joined", "-pk")[:5],
             "recent_activity": _visible_activity(request.user)[:6],
@@ -657,13 +662,168 @@ def bundle_edit(request, product_id):
 
 @review_moderator_required
 def reviews(request):
+    review_list = Review.objects.select_related("product", "author")
+    query = request.GET.get("query", "").strip()
+    status = request.GET.get("status", Review.Status.PENDING).strip()
+    rating = request.GET.get("rating", "").strip()
+    sort = request.GET.get("sort", "-updated")
+    sort_fields = {
+        "-updated": ("-updated_at", "-pk"),
+        "updated": ("updated_at", "pk"),
+        "-created": ("-created_at", "-pk"),
+        "rating": ("rating", "pk"),
+        "-rating": ("-rating", "pk"),
+    }
+
+    if query:
+        review_list = review_list.filter(
+            Q(author__username__icontains=query)
+            | Q(product__product_id__icontains=query)
+            | Q(product__artist__icontains=query)
+            | Q(product__title__icontains=query)
+            | Q(comment__icontains=query)
+        )
+    if status in Review.Status.values:
+        review_list = review_list.filter(status=status)
+    if rating in {"1", "2", "3", "4", "5"}:
+        review_list = review_list.filter(rating=int(rating))
+
+    page = Paginator(
+        review_list.order_by(*sort_fields.get(sort, sort_fields["-updated"])),
+        25,
+    ).get_page(request.GET.get("page"))
+
     return render(
         request,
-        "admin_panel/section_placeholder.html",
+        "admin_panel/review_list.html",
         {
             "active_section": "reviews",
-            "section_title": "Reviews",
-            "section_description": "The pending, approved, and rejected moderation queues will live here.",
+            "review_page": page,
+            "query": query,
+            "selected_status": status,
+            "selected_rating": rating,
+            "selected_sort": sort,
+            "review_statuses": Review.Status.choices,
+        },
+    )
+
+
+@review_moderator_required
+def review_detail(request, review_id):
+    review = get_object_or_404(
+        Review.objects.select_related("product", "author"),
+        pk=review_id,
+    )
+    previous_status = review.status
+    form = ReviewModerationForm(request.POST or None, instance=review)
+    if request.method == "POST" and form.is_valid():
+        review = form.save()
+        record_admin_activity(
+            actor=request.user,
+            action=AdminActivity.Action.MODERATION,
+            target_type="Review",
+            target_identifier=review.pk,
+            target_label=f"Review #{review.pk} by {review.author.username}",
+            summary=f"Set review #{review.pk} to {review.get_status_display().lower()}.",
+            metadata={
+                "previous_status": previous_status,
+                "new_status": review.status,
+                "product_id": review.product_id,
+            },
+        )
+        messages.success(
+            request,
+            f"Review #{review.pk} is now {review.get_status_display().lower()}.",
+        )
+        return redirect("admin_panel:review_detail", review_id=review.pk)
+
+    return render(
+        request,
+        "admin_panel/review_detail.html",
+        {
+            "active_section": "reviews",
+            "review": review,
+            "form": form,
+        },
+    )
+
+
+@review_moderator_required
+@require_POST
+def review_bulk_moderate(request):
+    form = BulkReviewModerationForm(
+        request.POST,
+        queryset=Review.objects.select_related("product", "author"),
+    )
+    if not form.is_valid():
+        messages.error(
+            request,
+            "Select at least one review and a valid moderation action.",
+        )
+        return redirect("admin_panel:reviews")
+
+    selected_reviews = list(form.cleaned_data["selected_reviews"])
+    new_status = form.cleaned_data["action"]
+    rejection_reason = form.cleaned_data["rejection_reason"]
+    with transaction.atomic():
+        for review in selected_reviews:
+            previous_status = review.status
+            review.status = new_status
+            review.rejection_reason = rejection_reason
+            review.save(update_fields=("status", "rejection_reason", "updated_at"))
+            record_admin_activity(
+                actor=request.user,
+                action=AdminActivity.Action.MODERATION,
+                target_type="Review",
+                target_identifier=review.pk,
+                target_label=f"Review #{review.pk} by {review.author.username}",
+                summary=f"Set review #{review.pk} to {review.get_status_display().lower()}.",
+                metadata={
+                    "previous_status": previous_status,
+                    "new_status": review.status,
+                    "product_id": review.product_id,
+                    "bulk": True,
+                },
+            )
+
+    messages.success(
+        request,
+        f"{len(selected_reviews)} review{'' if len(selected_reviews) == 1 else 's'} marked {Review.Status(new_status).label.lower()}.",
+    )
+    return redirect("admin_panel:reviews")
+
+
+@admin_only_required
+def review_delete(request, review_id):
+    review = get_object_or_404(
+        Review.objects.select_related("product", "author"),
+        pk=review_id,
+    )
+    form = ReviewDeleteConfirmationForm(request.POST or None, review=review)
+    if request.method == "POST" and form.is_valid():
+        identifier = review.pk
+        author = review.author.username
+        product_id = review.product_id
+        review.delete()
+        record_admin_activity(
+            actor=request.user,
+            action=AdminActivity.Action.DELETE,
+            target_type="Review",
+            target_identifier=identifier,
+            target_label=f"Review #{identifier} by {author}",
+            summary=f"Permanently deleted review #{identifier}.",
+            metadata={"author": author, "product_id": product_id},
+        )
+        messages.success(request, f"Review #{identifier} has been permanently deleted.")
+        return redirect("admin_panel:reviews")
+
+    return render(
+        request,
+        "admin_panel/review_confirm_delete.html",
+        {
+            "active_section": "reviews",
+            "review": review,
+            "form": form,
         },
     )
 

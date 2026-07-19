@@ -90,9 +90,25 @@
                         <h3 id="your-review-heading" class="h5">Your Review</h3>
 
                         {% if user_review and not is_editing_review %}
+                            <p class="mb-2">
+                                {% if user_review.status == "approved" %}
+                                    <span class="badge text-bg-success">Approved and live</span>
+                                {% elif user_review.status == "rejected" %}
+                                    <span class="badge text-bg-danger">Rejected</span>
+                                {% else %}
+                                    <span class="badge text-bg-warning">Pending approval</span>
+                                {% endif %}
+                            </p>
                             <p class="fw-semibold mb-2">{{ user_review.rating }} / 5 stars</p>
                             {% if user_review.comment %}
                                 <p>{{ user_review.comment|linebreaksbr }}</p>
+                            {% endif %}
+                            {% if user_review.status == "pending" %}
+                                <p class="small text-body-secondary">Your review will go live once an editor approves it.</p>
+                            {% elif user_review.status == "rejected" and user_review.rejection_reason %}
+                                <div class="alert alert-danger py-2">
+                                    <strong>Reason:</strong> {{ user_review.rejection_reason }}
+                                </div>
                             {% endif %}
                             <a
                                 href="{% url 'product_page:detail' product.product_id %}?edit_review=1#your-review"

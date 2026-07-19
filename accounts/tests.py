@@ -226,6 +226,22 @@ class DashboardTests(TestCase):
             f'{product.get_absolute_url()}#your-review',
         )
 
+    def test_dashboard_displays_review_status_and_rejection_reason(self):
+        product = Product.objects.get(product_id="MDEVCTRYLP")
+        Review.objects.create(
+            product=product,
+            author=self.user,
+            rating=2,
+            status=Review.Status.REJECTED,
+            rejection_reason="Please add more detail.",
+        )
+        self.client.force_login(self.user)
+
+        response = self.client.get(self.dashboard_url)
+
+        self.assertContains(response, "Rejected")
+        self.assertContains(response, "Reason: Please add more detail.")
+
     def test_dashboard_has_a_review_empty_state(self):
         self.client.force_login(self.user)
 

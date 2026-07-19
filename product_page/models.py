@@ -39,6 +39,11 @@ class ProductPage(models.Model):
 
 
 class Review(models.Model):
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        APPROVED = "approved", "Approved"
+        REJECTED = "rejected", "Rejected"
+
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,
@@ -57,7 +62,13 @@ class Review(models.Model):
         max_length=2000,
         validators=[MaxLengthValidator(2000)],
     )
-    is_approved = models.BooleanField(default=True, db_index=True)
+    status = models.CharField(
+        max_length=10,
+        choices=Status.choices,
+        default=Status.PENDING,
+        db_index=True,
+    )
+    rejection_reason = models.CharField(max_length=500, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -77,9 +88,15 @@ class Review(models.Model):
     def clean(self):
         super().clean()
         self.comment = self.comment.strip()
+        self.rejection_reason = self.rejection_reason.strip()
+        if self.status != self.Status.REJECTED:
+            self.rejection_reason = ""
 
     def save(self, *args, **kwargs):
         self.comment = self.comment.strip()
+        self.rejection_reason = self.rejection_reason.strip()
+        if self.status != self.Status.REJECTED:
+            self.rejection_reason = ""
         return super().save(*args, **kwargs)
 
     def __str__(self):

@@ -9,7 +9,7 @@ from django.forms import BaseInlineFormSet, inlineformset_factory
 
 from accounts.roles import UserRole, role_for_user, set_user_role
 from home.models import BundleItem, Product
-from product_page.models import ProductPage
+from product_page.models import ProductPage, Review
 
 
 ROLE_CHOICES = (
@@ -399,3 +399,74 @@ BundleItemFormSet = inlineformset_factory(
     extra=1,
     can_delete=True,
 )
+
+
+class ReviewModerationForm(forms.ModelForm):
+    class Meta:
+        model = Review
+        fields = ("status", "rejection_reason")
+        widgets = {
+            "rejection_reason": forms.Textarea(
+                attrs={
+                    "rows": 4,
+                    "placeholder": "Optional feedback shown to the reviewer",
+                }
+            ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        _apply_admin_form_classes(self)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get("status") != Review.Status.REJECTED:
+            cleaned_data["rejection_reason"] = ""
+        return cleaned_data
+
+
+class BulkReviewModerationForm(forms.Form):
+    selected_reviews = forms.ModelMultipleChoiceField(
+        queryset=Review.objects.none(),
+    )
+    action = forms.ChoiceField(
+        choices=(
+            (Review.Status.APPROVED, "Approve selected"),
+            (Review.Status.REJECTED, "Reject selected"),
+        )
+    )
+    rejection_reason = forms.CharField(
+        required=False,
+        max_length=500,
+        widget=forms.Textarea(attrs={"rows": 3}),
+    )
+
+    def __init__(self, *args, queryset=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["selected_reviews"].queryset = (
+            queryset if queryset is not None else Review.objects.all()
+        )
+        _apply_admin_form_classes(self)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get("action") != Review.Status.REJECTED:
+            cleaned_data["rejection_reason"] = ""
+        return cleaned_data
+
+
+class ReviewDeleteConfirmationForm(forms.Form):
+    confirm_review_id = forms.CharField(
+        label="Type the review ID to confirm",
+        widget=forms.TextInput(attrs={"autocomplete": "off", "class": "form-control"}),
+    )
+
+    def __init__(self, *args, review, **kwargs):
+        self.review = review
+        super().__init__(*args, **kwargs)
+
+    def clean_confirm_review_id(self):
+        review_id = self.cleaned_data["confirm_review_id"].strip()
+        if review_id != str(self.review.pk):
+            raise forms.ValidationError("The review ID does not match.")
+        return review_id
