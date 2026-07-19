@@ -87,7 +87,8 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 - Twelve fictional adult human assets are seeded through a data migration with approximate coordinates, network roles, civilian covers, status, consensus, exposure, notes, and irregularities.
 - Profile portraits were sourced once from This Person Does Not Exist, screened to exclude children and age-ambiguous faces, converted to local WebP files, and stripped of metadata. The application never requests portraits from the service in a visitor's browser.
 - The map uses OpenFreeMap's dark vector basemap, built from OpenStreetMap data, through Leaflet and the MapLibre GL Leaflet bridge. Its height contracts at tablet and phone widths, and vertical panning is confined to the rendered world so empty map space cannot be pulled into view. Provider and OpenStreetMap attribution remain visible, and the server-rendered directory and dossier links continue to work if JavaScript or the map library is unavailable.
-- The HAM interface keeps the shared Cult Records palette, typefaces, square geometry, visible focus, and shadow-free surfaces. Its denser grid, serial numbers, redactions, and deadpan administrative humor remain isolated from the public catalogue identity.
+- The HAM interface turns the protected page into a cinematic command centre with animated scanlines, fire, radar, broadcast warnings, telemetry meters, a map targeting display, and intentionally excessive administrative status messages. A page control can suspend the decorative spectacle while leaving all records and controls available.
+- HAM keeps the shared Cult Records typefaces, square geometry, and visible focus treatment, then adds red, orange, and amber effects that remain isolated from the public catalogue identity. Decorative animation is disabled when the browser reports a reduced-motion preference.
 
 ## Technologies
 
@@ -100,21 +101,21 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 | Pillow | Uploaded image validation | Lets Django verify and store real catalogue artwork and Human Asset portrait uploads. |
 | Stripe Python library | Test-mode Checkout Session creation, retrieval, and webhook signature verification | Connects the Django server to Stripe's hosted sandbox checkout without handling card details locally. |
 | HTML and Django templates | Page structure and server-rendered content | Produce semantic pages while allowing shared layouts and reusable components. |
-| CSS | Visual identity, responsive refinements, and CD/LP artwork presentation | Applies the Cult Records design system and packaging effects without an external 3D library. |
+| CSS | Visual identity, responsive refinements, CD/LP artwork presentation, and the animated HAM command-centre effects | Applies the Cult Records design system and cinematic effects without an external animation or 3D library. |
 | Bootstrap 5.3.3 | Responsive grid, navigation, forms, cards, dropdowns, modal behavior, and utility classes | Provides an accessible responsive component baseline that is customized by the project stylesheet. |
 | Leaflet 1.9.4 | HAM world map, markers, tooltips, keyboard navigation, zooming, and panning | Provides a small mobile-friendly map interface without adding a JavaScript build process. |
 | MapLibre GL JS and MapLibre GL Leaflet | Vector rendering inside the HAM Leaflet map | Lets Leaflet use a styled vector basemap while preserving the existing marker and navigation behavior. |
 | OpenFreeMap | Hosted HAM dark vector basemap | Provides a keyless OpenStreetMap-derived basemap intended for website integration. |
 | OpenStreetMap | HAM geographic data and context | Supplies open map data with visible contributor attribution. |
-| Vanilla JavaScript | Search filter behavior, product artwork movement, interactive star ratings, AJAX review updates, dynamic bundle rows, bulk review selection, delete confirmation, HAM dossier selection, and HAM map filtering | Adds browser interactions without a JavaScript framework or build process. |
+| Vanilla JavaScript | Search filter behavior, product artwork movement, interactive star ratings, AJAX review updates, dynamic bundle rows, bulk review selection, delete confirmation, HAM dossier selection, map filtering, UTC clock, and spectacle control | Adds browser interactions without a JavaScript framework or build process. |
 
 The Python project declares Django, RapidFuzz, Pillow, and Stripe as direct dependencies in `pyproject.toml`. Exact direct and transitive versions are recorded in `uv.lock` and exported to `requirements.txt`. Bootstrap's CSS and JavaScript bundle are loaded from jsDelivr, so the project does not require npm.
 
 ## Visual design and accessibility
 
-The public interface uses a fixed dark theme built around near-black, Oxblood, red, and Bone colors. The admin panel uses a separate dark blueprint palette so management work is clearly distinguished from the storefront. HAM extends the public palette with a denser square grid and compact data treatments. Instrument Serif is used for headings and Nunito Sans for body and interface text. Both open-source typefaces are loaded from Google Fonts with local fallback families.
+The public interface uses a fixed dark theme built around near-black, Oxblood, red, and Bone colors. The admin panel uses a separate dark blueprint palette so management work is clearly distinguished from the storefront. HAM extends the public palette with a cinematic square grid, orange and amber alarms, animated telemetry, and map instrumentation. Instrument Serif is used for headings and Nunito Sans for body and interface text. Both open-source typefaces are loaded from Google Fonts with local fallback families.
 
-Bootstrap supplies the responsive foundation, while the global stylesheet applies square controls, visible keyboard focus outlines, high-contrast text, and shadow-free surfaces. Layouts collapse for narrow screens, interactive artwork respects reduced-motion settings, and shared templates provide consistent navigation and footer landmarks. The `/visuals/` route provides a component gallery for typography, colors, controls, forms, tables, pagination, modal content, product cards, HAM data surfaces, and the shared page chrome.
+Bootstrap supplies the responsive foundation, while the global stylesheet applies square controls, visible keyboard focus outlines, high-contrast text, and shadow-free surfaces. Layouts collapse for narrow screens, interactive artwork and HAM effects respect reduced-motion settings, and shared templates provide consistent navigation and footer landmarks. The `/visuals/` route provides a component gallery for typography, colors, controls, forms, tables, pagination, modal content, product cards, HAM telemetry surfaces, and the shared page chrome.
 
 ## Security
 
