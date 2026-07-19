@@ -9,6 +9,7 @@ from django.db import transaction
 from django.forms import BaseInlineFormSet, inlineformset_factory
 
 from accounts.roles import UserRole, role_for_user, set_user_role
+from ham.models import HumanAsset
 from home.models import BundleItem, Product
 from product_page.models import ProductPage, Review
 
@@ -361,6 +362,169 @@ class ProductDeleteConfirmationForm(forms.Form):
         if product_id != self.product.product_id:
             raise forms.ValidationError("The product ID does not match.")
         return product_id
+
+
+class AdminHumanAssetForm(forms.ModelForm):
+    asset_code = forms.RegexField(
+        regex=r"^[A-Z0-9-]+$",
+        max_length=20,
+        help_text="Use uppercase letters, numbers, and hyphens.",
+    )
+    remove_uploaded_portrait = forms.BooleanField(
+        required=False,
+        label="Remove the uploaded portrait and use the stored static portrait",
+    )
+
+    class Meta:
+        model = HumanAsset
+        fields = (
+            "asset_code",
+            "name",
+            "alias",
+            "status",
+            "location_label",
+            "latitude",
+            "longitude",
+            "portrait",
+            "uploaded_portrait",
+            "network_role",
+            "civilian_cover",
+            "joined_on",
+            "last_contact",
+            "consensus",
+            "exposure",
+            "summary",
+            "network_notes",
+            "known_irregularity",
+            "is_visible",
+        )
+        labels = {
+            "portrait": "Stored static portrait path",
+            "uploaded_portrait": "Upload portrait",
+        }
+        help_texts = {
+            "portrait": "Existing portraits use a path such as ham/images/assets/example.webp.",
+            "is_visible": "Visible assets appear on the HAM map and in the dossier directory.",
+        }
+        widgets = {
+            "asset_code": forms.TextInput(
+                attrs={"autocomplete": "off", "spellcheck": "false"}
+            ),
+            "name": forms.TextInput(attrs={"autocomplete": "off"}),
+            "alias": forms.TextInput(attrs={"autocomplete": "off"}),
+            "location_label": forms.TextInput(attrs={"autocomplete": "off"}),
+            "latitude": forms.NumberInput(attrs={"step": "0.000001"}),
+            "longitude": forms.NumberInput(attrs={"step": "0.000001"}),
+            "portrait": forms.TextInput(
+                attrs={"autocomplete": "off", "spellcheck": "false"}
+            ),
+            "uploaded_portrait": forms.FileInput(
+                attrs={"accept": "image/jpeg,image/png,image/webp"}
+            ),
+            "network_role": forms.TextInput(attrs={"autocomplete": "off"}),
+            "civilian_cover": forms.TextInput(attrs={"autocomplete": "off"}),
+            "joined_on": forms.DateInput(attrs={"type": "date"}),
+            "last_contact": forms.DateInput(attrs={"type": "date"}),
+            "summary": forms.Textarea(attrs={"rows": 4}),
+            "network_notes": forms.Textarea(attrs={"rows": 5}),
+            "known_irregularity": forms.Textarea(attrs={"rows": 4}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        instance = kwargs.get("instance")
+        self._original_uploaded_portrait_name = (
+            instance.uploaded_portrait.name
+            if instance and instance.uploaded_portrait
+            else ""
+        )
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields["asset_code"].disabled = True
+            self.fields["asset_code"].help_text = "Asset codes are immutable."
+        if not self.instance.uploaded_portrait:
+            self.fields.pop("remove_uploaded_portrait")
+        _apply_admin_form_classes(self)
+
+    def clean_uploaded_portrait(self):
+        image = self.cleaned_data.get("uploaded_portrait")
+        if not image or "uploaded_portrait" not in self.changed_data:
+            return image
+        if image.size > 8 * 1024 * 1024:
+            raise forms.ValidationError("Upload an image no larger than 8 MB.")
+        image_format = getattr(getattr(image, "image", None), "format", "")
+        if image_format not in {"JPEG", "PNG", "WEBP"}:
+            raise forms.ValidationError("Upload a JPEG, PNG, or WebP image.")
+        return image
+
+    def clean(self):
+        cleaned_data = super().clean()
+        uploaded_changed = (
+            "uploaded_portrait" in self.changed_data
+            and cleaned_data.get("uploaded_portrait")
+        )
+        remove_uploaded = cleaned_data.get("remove_uploaded_portrait")
+        if uploaded_changed and remove_uploaded:
+            self.add_error(
+                "remove_uploaded_portrait",
+                "Choose a replacement portrait or remove the current portrait, not both.",
+            )
+
+        has_uploaded_portrait = bool(
+            uploaded_changed
+            or (self.instance.uploaded_portrait and not remove_uploaded)
+        )
+        if not cleaned_data.get("portrait") and not has_uploaded_portrait:
+            self.add_error(
+                "uploaded_portrait",
+                "Provide an uploaded portrait or a stored static portrait path.",
+            )
+
+        joined_on = cleaned_data.get("joined_on")
+        last_contact = cleaned_data.get("last_contact")
+        if joined_on and last_contact and last_contact < joined_on:
+            self.add_error(
+                "last_contact",
+                "Last contact cannot be earlier than the connected date.",
+            )
+        return cleaned_data
+
+    def save(self, commit=True):
+        asset = super().save(commit=False)
+        if self.cleaned_data.get("remove_uploaded_portrait"):
+            asset.uploaded_portrait = ""
+        if commit:
+            asset.save()
+            current_portrait_name = (
+                asset.uploaded_portrait.name if asset.uploaded_portrait else ""
+            )
+            if (
+                self._original_uploaded_portrait_name
+                and self._original_uploaded_portrait_name != current_portrait_name
+            ):
+                storage = HumanAsset._meta.get_field("uploaded_portrait").storage
+                transaction.on_commit(
+                    lambda name=self._original_uploaded_portrait_name: storage.delete(
+                        name
+                    )
+                )
+        return asset
+
+
+class HumanAssetDeleteConfirmationForm(forms.Form):
+    confirm_asset_code = forms.CharField(
+        label="Type the asset code to confirm",
+        widget=forms.TextInput(attrs={"autocomplete": "off", "class": "form-control"}),
+    )
+
+    def __init__(self, *args, asset, **kwargs):
+        self.asset = asset
+        super().__init__(*args, **kwargs)
+
+    def clean_confirm_asset_code(self):
+        asset_code = self.cleaned_data["confirm_asset_code"].strip()
+        if asset_code != self.asset.asset_code:
+            raise forms.ValidationError("The asset code does not match.")
+        return asset_code
 
 
 class AdminBundleForm(AdminProductForm):
