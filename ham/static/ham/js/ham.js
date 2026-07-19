@@ -14,6 +14,9 @@
 
     const assetsByCode = new Map(assets.map((asset) => [asset.code, asset]));
     const markersByCode = new Map();
+    const shell = document.querySelector(".ham-shell");
+    const overdriveToggle = document.querySelector("[data-ham-overdrive-toggle]");
+    const clock = document.querySelector("[data-ham-clock]");
     const dossier = {
         portrait: document.getElementById("dossier-portrait"),
         code: document.getElementById("dossier-code"),
@@ -35,6 +38,29 @@
     let selectedCode = document.querySelector(".ham-directory-item.active")?.dataset.hamAsset || assets[0].code;
     let activeFilter = "all";
     let map;
+
+    function updateClock() {
+        if (!clock) {
+            return;
+        }
+        clock.textContent = `${new Date().toLocaleTimeString("en-GB", {
+            hour12: false,
+            timeZone: "UTC",
+        })} UTC`;
+    }
+
+    if (shell && overdriveToggle) {
+        overdriveToggle.addEventListener("click", () => {
+            const muted = shell.classList.toggle("ham-spectacle-muted");
+            overdriveToggle.setAttribute("aria-pressed", muted ? "false" : "true");
+            overdriveToggle.textContent = muted
+                ? "Restore theatrical output"
+                : "Reduce theatrical output";
+        });
+    }
+
+    updateClock();
+    window.setInterval(updateClock, 1000);
 
     function isVisibleForFilter(asset) {
         if (activeFilter === "active") {

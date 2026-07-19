@@ -172,12 +172,16 @@ class HamAccessTests(TestCase):
         self.assertContains(response, "HAM-ATH-042")
         self.assertContains(response, "The Spoon Protocol")
         self.assertContains(response, "maplibre-gl-leaflet")
+        self.assertContains(response, "DEFCON MEATLOAF")
+        self.assertContains(response, "LOUDLY UNCLEAR")
+        self.assertContains(response, "Reduce theatrical output")
 
         map_script = Path(finders.find("ham/js/ham.js")).read_text()
         self.assertIn("tiles.openfreemap.org/styles/dark", map_script)
         self.assertNotIn("tile.openstreetmap.org", map_script)
         self.assertIn("maxBoundsViscosity: 1", map_script)
         self.assertIn("inertia: false", map_script)
+        self.assertIn("ham-spectacle-muted", map_script)
 
     def test_asset_query_selects_a_visible_dossier(self):
         HamClearance.objects.create(user=self.user, is_enlightened=True)
