@@ -67,6 +67,7 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 ### Shopping cart and checkout
 
 - Visitors can add multiple catalogue products to a session-backed cart without signing in.
+- Starting checkout requires a signed-in account. Anonymous visitors keep their cart and are directed to sign in before they can purchase anything.
 - Each cart line supports a quantity from 1 to 99. Visitors can add more units, replace a quantity, or remove the line.
 - The shared header reports the total number of units in the cart.
 - Products that become hidden are removed from the cart before they can be purchased.
@@ -136,7 +137,7 @@ Bootstrap supplies the responsive foundation, while the global stylesheet applie
 - Passwords use Django's password hashing system and configured password validators.
 - Review ratings, comment length, moderation state, product IDs, prices, image files, bundle components, quantities, ordering, and track data are validated on the server.
 - Review ownership is enforced when editing or deleting, and database constraints allow only one review per user and product.
-- Cart and checkout mutations accept POST requests and validate quantities and public product availability again on the server.
+- Cart and checkout mutations accept POST requests and validate quantities and public product availability again on the server. Checkout creation and order result pages also require an authenticated order owner.
 - Checkout totals are calculated from database prices rather than browser-supplied amounts. Payment confirmation checks the Stripe Session ID, paid status, currency, and total against the stored order.
 - Stripe webhook requests are verified against the raw request body and configured signing secret before an order is updated.
 - Live Stripe keys are rejected, secret keys stay in environment variables, and hosted Checkout keeps card details outside the application.
