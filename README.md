@@ -58,11 +58,12 @@ Use Stripe's standard test card on the checkout page:
 | SQLite and PostgreSQL | SQLite keeps local development simple; Render PostgreSQL stores deployed application data outside the web service |
 | RapidFuzz | Scores catalogue search results and supports misspelling-tolerant matching |
 | Pillow | Validates uploaded catalogue artwork and HAM portraits as real image files |
+| Cloudinary Python SDK and CDN | Stores production image uploads outside Render's filesystem and delivers all project images through optimized HTTPS URLs |
 | HTML, CSS, and Bootstrap 5.3.3 | Provide semantic server-rendered pages, responsive layouts, reusable components, and the three visual treatments |
 | Vanilla JavaScript | Handles live filters, product artwork movement, AJAX reviews, admin form interactions, and HAM map controls without a build process |
 | Stripe Python library | Creates and verifies hosted sandbox Checkout Sessions and validates signed webhooks |
 | Leaflet, MapLibre GL, OpenFreeMap, and OpenStreetMap | Provide HAM's interactive vector world map and geographic data |
-| Gunicorn, WhiteNoise, Psycopg, and dj-database-url | Run Django on Render, serve static assets, and connect the deployed application to PostgreSQL |
+| Gunicorn, WhiteNoise, Psycopg, and dj-database-url | Run Django on Render, serve CSS and JavaScript assets, and connect the deployed application to PostgreSQL |
 
 Instrument Serif and Nunito Sans are loaded from Google Fonts with fallback families. Bootstrap and the map libraries are loaded from CDNs, so the project does not require npm. Python dependencies are declared in `pyproject.toml`, locked in `uv.lock`, and exported to `requirements.txt`.
 
@@ -74,7 +75,7 @@ Instrument Serif and Nunito Sans are loaded from Google Fonts with fallback fami
 - Django hashes passwords and applies its configured password validators.
 - Forms and models validate prices, quantities, ratings, text lengths, image files, bundle contents, and product visibility.
 - Checkout totals come from database prices. Stripe payments are accepted only after session ownership, status, amount, currency, and webhook signatures are verified.
-- Uploaded files receive application-generated names and are kept below the configured media root.
+- Uploaded files receive application-generated names. Production images are stored in Cloudinary, and the API credential is supplied through an environment variable rather than Git.
 
 ## Local setup
 
@@ -87,6 +88,8 @@ uv run python manage.py runserver
 ```
 
 Open <http://127.0.0.1:8000/> and stop the server with `Ctrl+C`.
+
+Local development uses Django's filesystem storage when `CLOUDINARY_URL` is not set. To exercise the production image pipeline locally, set `CLOUDINARY_URL` in the shell before starting Django. Never add that value to the repository.
 
 To use a standard virtual environment on macOS or Linux:
 
@@ -115,6 +118,6 @@ The standard virtual-environment Python executable can be used instead of `uv ru
 
 ## Deployment
 
-`render.yaml` defines a Render web service and PostgreSQL database in the Frankfurt region. The build installs dependencies, collects static files, and applies migrations before Gunicorn starts Django. WhiteNoise serves bundled static assets, and the production service is available at [cult.chriskalos.xyz](https://cult.chriskalos.xyz/).
+`render.yaml` defines a Render web service and PostgreSQL database in the Frankfurt region. The build installs dependencies, collects static files, applies migrations, and verifies legacy media before Gunicorn starts Django. WhiteNoise serves CSS and JavaScript, while Cloudinary serves the brand logo, catalogue artwork, HAM portraits, and future admin uploads. The production service is available at [cult.chriskalos.xyz](https://cult.chriskalos.xyz/).
 
-Render's free web service uses an ephemeral filesystem. Bundled artwork is deployed with the application, but artwork uploaded through the admin panel requires persistent disk or object storage for durable production use.
+Render's free web service uses an ephemeral filesystem. Production image uploads do not depend on that filesystem because Django stores them directly in Cloudinary. The `CLOUDINARY_URL` secret must be added to the Render web service before deploying this version. See [DEPLOYMENT.md](DEPLOYMENT.md) for the required order and verification steps.
