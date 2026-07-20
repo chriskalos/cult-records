@@ -104,6 +104,12 @@ class HumanAsset(models.Model):
     def __str__(self):
         return f"{self.asset_code}: {self.alias}"
 
+    @property
+    def portrait_url(self):
+        if self.uploaded_portrait:
+            return self.uploaded_portrait.url
+        return self.portrait
+
 
 class AssetObservation(models.Model):
     class Kind(models.TextChoices):

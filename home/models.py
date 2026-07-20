@@ -56,6 +56,12 @@ class Product(models.Model):
     def __str__(self):
         return f"{self.artist} - {self.title}"
 
+    @property
+    def image_url(self):
+        if self.uploaded_image:
+            return self.uploaded_image.url
+        return self.image
+
     def get_absolute_url(self):
         return reverse("product_page:detail", args=[self.product_id])
 

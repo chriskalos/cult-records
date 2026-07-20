@@ -8,11 +8,17 @@ from django.urls import reverse
 from .models import BundleItem, Product
 
 
+MADEON_IMAGE_URL = (
+    "https://res.cloudinary.com/bobzlwnj/image/upload/"
+    "f_auto,q_auto/cult-records/products/madeon-victory"
+)
+
+
 class ProductModelTests(TestCase):
     def test_product_stores_catalogue_data(self):
         product = Product.objects.create(
             product_id="TESTCATLP",
-            image="home/images/products/madeon-victory.jpg",
+            image=MADEON_IMAGE_URL,
             artist="Madeon",
             title="Victory",
             description="Madeon's 2026 album Victory on vinyl LP.",
@@ -23,7 +29,8 @@ class ProductModelTests(TestCase):
 
         product.full_clean()
         self.assertEqual(product.pk, "TESTCATLP")
-        self.assertEqual(product.image, "home/images/products/madeon-victory.jpg")
+        self.assertEqual(product.image, MADEON_IMAGE_URL)
+        self.assertEqual(product.image_url, MADEON_IMAGE_URL)
         self.assertEqual(product.artist, "Madeon")
         self.assertEqual(product.genre, "Electronic")
         self.assertEqual(product.product_type, "LP")
@@ -149,17 +156,20 @@ class HomePageTests(TestCase):
         self.assertNotContains(response, "Placeholder Artist")
         self.assertContains(
             response,
-            "/static/home/images/products/madeon-victory.jpg",
+            "https://res.cloudinary.com/bobzlwnj/image/upload/f_auto,q_auto/"
+            "cult-records/products/madeon-victory",
             count=2,
         )
         self.assertContains(
             response,
-            "/static/home/images/products/cursed-locale-dance-w-me.jpg",
+            "https://res.cloudinary.com/bobzlwnj/image/upload/f_auto,q_auto/"
+            "cult-records/products/cursed-locale-dance-w-me",
         )
         self.assertContains(response, "WOR$T GIRL IN AMERICA")
         self.assertContains(
             response,
-            "/static/home/images/products/callinsick-doubling-down.jpg",
+            "https://res.cloudinary.com/bobzlwnj/image/upload/f_auto,q_auto/"
+            "cult-records/products/callinsick-doubling-down",
             count=2,
         )
         self.assertContains(response, 'data-product-format="LP"', count=13)
@@ -193,7 +203,8 @@ class HomePageTests(TestCase):
         self.assertContains(response, "/static/home/js/product-media.js")
         self.assertContains(
             response,
-            "/static/home/images/brand/cult-records-logo-64.png",
+            "https://res.cloudinary.com/bobzlwnj/image/upload/"
+            "f_auto,q_auto,c_scale,w_64/cult-records/brand/cult-records-logo",
         )
         self.assertContains(response, "<span>Cult Records</span>", html=True)
         self.assertContains(response, "Account")

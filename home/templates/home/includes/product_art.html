@@ -1,5 +1,3 @@
-{% load static %}
-
 {% if product.product_type == "LP" %}
     <div class="product-media product-media--lp" data-product-media data-product-format="LP">
         <div class="product-media__object" data-product-media-object>
@@ -7,15 +5,9 @@
                 <span class="product-media__record-label"></span>
             </div>
             <div class="product-media__sleeve">
-                {% if product.uploaded_image %}
+                {% if product.image_url %}
                     <img
-                        src="{{ product.uploaded_image.url }}"
-                        class="product-media__artwork"
-                        alt="{{ product.title }}"
-                    >
-                {% elif product.image %}
-                    <img
-                        src="{% static product.image %}"
+                        src="{{ product.image_url }}"
                         class="product-media__artwork"
                         alt="{{ product.title }}"
                     >
@@ -32,15 +24,9 @@
         <div class="product-media__object" data-product-media-object>
             <div class="product-media__cd-case">
                 <div class="product-media__cd-inlay">
-                    {% if product.uploaded_image %}
+                    {% if product.image_url %}
                         <img
-                            src="{{ product.uploaded_image.url }}"
-                            class="product-media__artwork"
-                            alt="{{ product.title }}"
-                        >
-                    {% elif product.image %}
-                        <img
-                            src="{% static product.image %}"
+                            src="{{ product.image_url }}"
                             class="product-media__artwork"
                             alt="{{ product.title }}"
                         >
@@ -63,15 +49,9 @@
     </div>
 {% else %}
     <div class="product-media product-media--generic">
-        {% if product.uploaded_image %}
+        {% if product.image_url %}
             <img
-                src="{{ product.uploaded_image.url }}"
-                class="product-media__artwork"
-                alt="{{ product.title }}"
-            >
-        {% elif product.image %}
-            <img
-                src="{% static product.image %}"
+                src="{{ product.image_url }}"
                 class="product-media__artwork"
                 alt="{{ product.title }}"
             >

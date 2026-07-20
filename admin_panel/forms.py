@@ -214,7 +214,7 @@ class AdminProductForm(forms.ModelForm):
     )
     remove_uploaded_image = forms.BooleanField(
         required=False,
-        label="Remove the uploaded image and use the existing static image or placeholder",
+        label="Remove the uploaded image and use the existing CDN image or placeholder",
     )
 
     class Meta:
@@ -372,7 +372,7 @@ class AdminHumanAssetForm(forms.ModelForm):
     )
     remove_uploaded_portrait = forms.BooleanField(
         required=False,
-        label="Remove the uploaded portrait and use the stored static portrait",
+        label="Remove the uploaded portrait and use the existing CDN portrait",
     )
 
     class Meta:
@@ -399,11 +399,11 @@ class AdminHumanAssetForm(forms.ModelForm):
             "is_visible",
         )
         labels = {
-            "portrait": "Stored static portrait path",
+            "portrait": "Existing CDN portrait URL",
             "uploaded_portrait": "Upload portrait",
         }
         help_texts = {
-            "portrait": "Existing portraits use a path such as ham/images/assets/example.webp.",
+            "portrait": "Existing portraits use a secure Cloudinary delivery URL.",
             "is_visible": "Visible assets appear on the HAM map and in the dossier directory.",
         }
         widgets = {

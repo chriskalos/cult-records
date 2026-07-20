@@ -1,15 +1,12 @@
 from django.db.models import Count, Q
 from django.shortcuts import render
-from django.templatetags.static import static
 
 from .access import enlightened_required
 from .models import ArchiveDocument, AssetObservation, Directive, HumanAsset
 
 
 def _portrait_url(asset):
-    if asset.uploaded_portrait:
-        return asset.uploaded_portrait.url
-    return static(asset.portrait)
+    return asset.portrait_url
 
 
 @enlightened_required

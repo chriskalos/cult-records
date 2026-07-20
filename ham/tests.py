@@ -121,7 +121,7 @@ class EnlightenmentTests(TestCase):
 
 
 class NetworkSeedTests(TestCase):
-    def test_initial_network_has_complete_local_dossiers(self):
+    def test_initial_network_has_complete_cloudinary_dossiers(self):
         assets = HumanAsset.objects.all()
 
         self.assertEqual(assets.count(), 12)
@@ -133,7 +133,12 @@ class NetworkSeedTests(TestCase):
                 self.assertLessEqual(asset.latitude, 90)
                 self.assertGreaterEqual(asset.longitude, -180)
                 self.assertLessEqual(asset.longitude, 180)
-                self.assertIsNotNone(finders.find(asset.portrait))
+                self.assertTrue(
+                    asset.portrait.startswith(
+                        "https://res.cloudinary.com/bobzlwnj/image/upload/"
+                    )
+                )
+                self.assertEqual(asset.portrait_url, asset.portrait)
 
     def test_initial_network_includes_directives_and_archive_records(self):
         self.assertEqual(Directive.objects.filter(is_active=True).count(), 4)

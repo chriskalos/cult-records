@@ -1,5 +1,6 @@
 {% extends "admin_panel/base.html" %}
-{% load static %}
+{% load static cloudinary_assets %}
+{% cloudinary_image "cult-records/brand/cult-records-logo" width=104 as brand_logo_thumb %}
 
 {% block title %}Admin components{% endblock %}
 {% block page_kicker %}Blueprint identity review{% endblock %}
@@ -114,7 +115,7 @@
                     <tr>
                         <td>
                             <div class="admin-asset-cell">
-                                <img class="admin-asset-thumb" src="{% static 'home/images/brand/cult-records-logo-64.png' %}" width="52" height="52" alt="">
+                                <img class="admin-asset-thumb" src="{{ brand_logo_thumb }}" width="52" height="52" alt="">
                                 <span><strong>Record with thumbnail</strong><small>Secondary identity · <code>REF-001</code></small></span>
                             </div>
                         </td>

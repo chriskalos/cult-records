@@ -12,8 +12,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+from urllib.parse import urlsplit
 
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,6 +25,24 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 IS_RENDER = bool(os.environ.get("RENDER"))
+
+CLOUDINARY_URL = os.environ.get("CLOUDINARY_URL", "").strip()
+_cloudinary_url_cloud_name = (
+    urlsplit(CLOUDINARY_URL).hostname if CLOUDINARY_URL else ""
+)
+CLOUDINARY_CLOUD_NAME = os.environ.get(
+    "CLOUDINARY_CLOUD_NAME",
+    _cloudinary_url_cloud_name or "bobzlwnj",
+).strip()
+CLOUDINARY_MEDIA_MIGRATION_ORIGIN = os.environ.get(
+    "CLOUDINARY_MEDIA_MIGRATION_ORIGIN",
+    "",
+).strip()
+
+if IS_RENDER and not CLOUDINARY_URL:
+    raise ImproperlyConfigured(
+        "CLOUDINARY_URL must be configured on Render before deploying this version."
+    )
 
 SECRET_KEY = os.environ.get(
     "SECRET_KEY",
@@ -171,7 +191,11 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 STORAGES = {
     "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "BACKEND": (
+            "cultrecords.storage.CloudinaryImageStorage"
+            if CLOUDINARY_URL
+            else "django.core.files.storage.FileSystemStorage"
+        ),
     },
     "staticfiles": {
         "BACKEND": (
@@ -184,11 +208,6 @@ STORAGES = {
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", BASE_DIR / "media"))
-SERVE_MEDIA_FILES = os.environ.get("SERVE_MEDIA_FILES", "0").lower() in {
-    "1",
-    "true",
-    "yes",
-}
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

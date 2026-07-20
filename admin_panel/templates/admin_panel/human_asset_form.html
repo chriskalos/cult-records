@@ -63,10 +63,8 @@
             </div>
             <div class="admin-media-form">
                 <div class="admin-image-preview">
-                    {% if asset.uploaded_portrait %}
-                        <img src="{{ asset.uploaded_portrait.url }}" alt="Current portrait of {{ asset.name }}">
-                    {% elif asset.portrait %}
-                        <img src="{% static asset.portrait %}" alt="Current portrait of {{ asset.name }}">
+                    {% if asset.portrait_url %}
+                        <img src="{{ asset.portrait_url }}" alt="Current portrait of {{ asset.name }}">
                     {% else %}
                         <span>No portrait filed</span>
                     {% endif %}

@@ -1,6 +1,4 @@
 {% extends "admin_panel/base.html" %}
-{% load static %}
-
 {% block title %}{{ form_title }}{% endblock %}
 {% block page_title %}{{ form_title }}{% endblock %}
 {% block page_description %}{{ form_description }}{% endblock %}
@@ -45,10 +43,8 @@
             </div>
             <div class="admin-media-form">
                 <div class="admin-image-preview admin-image-preview--artwork">
-                    {% if product.uploaded_image %}
-                        <img src="{{ product.uploaded_image.url }}" alt="Current artwork for {{ product.title }}">
-                    {% elif product.image %}
-                        <img src="{% static product.image %}" alt="Current artwork for {{ product.title }}">
+                    {% if product.image_url %}
+                        <img src="{{ product.image_url }}" alt="Current artwork for {{ product.title }}">
                     {% else %}
                         <span>No artwork uploaded</span>
                     {% endif %}

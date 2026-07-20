@@ -94,10 +94,8 @@
                             <tr>
                                 <td>
                                     <div class="admin-asset-cell">
-                                        {% if asset.uploaded_portrait %}
-                                            <img class="admin-asset-thumb" src="{{ asset.uploaded_portrait.url }}" width="52" height="52" alt="">
-                                        {% elif asset.portrait %}
-                                            <img class="admin-asset-thumb" src="{% static asset.portrait %}" width="52" height="52" alt="">
+                                        {% if asset.portrait_url %}
+                                            <img class="admin-asset-thumb" src="{{ asset.portrait_url }}" width="52" height="52" alt="">
                                         {% endif %}
                                         <span>
                                             <strong>{{ asset.alias }}</strong>

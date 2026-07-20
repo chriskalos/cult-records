@@ -4,6 +4,7 @@ asgiref==3.11.1
 brotli==1.2.0
 certifi==2026.6.17
 charset-normalizer==3.4.9
+cloudinary==1.45.0
 dj-database-url==3.1.2
 django==6.0.7
 gunicorn==26.0.0
@@ -14,6 +15,7 @@ psycopg==3.3.4
 psycopg-binary==3.3.4 ; implementation_name != 'pypy'
 rapidfuzz==3.14.5
 requests==2.34.2
+six==1.17.0
 sqlparse==0.5.5
 stripe==15.3.1
 typing-extensions==4.16.0

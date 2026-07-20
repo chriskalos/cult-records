@@ -162,7 +162,10 @@ class ProductDetailPageTests(TestCase):
     def setUp(self):
         self.product = Product.objects.create(
             product_id="PAGECD",
-            image="home/images/products/madeon-victory.jpg",
+            image=(
+                "https://res.cloudinary.com/bobzlwnj/image/upload/"
+                "f_auto,q_auto/cult-records/products/madeon-victory"
+            ),
             artist="Test Artist",
             title="Page Album",
             description="Short catalogue description.",

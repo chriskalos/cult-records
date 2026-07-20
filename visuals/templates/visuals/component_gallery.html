@@ -1,5 +1,7 @@
 {% extends "home/base.html" %}
-{% load static %}
+{% load static cloudinary_assets %}
+{% cloudinary_image "cult-records/ham/adrian-voss" width=144 as adrian_voss_portrait %}
+{% cloudinary_image "cult-records/ham/edith-pike" width=144 as edith_pike_portrait %}
 
 {% block title %}Visual test | Cult Records{% endblock %}
 
@@ -287,11 +289,11 @@
                     </div>
                     <div class="ham-directory">
                         <a href="#ham-components-heading" class="ham-directory-item active" aria-current="true">
-                            <img src="{% static 'ham/images/assets/adrian-voss.webp' %}" width="72" height="72" alt="">
+                            <img src="{{ adrian_voss_portrait }}" width="72" height="72" alt="">
                             <span><strong>Latchkey</strong><small>HAM-ATH-042 · Athens</small></span>
                         </a>
                         <a href="#ham-components-heading" class="ham-directory-item">
-                            <img src="{% static 'ham/images/assets/edith-pike.webp' %}" width="72" height="72" alt="">
+                            <img src="{{ edith_pike_portrait }}" width="72" height="72" alt="">
                             <span><strong>Tuesday</strong><small>HAM-VAN-001 · Vancouver</small></span>
                         </a>
                     </div>

@@ -75,10 +75,8 @@
             </div>
             <div class="admin-media-form">
                 <div class="admin-image-preview admin-image-preview--artwork">
-                    {% if bundle.uploaded_image %}
-                        <img src="{{ bundle.uploaded_image.url }}" alt="Current artwork for {{ bundle.title }}">
-                    {% elif bundle.image %}
-                        <img src="{% static bundle.image %}" alt="Current artwork for {{ bundle.title }}">
+                    {% if bundle.image_url %}
+                        <img src="{{ bundle.image_url }}" alt="Current artwork for {{ bundle.title }}">
                     {% else %}
                         <span>No artwork uploaded</span>
                     {% endif %}

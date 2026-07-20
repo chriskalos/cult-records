@@ -21,8 +21,10 @@ services:
         value: "0"
       - key: CUSTOM_DOMAIN
         value: cult.chriskalos.xyz
-      - key: SERVE_MEDIA_FILES
-        value: "1"
+      - key: CLOUDINARY_URL
+        sync: false
+      - key: CLOUDINARY_MEDIA_MIGRATION_ORIGIN
+        value: https://cult.chriskalos.xyz/media/
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: STRIPE_WEBHOOK_SECRET
