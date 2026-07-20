@@ -100,6 +100,10 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 | RapidFuzz | Search relevance scoring | Provides efficient fuzzy string comparison for misspelling-tolerant catalogue search. |
 | Pillow | Uploaded image validation | Lets Django verify and store real catalogue artwork and Human Asset portrait uploads. |
 | Stripe Python library | Test-mode Checkout Session creation, retrieval, and webhook signature verification | Connects the Django server to Stripe's hosted sandbox checkout without handling card details locally. |
+| Gunicorn | Production WSGI server | Runs Django behind Render's HTTPS proxy and binds to the port supplied by the platform. |
+| WhiteNoise | Production static-file serving | Serves compressed, cacheable CSS, JavaScript, and bundled images directly from the Django service. |
+| Render PostgreSQL, Psycopg, and dj-database-url | Deployed relational data storage and connection configuration | Keeps account, catalogue, review, cart, order, and HAM data outside the web service's ephemeral filesystem. |
+| Render Blueprint | Deployment configuration | Provisions the web service and PostgreSQL database from the version-controlled `render.yaml` file. |
 | HTML and Django templates | Page structure and server-rendered content | Produce semantic pages while allowing shared layouts and reusable components. |
 | CSS | Visual identity, responsive refinements, CD/LP artwork presentation, and the HAM after-hours office treatment | Applies the Cult Records design system and packaging effects without an external 3D library. |
 | Bootstrap 5.3.3 | Responsive grid, navigation, forms, cards, dropdowns, modal behavior, and utility classes | Provides an accessible responsive component baseline that is customized by the project stylesheet. |
@@ -206,6 +210,14 @@ uv run python manage.py runserver
 ```
 
 `uv` creates the virtual environment and installs the versions recorded in `uv.lock`. The standard Python instructions install the same resolved dependency versions from `requirements.txt`.
+
+## Render deployment
+
+The repository includes a Render Blueprint in `render.yaml`. It provisions a free Python web service and a free PostgreSQL database in Render's Frankfurt region. The build installs the locked requirements, collects static files, and applies Django migrations. Gunicorn then runs the application on Render's assigned port.
+
+Create a Blueprint from this repository in the Render Dashboard and apply it. Render generates the production `SECRET_KEY` and connects the application to PostgreSQL automatically. `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` are optional secret fields. Leave them empty if checkout does not need to be active, or provide sandbox values to enable it.
+
+The free PostgreSQL instance is intended for demonstrations and expires after 30 days unless it is upgraded. The free web service also uses an ephemeral filesystem. Bundled catalogue artwork remains available because WhiteNoise serves it from the deployed application, but files uploaded through the admin panel can disappear after a restart or deployment. Use a paid persistent disk or an object-storage service before relying on uploaded media in a long-running deployment.
 
 ## Stripe sandbox setup
 
