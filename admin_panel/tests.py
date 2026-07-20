@@ -382,6 +382,7 @@ class AdminUserManagementTests(TestCase):
                 "is_active": "on",
                 "role": UserRole.EDITOR,
             },
+            follow=True,
         )
 
         self.user.refresh_from_db()
@@ -391,6 +392,8 @@ class AdminUserManagementTests(TestCase):
         )
         self.assertEqual(self.user.username, "renamed-listener")
         self.assertEqual(role_for_user(self.user), UserRole.EDITOR)
+        self.assertContains(response, 'class="admin-messages"')
+        self.assertContains(response, "User renamed-listener has been updated.")
         self.assertTrue(
             AdminActivity.objects.filter(
                 action=AdminActivity.Action.ROLE,

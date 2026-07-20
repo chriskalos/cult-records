@@ -9,21 +9,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&display=swap" rel="stylesheet">
-    <link href="{% static 'css/style.css' %}?v=2" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}?v=3" rel="stylesheet">
     {% block styles %}{% endblock %}
 </head>
 <body class="d-flex flex-column min-vh-100">
     {% include "home/includes/header.html" %}
 
     <main class="container flex-grow-1 py-4">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
+        {% block messages %}
+            {% include "home/includes/messages.html" %}
+        {% endblock %}
         {% block content %}{% endblock %}
     </main>
 

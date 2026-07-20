@@ -428,8 +428,13 @@ a:focus-visible {
     background: #102e22;
     border: 1px solid #27845a;
     color: #dff5e9;
-    margin-bottom: 1.5rem;
+    max-width: calc(100vw - 2rem);
     padding: 0.8rem 1rem;
+    position: fixed;
+    right: 1rem;
+    top: 1rem;
+    width: 32rem;
+    z-index: 1090;
 }
 
 .review-feedback.is-error:not(:empty) {
@@ -876,6 +881,22 @@ a:focus-visible {
     background: #380b10;
     border-color: var(--cult-red);
     color: #ffe8e6;
+}
+
+.site-messages {
+    inset: 1rem 1rem auto auto;
+    max-width: calc(100vw - 2rem);
+    position: fixed;
+    width: 32rem;
+    z-index: 1090;
+}
+
+.site-messages .alert {
+    margin-bottom: 0.75rem;
+}
+
+.site-messages .alert:last-child {
+    margin-bottom: 0;
 }
 
 .table {

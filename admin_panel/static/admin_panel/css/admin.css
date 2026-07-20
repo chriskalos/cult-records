@@ -303,7 +303,20 @@ code {
 }
 
 .admin-messages {
-    margin-bottom: 2rem;
+    max-width: calc(100vw - 2rem);
+    position: fixed;
+    right: 1rem;
+    top: 1rem;
+    width: 32rem;
+    z-index: 1090;
+}
+
+.admin-messages .alert {
+    margin-bottom: 0.75rem;
+}
+
+.admin-messages .alert:last-child {
+    margin-bottom: 0;
 }
 
 .admin-page-header {

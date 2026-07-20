@@ -233,6 +233,16 @@ class ProductDetailPageTests(TestCase):
             reverse("product_page:detail", args=["MDEVCTRYLP"]),
         )
 
+    def test_cart_message_uses_the_shared_notification_stack(self):
+        response = self.client.post(
+            reverse("cart:add", args=[self.product.pk]),
+            {"quantity": 1},
+            follow=True,
+        )
+
+        self.assertContains(response, "Page Album was added to your cart.")
+        self.assertContains(response, 'class="site-messages"')
+
 
 class ReviewFormTests(TestCase):
     def test_comment_is_optional_and_whitespace_becomes_empty(self):
