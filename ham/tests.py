@@ -176,14 +176,15 @@ class HamAccessTests(TestCase):
         self.assertContains(response, "The network is awake")
         self.assertContains(response, '<body class="d-flex flex-column min-vh-100 ham-page">')
         self.assertContains(response, "HAM-ATH-042")
-        self.assertContains(response, "The Spoon Protocol")
+        self.assertContains(
+            response,
+            "If a teaspoon is found standing upright, leave the room in a professional manner.",
+        )
         self.assertContains(response, "maplibre-gl-leaflet")
-        self.assertContains(response, "decentralized vampire network")
         self.assertContains(
             response,
             "Lena from HR says we should stop killing people cuz Legal is mad about it.",
         )
-        self.assertContains(response, "One is cursed only in mono")
         self.assertContains(response, "Positions are approximate. Accuracy encourages paperwork.")
         self.assertNotContains(
             response,
@@ -203,6 +204,9 @@ class HamAccessTests(TestCase):
 
         ham_styles = Path(finders.find("ham/css/ham.css")).read_text()
         self.assertIn('background-image: url("../images/fire.gif") !important;', ham_styles)
+        self.assertIn("--ham-acid: #f3f1ed;", ham_styles)
+        self.assertNotIn("#9cff9c", ham_styles)
+        self.assertIn("invert(0.85)", ham_styles)
         self.assertIsNotNone(finders.find("ham/images/fire.gif"))
 
     def test_asset_query_selects_a_visible_dossier(self):

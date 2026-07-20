@@ -1,5 +1,5 @@
 .ham-shell {
-    --ham-acid: #9cff9c;
+    --ham-acid: #f3f1ed;
     --ham-canvas: #40000b;
     --ham-cyan: #d3e1e9;
     --ham-cream: #d3e1e9;
@@ -514,9 +514,11 @@ body.ham-page > footer {
 }
 
 .ham-map-layout {
+    align-items: stretch;
     display: grid;
     gap: 1rem;
     grid-template-columns: minmax(0, 1.65fr) minmax(20rem, 0.75fr);
+    height: 35rem;
 }
 
 .ham-map-panel,
@@ -526,11 +528,17 @@ body.ham-page > footer {
     min-width: 0;
 }
 
+.ham-map-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
 .ham-map {
     background:
         linear-gradient(rgba(113, 0, 0, 0.2), rgba(8, 0, 0, 0.42)),
         var(--ham-panel-deep);
-    height: 32rem;
+    height: 100%;
     overflow: hidden;
     position: relative;
     width: 100%;
@@ -538,6 +546,8 @@ body.ham-page > footer {
 }
 
 .ham-map-stage {
+    flex: 1 1 auto;
+    min-height: 0;
     position: relative;
 }
 
@@ -562,7 +572,7 @@ body.ham-page > footer {
 }
 
 .ham-map .leaflet-tile-pane {
-    filter: grayscale(1) contrast(1.4) brightness(0.65);
+    filter: grayscale(1) invert(0.85) brightness(0.62) contrast(1.35);
 }
 
 .ham-map .leaflet-control-zoom a,
@@ -644,7 +654,7 @@ body.ham-page > footer {
 }
 
 .ham-dossier {
-    height: calc(32rem + 2.6rem);
+    height: 100%;
     overflow-y: auto;
     scrollbar-color: var(--ham-acid) var(--ham-panel);
     scrollbar-gutter: stable;
@@ -1140,6 +1150,18 @@ body.ham-page > footer {
     .ham-map-layout,
     .ham-secondary-grid {
         grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ham-map-layout {
+        height: auto;
+    }
+
+    .ham-map-panel {
+        height: auto;
+    }
+
+    .ham-map-stage {
+        flex: none;
     }
 
     .ham-panel + .ham-panel {
