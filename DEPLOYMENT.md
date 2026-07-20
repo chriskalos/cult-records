@@ -116,24 +116,24 @@ In Cloudflare:
 7. Leave the TTL on **Auto**.
 8. Remove any `AAAA` record for the exact hostname `cult.chriskalos.xyz`. Do not remove unrelated records for the rest of the domain.
 
-Return to Render's **Custom Domains** section and select **Verify**. DNS changes can take several minutes to propagate. Once verification succeeds, wait for Render to report that the TLS certificate is issued and valid. Open `https://cult.chriskalos.xyz` and confirm that the page loads before enabling Cloudflare proxying.
+Return to Render's **Custom Domains** section and select **Verify**. DNS changes can take several minutes to propagate. Once verification succeeds, wait for Render to report that the TLS certificate is issued and valid. Open `https://cult.chriskalos.xyz` and confirm that the page loads.
 
-### Enable Cloudflare proxying
+### Keep the record on DNS only
 
-Proxying is optional. The domain can remain on **DNS only** permanently.
+Keep the `cult` CNAME set to **DNS only**, shown as a gray cloud. Do not change it to **Proxied** after Render verifies the domain.
 
-To enable it after Render has verified the domain and issued its certificate:
+Cloudflare proxying was tested with this deployment after Render had verified the hostname and issued its certificate. The proxied route did not work reliably and returned **Error 1000: DNS points to prohibited IP**. The working configuration is:
 
-1. In Cloudflare, open **SSL/TLS** > **Overview**.
-2. Set the encryption mode to **Full (strict)**.
-3. Return to **DNS** > **Records**.
-4. Change the `cult` CNAME from **DNS only** to **Proxied**, shown as an orange cloud.
-5. Leave the target as `cult-records.onrender.com`.
-6. Open the custom domain again and confirm that it still loads over HTTPS.
+- Type: `CNAME`
+- Name: `cult`
+- Target: `cult-records.onrender.com`
+- Proxy status: **DNS only**
+- TTL: **Auto**
+- No `A` or `AAAA` record for the same hostname
 
-Do not enable Authenticated Origin Pulls for this setup, and do not add a **Cache Everything** rule for the Django site. Normal Cloudflare proxying is sufficient.
+With DNS-only routing, visitors still receive HTTPS directly through Render's managed certificate. Cloudflare continues to provide the domain's authoritative DNS, but its HTTP proxy and cache are not placed in front of the Render service.
 
-If Cloudflare shows **Error 1000: DNS points to prohibited IP**, switch the record back to **DNS only**. Confirm that the CNAME still points directly to the service's `onrender.com` hostname, confirm that Render shows the custom hostname as verified, and remove any conflicting `A` or `AAAA` record for `cult`. After Render's certificate is valid, proxying can be tried again.
+If Cloudflare shows **Error 1000: DNS points to prohibited IP**, switch the record back to **DNS only**. Confirm that the CNAME points directly to the service's `onrender.com` hostname, confirm that Render shows the custom hostname as verified, and remove any conflicting `A` or `AAAA` record for `cult`. Do not turn proxying back on for this deployment.
 
 ## 7. Enable Stripe sandbox checkout, if required
 
@@ -198,7 +198,7 @@ A fresh deployment is complete when all of the following are true:
 - Static CSS, JavaScript, fonts, and bundled images load correctly.
 - Render shows the custom domain as verified and its certificate as valid.
 - The custom domain loads over HTTPS.
-- If Cloudflare proxying is enabled, the record is orange-clouded and SSL/TLS mode is **Full (strict)**.
+- The Cloudflare `cult` CNAME remains **DNS only**, shown as a gray cloud.
 - If Stripe is enabled, sandbox checkout and the signed webhook both succeed.
 - The database expiration date and the limitations of uploaded media have been recorded by the person maintaining the deployment.
 
@@ -209,4 +209,4 @@ A fresh deployment is complete when all of the following are true:
 - [Render free-tier limitations](https://render.com/docs/free)
 - [Render custom domains](https://render.com/docs/custom-domains)
 - [Configuring Cloudflare DNS for Render](https://render.com/docs/configure-cloudflare-dns)
-- [Cloudflare Full (strict) SSL mode](https://developers.cloudflare.com/ssl/origin-configuration/ssl-modes/full-strict/)
+- [Cloudflare Error 1000](https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-1xxx-errors/error-1000/)
