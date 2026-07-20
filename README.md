@@ -219,7 +219,7 @@ Create a Blueprint from this repository in the Render Dashboard and apply it. Re
 
 The free PostgreSQL instance is intended for demonstrations and expires after 30 days unless it is upgraded. The free web service also uses an ephemeral filesystem. Bundled catalogue artwork remains available because WhiteNoise serves it from the deployed application, but files uploaded through the admin panel can disappear after a restart or deployment. Use a paid persistent disk or an object-storage service before relying on uploaded media in a long-running deployment.
 
-The deployed application uses `cult.chriskalos.xyz` as its custom domain. Cloudflare DNS should define a `cult` CNAME pointing to `cult-records.onrender.com`. Keep the record set to DNS only while Render verifies the hostname and issues its TLS certificate. If Cloudflare proxying is enabled later, its SSL mode must be Full (strict).
+The deployed application uses `cult.chriskalos.xyz` as its custom domain. Cloudflare DNS should define a `cult` CNAME pointing to `cult-records.onrender.com`. Keep the record set to DNS only, including after Render verifies the hostname and issues its TLS certificate. Cloudflare proxying did not fully work for this deployment, so the `cult` record should remain unproxied.
 
 ## Stripe sandbox setup
 
