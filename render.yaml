@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: cult-records
+    runtime: python
+    plan: free
+    region: frankfurt
+    buildCommand: ./build.sh
+    startCommand: gunicorn cultrecords.wsgi:application --bind 0.0.0.0:$PORT
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cult-records-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "0"
+      - key: SERVE_MEDIA_FILES
+        value: "1"
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+
+databases:
+  - name: cult-records-db
+    plan: free
+    region: frankfurt
+    databaseName: cult_records
+    user: cult_records
+    ipAllowList: []
