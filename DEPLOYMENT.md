@@ -122,7 +122,7 @@ Return to Render's **Custom Domains** section and select **Verify**. DNS changes
 
 Keep the `cult` CNAME set to **DNS only**, shown as a gray cloud. Do not change it to **Proxied** after Render verifies the domain.
 
-Cloudflare proxying was tested with this deployment after Render had verified the hostname and issued its certificate. The proxied route did not work reliably and returned **Error 1000: DNS points to prohibited IP**. The working configuration is:
+Cloudflare proxying was tested with this deployment after Render had verified the hostname and issued its certificate, but the proxied route did not fully work. The working configuration is:
 
 - Type: `CNAME`
 - Name: `cult`
@@ -133,7 +133,7 @@ Cloudflare proxying was tested with this deployment after Render had verified th
 
 With DNS-only routing, visitors still receive HTTPS directly through Render's managed certificate. Cloudflare continues to provide the domain's authoritative DNS, but its HTTP proxy and cache are not placed in front of the Render service.
 
-If Cloudflare shows **Error 1000: DNS points to prohibited IP**, switch the record back to **DNS only**. Confirm that the CNAME points directly to the service's `onrender.com` hostname, confirm that Render shows the custom hostname as verified, and remove any conflicting `A` or `AAAA` record for `cult`. Do not turn proxying back on for this deployment.
+If the custom domain does not work, confirm that the record is still set to **DNS only**, the CNAME points directly to the service's `onrender.com` hostname, Render shows the custom hostname as verified, and there is no conflicting `A` or `AAAA` record for `cult`. Do not turn proxying on for this deployment.
 
 ## 7. Enable Stripe sandbox checkout, if required
 
@@ -209,4 +209,3 @@ A fresh deployment is complete when all of the following are true:
 - [Render free-tier limitations](https://render.com/docs/free)
 - [Render custom domains](https://render.com/docs/custom-domains)
 - [Configuring Cloudflare DNS for Render](https://render.com/docs/configure-cloudflare-dns)
-- [Cloudflare Error 1000](https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-1xxx-errors/error-1000/)
