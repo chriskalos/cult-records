@@ -120,3 +120,29 @@ class CloudinaryMigrationCommandTests(TestCase):
 
         product.refresh_from_db()
         self.assertFalse(product.uploaded_image)
+
+    @override_settings(CLOUDINARY_MEDIA_MIGRATION_ORIGIN="")
+    @patch("home.management.commands.migrate_media_to_cloudinary.uploader.upload")
+    @patch(
+        "home.management.commands.migrate_media_to_cloudinary.api.resource",
+        side_effect=NotFound,
+    )
+    def test_missing_reference_is_cleared_without_a_migration_origin(
+        self,
+        resource,
+        upload,
+    ):
+        product = Product.objects.get(product_id="MDEVCTRYCD")
+        product.uploaded_image = "products/MDEVCTRYCD/missing.png"
+        product.save(update_fields=("uploaded_image",))
+
+        call_command(
+            "migrate_media_to_cloudinary",
+            clear_missing=True,
+            stdout=StringIO(),
+            stderr=StringIO(),
+        )
+
+        product.refresh_from_db()
+        self.assertFalse(product.uploaded_image)
+        upload.assert_not_called()

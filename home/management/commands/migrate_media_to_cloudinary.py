@@ -27,6 +27,15 @@ class Command(BaseCommand):
         public_id = str(path.with_suffix("")) if image_format else str(path)
         return public_id, image_format
 
+    def _clear_reference(self, instance, field_name, current_name):
+        type(instance).objects.filter(pk=instance.pk).update(**{field_name: ""})
+        self.stderr.write(
+            self.style.WARNING(
+                f"Cleared missing legacy media reference {current_name}."
+            )
+        )
+        return "cleared"
+
     def _migrate_field(self, instance, field_name, origin, clear_missing):
         field = getattr(instance, field_name)
         if not field:
@@ -38,6 +47,12 @@ class Command(BaseCommand):
             result = api.resource(public_id, resource_type="image")
         except NotFound:
             if not origin:
+                if clear_missing:
+                    return self._clear_reference(
+                        instance,
+                        field_name,
+                        current_name,
+                    )
                 raise CommandError(
                     f"CLOUDINARY_MEDIA_MIGRATION_ORIGIN is required to copy {current_name}."
                 )
@@ -57,15 +72,7 @@ class Command(BaseCommand):
                     raise CommandError(
                         f"The legacy media file no longer exists at {source_url}."
                     )
-                type(instance).objects.filter(pk=instance.pk).update(
-                    **{field_name: ""}
-                )
-                self.stderr.write(
-                    self.style.WARNING(
-                        f"Cleared missing legacy media reference {current_name}."
-                    )
-                )
-                return "cleared"
+                return self._clear_reference(instance, field_name, current_name)
 
         stored_format = result.get("format") or current_format
         stored_name = (
