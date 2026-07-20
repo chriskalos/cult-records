@@ -201,6 +201,10 @@ class HamAccessTests(TestCase):
         self.assertIn("inertia: false", map_script)
         self.assertNotIn("ham-spectacle-muted", map_script)
 
+        ham_styles = Path(finders.find("ham/css/ham.css")).read_text()
+        self.assertIn('background-image: url("../images/fire.gif") !important;', ham_styles)
+        self.assertIsNotNone(finders.find("ham/images/fire.gif"))
+
     def test_asset_query_selects_a_visible_dossier(self):
         HamClearance.objects.create(user=self.user, is_enlightened=True)
         self.client.force_login(self.user)

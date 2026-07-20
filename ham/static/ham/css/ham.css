@@ -1,23 +1,23 @@
 .ham-shell {
-    --ham-acid: #d7ff55;
-    --ham-canvas: #16091d;
-    --ham-cyan: #6de5df;
-    --ham-cream: #fff6dc;
-    --ham-lilac: #c9a7df;
-    --ham-line: #806790;
-    --ham-muted: #c5b7cc;
-    --ham-panel: #281332;
-    --ham-panel-deep: #0d0911;
-    --ham-plum: #4d205b;
-    --ham-yellow: #ffd863;
-    --ham-grid: rgba(215, 255, 85, 0.055);
+    --ham-acid: #9cff9c;
+    --ham-canvas: #40000b;
+    --ham-cyan: #d3e1e9;
+    --ham-cream: #d3e1e9;
+    --ham-lilac: #d3e1e9;
+    --ham-line: rgba(211, 225, 233, 0.48);
+    --ham-muted: #a9bac7;
+    --ham-panel: #180005;
+    --ham-panel-deep: #080000;
+    --ham-plum: #710000;
+    --ham-yellow: #d3e1e9;
+    --ham-grid: rgba(211, 225, 233, 0.045);
     --cult-black: var(--ham-panel-deep);
     --cult-bone: var(--ham-cream);
     --cult-coal: var(--ham-panel);
     --cult-muted: var(--ham-muted);
     --cult-red: var(--ham-plum);
     --cult-red-bright: var(--ham-acid);
-    --cult-steel: #3b1b47;
+    --cult-steel: #330009;
     background-color: var(--ham-canvas);
     background-image:
         linear-gradient(var(--ham-grid) 1px, transparent 1px),
@@ -32,19 +32,27 @@
 
 body.ham-page {
     background:
-        radial-gradient(circle at 18% 6%, rgba(109, 229, 223, 0.15), transparent 24rem),
-        radial-gradient(circle at 82% 12%, rgba(215, 255, 85, 0.11), transparent 28rem),
-        #0c0610;
+        radial-gradient(circle at 50% 0, rgba(113, 0, 0, 0.7), transparent 34rem),
+        #190004;
 }
 
 body.ham-page main.container {
     max-width: 1680px;
 }
 
-body.ham-page header .navbar,
+body.ham-page header .navbar {
+    background-color: #710000 !important;
+    background-image: url("../images/fire.gif") !important;
+    background-position: top center !important;
+    background-repeat: no-repeat !important;
+    background-size: 100% 100% !important;
+    background-blend-mode: multiply;
+    border-color: #d3e1e9;
+}
+
 body.ham-page > footer {
-    background: var(--ham-page-plum, #35123f) !important;
-    border-color: #d7ff55;
+    background: #710000 !important;
+    border-color: #d3e1e9;
 }
 
 .ham-shell h1,
@@ -62,11 +70,11 @@ body.ham-page > footer {
 }
 
 .ham-shell a {
-    color: var(--ham-acid);
+    color: var(--ham-cream);
 }
 
 .ham-shell a:hover {
-    color: var(--ham-cyan);
+    color: var(--ham-acid);
 }
 
 /* Keep Leaflet's essential layout intact if its CDN stylesheet is unavailable. */
@@ -181,7 +189,7 @@ body.ham-page > footer {
 
 .ham-intro {
     align-items: stretch;
-    border-bottom: 0.4rem solid var(--ham-acid);
+    border-bottom: 0.25rem solid var(--ham-cream);
     display: grid;
     gap: clamp(2rem, 5vw, 5rem);
     grid-template-columns: minmax(0, 1fr) minmax(17rem, 22rem);
@@ -189,7 +197,7 @@ body.ham-page > footer {
 }
 
 .ham-intro h1 {
-    color: var(--ham-acid);
+    color: var(--ham-cream);
     font-size: clamp(3rem, 6.5vw, 6.4rem);
     line-height: 0.86;
     margin-bottom: 1rem;
@@ -238,9 +246,9 @@ body.ham-page > footer {
 
 .ham-network-state {
     align-items: center;
-    background: var(--ham-acid);
+    background: rgba(0, 0, 0, 0.62);
     border: 2px solid var(--ham-cream);
-    color: var(--ham-panel-deep);
+    color: var(--ham-acid);
     display: flex;
     flex: 0 0 auto;
     gap: 0.65rem;
@@ -249,8 +257,8 @@ body.ham-page > footer {
 }
 
 .ham-network-state span {
-    background: var(--ham-plum);
-    border: 2px solid var(--ham-panel-deep);
+    background: var(--ham-acid);
+    border: 1px solid var(--ham-cream);
     border-radius: 50%;
     height: 0.65rem;
     width: 0.65rem;
@@ -295,20 +303,19 @@ body.ham-page > footer {
 
 .ham-night-memo {
     align-items: center;
-    background: var(--ham-yellow);
-    border: 2px solid var(--ham-panel-deep);
-    border-left: 0.75rem solid var(--ham-cyan);
-    color: var(--ham-panel-deep);
+    background: rgba(0, 0, 0, 0.62);
+    border: 2px solid var(--ham-cream);
+    border-left: 0.75rem solid var(--ham-plum);
+    color: var(--ham-cream);
     display: grid;
     gap: 0.35rem 1.5rem;
     grid-template-columns: auto minmax(0, 1fr) auto;
     padding: 1rem 1.25rem;
-    transform: rotate(-0.3deg);
 }
 
 .ham-night-memo span,
 .ham-night-memo small {
-    color: var(--ham-plum);
+    color: var(--ham-muted);
     font-size: 0.7rem;
     font-weight: 800;
     letter-spacing: 0.1em;
@@ -316,7 +323,7 @@ body.ham-page > footer {
 }
 
 .ham-night-memo span {
-    color: var(--ham-panel-deep);
+    color: var(--ham-acid);
 }
 
 .ham-night-memo p {
@@ -337,7 +344,7 @@ body.ham-page > footer {
 }
 
 .ham-stat-grid article {
-    background: rgba(40, 19, 50, 0.62);
+    background: rgba(0, 0, 0, 0.55);
     border: 0;
     border-right: 1px dashed var(--ham-line);
     display: flex;
@@ -378,7 +385,7 @@ body.ham-page > footer {
 
 .ham-night-briefing {
     align-items: start;
-    background: rgba(13, 9, 17, 0.45);
+    background: rgba(0, 0, 0, 0.55);
     border-bottom: 2px dashed var(--ham-cyan);
     border-top: 2px dashed var(--ham-cyan);
     display: grid;
@@ -468,16 +475,16 @@ body.ham-page > footer {
 }
 
 .ham-map-filters .active {
-    background: var(--ham-acid);
+    background: var(--ham-plum);
     border-color: var(--ham-cream);
-    color: var(--ham-panel-deep);
+    color: var(--ham-cream);
 }
 
 .ham-map-filters .btn:hover,
 .ham-map-filters .btn:focus-visible {
-    background: var(--ham-cyan);
+    background: #970018;
     border-color: var(--ham-cream);
-    color: var(--ham-panel-deep);
+    color: var(--ham-cream);
 }
 
 .ham-map-controls {
@@ -521,7 +528,7 @@ body.ham-page > footer {
 
 .ham-map {
     background:
-        linear-gradient(rgba(77, 32, 91, 0.18), rgba(13, 9, 17, 0.35)),
+        linear-gradient(rgba(113, 0, 0, 0.2), rgba(8, 0, 0, 0.42)),
         var(--ham-panel-deep);
     height: 32rem;
     overflow: hidden;
@@ -547,21 +554,21 @@ body.ham-page > footer {
 }
 
 .ham-map-notice {
-    background: var(--ham-acid);
+    background: rgba(0, 0, 0, 0.82);
     border-top: 2px solid var(--ham-lilac);
-    color: var(--ham-panel-deep);
+    color: var(--ham-acid);
     margin: 0;
     padding: 0.8rem 1rem;
 }
 
 .ham-map .leaflet-tile-pane {
-    filter: grayscale(0.75) invert(0.86) sepia(0.38) hue-rotate(205deg) saturate(1.15) brightness(0.52) contrast(1.4);
+    filter: grayscale(1) contrast(1.4) brightness(0.65);
 }
 
 .ham-map .leaflet-control-zoom a,
 .ham-map .leaflet-control-attribution {
-    background: var(--ham-acid);
-    color: var(--ham-panel-deep);
+    background: var(--ham-plum);
+    color: var(--ham-cream);
 }
 
 .ham-map .leaflet-control-zoom {
@@ -582,12 +589,12 @@ body.ham-page > footer {
 
 .ham-map .leaflet-control-zoom a:hover,
 .ham-map .leaflet-control-zoom a:focus-visible {
-    background: var(--ham-cyan);
+    background: #970018;
 }
 
 .ham-map .leaflet-control-attribution,
 .ham-map .leaflet-control-attribution a {
-    color: var(--ham-panel-deep);
+    color: var(--ham-cream);
 }
 
 .ham-marker-shell {
@@ -609,7 +616,7 @@ body.ham-page > footer {
 .ham-map-marker.status-misplaced,
 .ham-map-marker.status-disputed {
     background: var(--ham-panel-deep);
-    border-color: var(--ham-acid);
+    border-color: var(--ham-cream);
 }
 
 .ham-map-marker.status-on_break {
@@ -624,16 +631,16 @@ body.ham-page > footer {
 }
 
 .ham-map .leaflet-tooltip {
-    background: var(--ham-yellow);
-    border: 2px solid var(--ham-panel-deep);
+    background: var(--ham-panel-deep);
+    border: 2px solid var(--ham-cream);
     border-radius: 0.35rem;
-    color: var(--ham-panel-deep);
+    color: var(--ham-cream);
     font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
     font-weight: 800;
 }
 
 .ham-map .leaflet-tooltip::before {
-    border-top-color: var(--ham-yellow);
+    border-top-color: var(--ham-panel-deep);
 }
 
 .ham-dossier {
@@ -660,9 +667,9 @@ body.ham-page > footer {
 
 .ham-dossier-banner {
     align-items: center;
-    background: var(--ham-lilac);
+    background: var(--ham-plum);
     border-bottom: 2px solid var(--ham-cream);
-    color: var(--ham-panel-deep);
+    color: var(--ham-cream);
     display: flex;
     font-size: 0.68rem;
     font-weight: 800;
@@ -712,17 +719,17 @@ body.ham-page > footer {
 }
 
 .ham-dossier-image-wrap img {
-    filter: grayscale(0.8) contrast(1.1);
+    filter: grayscale(1) contrast(1.4) brightness(0.75);
     height: 100%;
     object-fit: cover;
     width: 100%;
 }
 
 .ham-dossier-image-wrap > span {
-    background: var(--ham-yellow);
-    border: 2px solid var(--ham-panel-deep);
+    background: var(--ham-panel-deep);
+    border: 2px solid var(--ham-cream);
     bottom: 1rem;
-    color: var(--ham-panel-deep);
+    color: var(--ham-cream);
     font-size: 0.75rem;
     font-weight: 800;
     left: 1rem;
@@ -745,11 +752,11 @@ body.ham-page > footer {
 }
 
 .ham-status-active {
-    border-left-color: var(--ham-cyan);
+    border-left-color: var(--ham-acid);
 }
 
 .ham-status-on_break {
-    border-left-color: var(--ham-yellow);
+    border-left-color: var(--ham-cream);
 }
 
 .ham-dossier h3 {
@@ -846,7 +853,7 @@ body.ham-page > footer {
 
 .ham-directory-item {
     align-items: center;
-    background: rgba(40, 19, 50, 0.72);
+    background: rgba(0, 0, 0, 0.48);
     border: 0;
     border-bottom: 1px solid var(--ham-line);
     border-right: 1px solid var(--ham-line);
@@ -860,13 +867,13 @@ body.ham-page > footer {
 
 .ham-directory-item:hover,
 .ham-directory-item:focus-visible {
-    background: var(--ham-cyan);
-    color: var(--ham-panel-deep);
+    background: rgba(211, 225, 233, 0.14);
+    color: var(--ham-cream);
 }
 
 .ham-directory-item.active {
-    background: var(--ham-acid);
-    color: var(--ham-panel-deep);
+    background: var(--ham-plum);
+    color: var(--ham-cream);
 }
 
 .ham-directory-item[hidden] {
@@ -875,7 +882,7 @@ body.ham-page > footer {
 
 .ham-directory-item img {
     border: 2px solid var(--ham-lilac);
-    filter: grayscale(1);
+    filter: grayscale(1) contrast(1.4) brightness(0.75);
     flex: 0 0 auto;
     height: 3.2rem;
     object-fit: cover;
@@ -883,8 +890,8 @@ body.ham-page > footer {
 }
 
 .ham-directory-item.active img {
-    border-color: var(--ham-panel-deep);
-    filter: grayscale(0.4) contrast(1.05);
+    border-color: var(--ham-cream);
+    filter: grayscale(1) contrast(1.4) brightness(0.75);
 }
 
 .ham-directory-item span {
@@ -908,7 +915,7 @@ body.ham-page > footer {
 .ham-directory-item.active small,
 .ham-directory-item:hover small,
 .ham-directory-item:focus-visible small {
-    color: var(--ham-panel-deep);
+    color: var(--ham-cream);
 }
 
 .ham-secondary-grid {
@@ -991,7 +998,7 @@ body.ham-page > footer {
 }
 
 .ham-archive details {
-    background: rgba(40, 19, 50, 0.56);
+    background: rgba(0, 0, 0, 0.48);
     border: 0;
     border-bottom: 1px solid var(--ham-line);
     border-right: 1px solid var(--ham-line);
@@ -1013,9 +1020,9 @@ body.ham-page > footer {
 
 .ham-archive summary::before {
     align-items: center;
-    background: var(--ham-acid);
+    background: var(--ham-plum);
     border-radius: 50%;
-    color: var(--ham-panel-deep);
+    color: var(--ham-cream);
     content: "+";
     display: inline-flex;
     float: right;
@@ -1067,7 +1074,7 @@ body.ham-page > footer {
 }
 
 .ham-redaction span {
-    background: var(--ham-acid);
+    background: #000;
     display: block;
     height: 0.65rem;
 }
