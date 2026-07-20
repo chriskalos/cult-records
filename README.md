@@ -12,7 +12,7 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 - Every product links to a detail page with an optional release date, long description, and ordered track list.
 - CD and LP artwork uses CSS-based packaging geometry and subtle pointer-driven movement. The interaction is disabled for touch input and when the browser reports a reduced-motion preference.
 - Product IDs are manually assigned uppercase alphanumeric codes. LP, CD, Bundle, and Merch are controlled product categories rather than free-text values.
-- Product artwork can use existing static catalogue assets or uploaded JPEG, PNG, and WebP files. Uploaded files are validated as images and limited to 8 MB.
+- Product artwork can use existing static catalogue assets or uploaded JPEG, PNG, and WebP files. Uploaded files are validated as images, limited to 8 MB, and fitted into the artwork area without cropping.
 - Hidden products are removed from the home page, search results, and direct public product URLs.
 - Bundle pages list their component products, quantities, formats, and individual prices.
 
