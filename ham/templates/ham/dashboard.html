@@ -11,7 +11,7 @@
         crossorigin=""
     >
     <link rel="stylesheet" href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css">
-    <link href="{% static 'ham/css/ham.css' %}?v=4" rel="stylesheet">
+    <link href="{% static 'ham/css/ham.css' %}?v=5" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -100,16 +100,16 @@
                         <div id="ham-map" class="ham-map" role="application" aria-label="Interactive world map of human asset locations">
                             <p>Map interface loading. The dossier directory remains available below.</p>
                         </div>
-                        <div class="ham-map-hud" aria-hidden="true">
-                            <p>Locations approximate // last reviewed after sundown</p>
-                        </div>
                     </div>
                     <p class="ham-map-notice">Positions are approximate. Accuracy encourages paperwork.</p>
                 </div>
 
                 {% if selected_asset %}
-                    <article id="asset-dossier" class="ham-dossier" aria-live="polite">
-                        <p class="ham-dossier-banner">Human intermediary // confidential file</p>
+                    <article id="asset-dossier" class="ham-dossier" aria-live="polite" tabindex="0">
+                        <p class="ham-dossier-banner">
+                            Human intermediary // confidential file
+                            <span class="ham-dossier-scroll-cue" aria-hidden="true">&#8595;</span>
+                        </p>
                         <div class="ham-dossier-image-wrap">
                             <img
                                 id="dossier-portrait"
@@ -243,5 +243,5 @@
     ></script>
     <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
     <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet/leaflet-maplibre-gl.js"></script>
-    <script src="{% static 'ham/js/ham.js' %}?v=6"></script>
+    <script src="{% static 'ham/js/ham.js' %}?v=7"></script>
 {% endblock %}

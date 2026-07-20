@@ -14,6 +14,7 @@
 
     const assetsByCode = new Map(assets.map((asset) => [asset.code, asset]));
     const markersByCode = new Map();
+    const dossierNode = document.getElementById("asset-dossier");
     const dossier = {
         portrait: document.getElementById("dossier-portrait"),
         code: document.getElementById("dossier-code"),
@@ -35,6 +36,16 @@
     let selectedCode = document.querySelector(".ham-directory-item.active")?.dataset.hamAsset || assets[0].code;
     let activeFilter = "all";
     let map;
+
+    function updateDossierScrollState() {
+        if (!dossierNode) {
+            return;
+        }
+        const scrollable = dossierNode.scrollHeight > dossierNode.clientHeight + 2;
+        const atEnd = dossierNode.scrollTop + dossierNode.clientHeight >= dossierNode.scrollHeight - 2;
+        dossierNode.classList.toggle("is-scrollable", scrollable);
+        dossierNode.classList.toggle("is-at-end", atEnd);
+    }
 
     function isVisibleForFilter(asset) {
         if (activeFilter === "active") {
@@ -106,6 +117,7 @@
         dossier.notes.textContent = asset.notes;
         replaceObservationList(asset);
         updateSelectionStyles();
+        window.requestAnimationFrame(updateDossierScrollState);
 
         if (options.centerMap && map) {
             map.setView([asset.latitude, asset.longitude], Math.max(map.getZoom(), 5), {animate: false});
@@ -180,6 +192,9 @@
     document.querySelectorAll("[data-ham-filter]").forEach((button) => {
         button.addEventListener("click", () => applyFilter(button.dataset.hamFilter));
     });
+
+    dossierNode?.addEventListener("scroll", updateDossierScrollState, {passive: true});
+    window.addEventListener("resize", updateDossierScrollState);
 
     if (window.L) {
         mapNode.replaceChildren();

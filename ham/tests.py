@@ -173,13 +173,25 @@ class HamAccessTests(TestCase):
 
         self.assertContains(header_response, reverse("ham:dashboard"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "The night shift is permanent.")
+        self.assertContains(response, "The network is awake")
         self.assertContains(response, "HAM-ATH-042")
         self.assertContains(response, "The Spoon Protocol")
         self.assertContains(response, "maplibre-gl-leaflet")
         self.assertContains(response, "decentralized vampire network")
-        self.assertContains(response, "Distribution meeting moved to Crypt B")
+        self.assertContains(
+            response,
+            "Lena from HR says we should stop killing people cuz Legal is mad about it.",
+        )
         self.assertContains(response, "One is cursed only in mono")
+        self.assertContains(response, "Positions are approximate. Accuracy encourages paperwork.")
+        self.assertNotContains(
+            response,
+            "Locations approximate // last reviewed after sundown",
+        )
+        self.assertContains(
+            response,
+            'id="asset-dossier" class="ham-dossier" aria-live="polite" tabindex="0"',
+        )
 
         map_script = Path(finders.find("ham/js/ham.js")).read_text()
         self.assertIn("tiles.openfreemap.org/styles/dark", map_script)

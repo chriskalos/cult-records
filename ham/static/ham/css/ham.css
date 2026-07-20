@@ -84,8 +84,8 @@
 }
 
 .ham-map .leaflet-control-zoom {
-    margin-left: 0.65rem;
-    margin-top: 0.65rem;
+    margin-left: 1rem;
+    margin-top: 1rem;
 }
 
 .ham-map .leaflet-control-attribution {
@@ -449,26 +449,6 @@
     position: relative;
 }
 
-.ham-map-hud {
-    left: 0.85rem;
-    pointer-events: none;
-    position: absolute;
-    top: 0.85rem;
-    z-index: 700;
-}
-
-.ham-map-hud p {
-    background: rgba(8, 8, 9, 0.86);
-    border-left: 0.25rem solid var(--cult-red-bright);
-    color: var(--cult-bone);
-    font-size: 0.65rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    margin: 0;
-    padding: 0.55rem 0.7rem;
-    text-transform: uppercase;
-}
-
 .ham-map .leaflet-pane,
 .ham-map .leaflet-map-pane,
 .ham-map .leaflet-control-container {
@@ -506,6 +486,10 @@
 
 .ham-map .leaflet-control-zoom a {
     border-color: var(--ham-line);
+    font-size: 1.45rem;
+    height: 2.85rem;
+    line-height: 2.7rem;
+    width: 2.85rem;
 }
 
 .ham-map .leaflet-control-zoom a:hover,
@@ -567,18 +551,60 @@
 .ham-dossier {
     height: calc(32rem + 2.6rem);
     overflow-y: auto;
+    scrollbar-color: var(--cult-red-bright) var(--cult-coal);
+    scrollbar-gutter: stable;
+    scrollbar-width: auto;
+}
+
+.ham-dossier::-webkit-scrollbar {
+    width: 0.8rem;
+}
+
+.ham-dossier::-webkit-scrollbar-track {
+    background: var(--cult-coal);
+    border-left: 1px solid var(--ham-line);
+}
+
+.ham-dossier::-webkit-scrollbar-thumb {
+    background: var(--cult-red-bright);
+    border: 0.2rem solid var(--cult-coal);
 }
 
 .ham-dossier-banner {
+    align-items: center;
     background: var(--cult-coal);
     border-bottom: 1px solid var(--ham-line);
     color: var(--cult-muted);
+    display: flex;
     font-size: 0.68rem;
     font-weight: 800;
+    justify-content: space-between;
     letter-spacing: 0.1em;
     margin: 0;
     padding: 0.7rem 1rem;
+    position: sticky;
+    top: 0;
     text-transform: uppercase;
+    z-index: 3;
+}
+
+.ham-dossier-scroll-cue {
+    align-items: center;
+    border: 1px solid var(--cult-red-bright);
+    color: var(--cult-bone);
+    display: inline-flex;
+    flex: 0 0 auto;
+    font-size: 1rem;
+    height: 1.65rem;
+    justify-content: center;
+    margin-left: 1rem;
+    opacity: 0;
+    transition: opacity 120ms;
+    width: 1.65rem;
+}
+
+.ham-dossier.is-scrollable:not(.is-at-end) .ham-dossier-scroll-cue {
+    opacity: 1;
 }
 
 .ham-dossier-image-wrap {
@@ -1072,15 +1098,6 @@
     .ham-night-memo {
         margin-left: -0.25rem;
         margin-right: -0.25rem;
-    }
-
-    .ham-map-hud {
-        left: 0.6rem;
-        top: 0.6rem;
-    }
-
-    .ham-map-hud p {
-        max-width: 14rem;
     }
 
     .ham-map {
