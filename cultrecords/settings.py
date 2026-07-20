@@ -41,13 +41,22 @@ ALLOWED_HOSTS = [
     if host.strip()
 ]
 
-render_hostname = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
-if render_hostname:
-    ALLOWED_HOSTS.append(render_hostname)
+render_hostname = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "").strip()
+custom_domain = os.environ.get(
+    "CUSTOM_DOMAIN",
+    "cult.chriskalos.xyz" if IS_RENDER else "",
+).strip()
+production_hostnames = [
+    hostname for hostname in (render_hostname, custom_domain) if hostname
+]
 
-CSRF_TRUSTED_ORIGINS = (
-    [f"https://{render_hostname}"] if render_hostname else []
-)
+for hostname in production_hostnames:
+    if hostname not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(hostname)
+
+CSRF_TRUSTED_ORIGINS = [
+    f"https://{hostname}" for hostname in production_hostnames
+]
 
 
 # Application definition

@@ -7,6 +7,8 @@ services:
     buildCommand: ./build.sh
     startCommand: gunicorn cultrecords.wsgi:application --bind 0.0.0.0:$PORT
     healthCheckPath: /
+    domains:
+      - cult.chriskalos.xyz
     autoDeploy: true
     envVars:
       - key: DATABASE_URL
@@ -17,6 +19,8 @@ services:
         generateValue: true
       - key: DEBUG
         value: "0"
+      - key: CUSTOM_DOMAIN
+        value: cult.chriskalos.xyz
       - key: SERVE_MEDIA_FILES
         value: "1"
       - key: STRIPE_SECRET_KEY
