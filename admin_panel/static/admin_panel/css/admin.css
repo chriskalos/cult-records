@@ -996,6 +996,10 @@ code {
     object-fit: cover;
 }
 
+.admin-image-preview--artwork img {
+    object-fit: contain;
+}
+
 .admin-media-fields {
     display: grid;
     align-content: start;

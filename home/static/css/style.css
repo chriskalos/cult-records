@@ -562,8 +562,12 @@ a:focus-visible {
 .product-media__placeholder {
     display: block;
     height: 100%;
-    object-fit: cover;
     width: 100%;
+}
+
+.product-media__artwork {
+    background-color: var(--cult-coal);
+    object-fit: contain;
 }
 
 .product-media__placeholder {
@@ -832,13 +836,12 @@ a:focus-visible {
 .product-media--generic .product-media__artwork,
 .product-media--generic .product-media__placeholder {
     border: 1px solid var(--cult-border);
-    bottom: 8%;
-    height: auto;
+    box-sizing: border-box;
+    height: 84%;
     left: 8%;
     position: absolute;
-    right: 8%;
     top: 8%;
-    width: auto;
+    width: 84%;
 }
 
 .text-bg-primary {

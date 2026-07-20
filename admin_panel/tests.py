@@ -567,6 +567,14 @@ class AdminProductManagementTests(TestCase):
         editor_response = self.client.get(reverse("admin_panel:products"))
         self.assertNotContains(editor_response, "Add product")
 
+    def test_product_form_explains_that_artwork_is_not_cropped(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.get(reverse("admin_panel:product_create"))
+
+        self.assertContains(response, "admin-image-preview--artwork")
+        self.assertContains(response, "The full image is shown without cropping.")
+
     def test_admin_can_create_product_with_image_and_product_page_data(self):
         self.client.force_login(self.admin)
         data = self._product_data()

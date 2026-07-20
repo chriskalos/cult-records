@@ -74,7 +74,7 @@
                 </div>
             </div>
             <div class="admin-media-form">
-                <div class="admin-image-preview">
+                <div class="admin-image-preview admin-image-preview--artwork">
                     {% if bundle.uploaded_image %}
                         <img src="{{ bundle.uploaded_image.url }}" alt="Current artwork for {{ bundle.title }}">
                     {% elif bundle.image %}
@@ -86,7 +86,7 @@
                 <div class="admin-media-fields">
                     {% include "admin_panel/includes/form_field.html" with field=form.uploaded_image %}
                     {% if form.remove_uploaded_image %}{% include "admin_panel/includes/form_field.html" with field=form.remove_uploaded_image %}{% endif %}
-                    <p class="form-text mb-0">JPEG, PNG, or WebP. Maximum file size 8 MB.</p>
+                    <p class="form-text mb-0">JPEG, PNG, or WebP. Maximum file size 8 MB. The full image is shown without cropping.</p>
                 </div>
             </div>
         </section>
