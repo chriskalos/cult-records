@@ -14,7 +14,7 @@ Cult Records is a responsive record catalogue and sandbox storefront built with 
 - Provides a custom role-protected admin panel at `/admin/` for catalogue, bundle, review, user, and activity management.
 - Includes a protected Human Assets Manager, or HAM, with fictional network records and an interactive world map. An account unlocks HAM when one paid order contains exactly 42 copies of product `CLXYZCD`.
 
-The public catalogue and admin panel use related Cult Records typography and square geometry. HAM intentionally breaks from those conventions with a brighter after-hours terminal style, while all three interfaces retain responsive layouts, visible keyboard focus, and reduced-motion support.
+The public catalogue and admin panel use related Cult Records typography and square geometry. HAM intentionally breaks from those conventions with a Cult Radio-inspired surveillance terminal, a dried-blood palette, and an animated navbar treatment. All three interfaces retain responsive layouts and visible keyboard focus.
 
 ## Demonstration accounts
 
