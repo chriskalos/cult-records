@@ -6,7 +6,7 @@ services:
     region: frankfurt
     buildCommand: ./build.sh
     startCommand: gunicorn cultrecords.wsgi:application --bind 0.0.0.0:$PORT
-    healthCheckPath: /
+    healthCheckPath: /health/
     domains:
       - cult.chriskalos.xyz
     autoDeploy: true

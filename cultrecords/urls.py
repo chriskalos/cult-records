@@ -18,7 +18,10 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
 
+from .views import health_check
+
 urlpatterns = [
+    path('health/', health_check, name='health_check'),
     path('admin/', include('admin_panel.urls')),
     path('accounts/', include('accounts.urls')),
     path('cart/', include('cart.urls')),
