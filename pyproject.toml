@@ -5,8 +5,12 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "dj-database-url>=3.0.1",
     "django>=6.0.7",
+    "gunicorn>=23.0.0",
     "pillow>=12.3.0",
+    "psycopg[binary]>=3.2.9",
     "rapidfuzz>=3.14.5",
     "stripe>=15.3.1",
+    "whitenoise[brotli]>=6.9.0",
 ]
