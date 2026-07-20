@@ -197,6 +197,12 @@ class CartTests(TestCase):
 
 class CheckoutTests(TestCase):
     def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            username="checkout-user",
+            email="checkout@example.com",
+            password="test-password",
+        )
+        self.client.force_login(self.user)
         self.album = Product.objects.create(
             product_id="CHECKOUTLP",
             artist="Checkout Artist",
@@ -221,6 +227,7 @@ class CheckoutTests(TestCase):
 
     def _create_pending_order(self):
         order = Order.objects.create(
+            user=self.user,
             currency="eur",
             subtotal=Decimal("25.00"),
             stripe_checkout_session_id="cs_test_confirmed",
@@ -256,6 +263,49 @@ class CheckoutTests(TestCase):
         create_session.assert_not_called()
         self.assertFalse(Order.objects.exists())
 
+    @override_settings(STRIPE_SECRET_KEY="sk_test_example")
+    def test_anonymous_user_cannot_start_checkout(self):
+        self.client.logout()
+        self._put_products_in_cart()
+
+        with patch("cart.checkout.stripe.checkout.Session.create") as create_session:
+            response = self.client.post(reverse("cart:checkout_start"))
+
+        login_url = reverse("accounts:login")
+        checkout_url = reverse("cart:checkout_start")
+        self.assertRedirects(response, f"{login_url}?next={checkout_url}")
+        create_session.assert_not_called()
+        self.assertFalse(Order.objects.exists())
+
+    @override_settings(STRIPE_SECRET_KEY="sk_test_example")
+    def test_anonymous_cart_prompts_user_to_sign_in_for_checkout(self):
+        self.client.logout()
+        self._put_products_in_cart()
+
+        response = self.client.get(reverse("cart:detail"))
+
+        self.assertContains(response, "Sign in to checkout")
+        self.assertNotContains(response, 'action="/cart/checkout/"')
+
+    def test_user_cannot_view_another_users_checkout(self):
+        order = self._create_pending_order()
+        other_user = get_user_model().objects.create_user(
+            username="other-checkout-user",
+            password="test-password",
+        )
+        self.client.force_login(other_user)
+
+        success_response = self.client.get(
+            reverse("cart:checkout_success"),
+            {"session_id": order.stripe_checkout_session_id},
+        )
+        cancel_response = self.client.get(
+            reverse("cart:checkout_cancel", args=[order.pk])
+        )
+
+        self.assertEqual(success_response.status_code, 404)
+        self.assertEqual(cancel_response.status_code, 404)
+
     @override_settings(STRIPE_SECRET_KEY="")
     def test_missing_stripe_key_prevents_checkout(self):
         self._put_products_in_cart()
@@ -281,12 +331,6 @@ class CheckoutTests(TestCase):
     @override_settings(STRIPE_SECRET_KEY="sk_test_example", STRIPE_CURRENCY="eur")
     @patch("cart.checkout.stripe.checkout.Session.create")
     def test_checkout_snapshots_cart_and_redirects_to_stripe(self, create_session):
-        user = get_user_model().objects.create_user(
-            username="checkout-user",
-            email="checkout@example.com",
-            password="test-password",
-        )
-        self.client.force_login(user)
         self._put_products_in_cart()
         create_session.return_value = SimpleNamespace(
             id="cs_test_created",
@@ -298,7 +342,7 @@ class CheckoutTests(TestCase):
         self.assertEqual(response.status_code, 303)
         self.assertEqual(response["Location"], create_session.return_value.url)
         order = Order.objects.get()
-        self.assertEqual(order.user, user)
+        self.assertEqual(order.user, self.user)
         self.assertEqual(order.status, Order.Status.PENDING)
         self.assertEqual(order.subtotal, Decimal("29.25"))
         self.assertEqual(order.stripe_checkout_session_id, "cs_test_created")

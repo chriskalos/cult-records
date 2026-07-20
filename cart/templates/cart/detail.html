@@ -76,16 +76,22 @@
                         </dl>
                         <div class="checkout-notice mb-3">
                             <strong class="d-block">Secure checkout</strong>
-                            {% if checkout_ready %}
+                            {% if not user.is_authenticated %}
+                                <span>Sign in to your account before continuing to checkout.</span>
+                            {% elif checkout_ready %}
                                 <span>You will continue to Stripe to complete your payment.</span>
                             {% else %}
                                 <span>Checkout is currently unavailable.</span>
                             {% endif %}
                         </div>
-                        <form action="{% url 'cart:checkout_start' %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-primary w-100" {% if not checkout_ready %}disabled{% endif %}>Checkout</button>
-                        </form>
+                        {% if user.is_authenticated %}
+                            <form action="{% url 'cart:checkout_start' %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary w-100" {% if not checkout_ready %}disabled{% endif %}>Checkout</button>
+                            </form>
+                        {% else %}
+                            <a href="{% url 'accounts:login' %}?next={% url 'cart:detail' %}" class="btn btn-primary w-100">Sign in to checkout</a>
+                        {% endif %}
                     </div>
                 </aside>
             </div>

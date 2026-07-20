@@ -1,6 +1,7 @@
 import stripe
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -82,6 +83,7 @@ def remove(request, product_id):
 
 
 @require_POST
+@login_required
 def checkout_start(request):
     cart = Cart(request.session)
     if not cart.lines:
@@ -111,11 +113,13 @@ def checkout_start(request):
     return response
 
 
+@login_required
 def checkout_success(request):
     session_id = request.GET.get("session_id", "")
     order = get_object_or_404(
         Order.objects.prefetch_related("items"),
         stripe_checkout_session_id=session_id,
+        user=request.user,
     )
 
     if order.status != Order.Status.PAID and has_stripe_test_key():
@@ -145,8 +149,9 @@ def checkout_success(request):
     return render(request, "cart/checkout_success.html", {"order": order})
 
 
+@login_required
 def checkout_cancel(request, order_id):
-    order = get_object_or_404(Order, pk=order_id)
+    order = get_object_or_404(Order, pk=order_id, user=request.user)
     return render(request, "cart/checkout_cancel.html", {"order": order})
 
 

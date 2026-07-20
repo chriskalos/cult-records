@@ -2,6 +2,7 @@ from decimal import Decimal
 
 import stripe
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.urls import reverse
 from django.utils import timezone
@@ -24,9 +25,12 @@ def has_stripe_test_key():
 
 @transaction.atomic
 def create_order(cart, user):
+    if not user.is_authenticated:
+        raise PermissionDenied("Authentication is required to create an order.")
+
     lines = cart.lines
     order = Order.objects.create(
-        user=user if user.is_authenticated else None,
+        user=user,
         currency=settings.STRIPE_CURRENCY,
         subtotal=sum(
             (line.total_price for line in lines),
