@@ -1,10 +1,72 @@
 .ham-shell {
-    --ham-panel: #111113;
-    --ham-panel-deep: #0b0b0c;
-    --ham-line: #3b3b42;
-    --ham-grid: rgba(243, 241, 237, 0.045);
+    --ham-acid: #d7ff55;
+    --ham-canvas: #16091d;
+    --ham-cyan: #6de5df;
+    --ham-cream: #fff6dc;
+    --ham-lilac: #c9a7df;
+    --ham-line: #806790;
+    --ham-muted: #c5b7cc;
+    --ham-panel: #281332;
+    --ham-panel-deep: #0d0911;
+    --ham-plum: #4d205b;
+    --ham-yellow: #ffd863;
+    --ham-grid: rgba(215, 255, 85, 0.055);
+    --cult-black: var(--ham-panel-deep);
+    --cult-bone: var(--ham-cream);
+    --cult-coal: var(--ham-panel);
+    --cult-muted: var(--ham-muted);
+    --cult-red: var(--ham-plum);
+    --cult-red-bright: var(--ham-acid);
+    --cult-steel: #3b1b47;
+    background-color: var(--ham-canvas);
+    background-image:
+        linear-gradient(var(--ham-grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--ham-grid) 1px, transparent 1px);
+    background-size: 1.5rem 1.5rem;
+    color: var(--ham-cream);
     display: grid;
-    gap: 2rem;
+    font-family: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    gap: clamp(2.5rem, 5vw, 4.5rem);
+    padding: clamp(1.25rem, 3vw, 2.75rem);
+}
+
+body.ham-page {
+    background:
+        radial-gradient(circle at 18% 6%, rgba(109, 229, 223, 0.15), transparent 24rem),
+        radial-gradient(circle at 82% 12%, rgba(215, 255, 85, 0.11), transparent 28rem),
+        #0c0610;
+}
+
+body.ham-page main.container {
+    max-width: 1680px;
+}
+
+body.ham-page header .navbar,
+body.ham-page > footer {
+    background: var(--ham-page-plum, #35123f) !important;
+    border-color: #d7ff55;
+}
+
+.ham-shell h1,
+.ham-shell h2,
+.ham-shell h3,
+.ham-shell h4 {
+    color: var(--ham-cream);
+    font-family: "Arial Black", "Trebuchet MS", sans-serif;
+    font-weight: 900;
+    letter-spacing: -0.045em;
+}
+
+.ham-shell :focus-visible {
+    outline-color: var(--ham-acid);
+}
+
+.ham-shell a {
+    color: var(--ham-acid);
+}
+
+.ham-shell a:hover {
+    color: var(--ham-cyan);
 }
 
 /* Keep Leaflet's essential layout intact if its CDN stylesheet is unavailable. */
@@ -113,26 +175,25 @@
 .ham-workspace,
 .ham-panel,
 .ham-archive {
-    background-color: var(--ham-panel);
-    background-image:
-        linear-gradient(var(--ham-grid) 1px, transparent 1px),
-        linear-gradient(90deg, var(--ham-grid) 1px, transparent 1px);
-    background-size: 2rem 2rem;
-    border: 1px solid var(--ham-line);
+    background: transparent;
+    border: 0;
 }
 
 .ham-intro {
     align-items: stretch;
+    border-bottom: 0.4rem solid var(--ham-acid);
     display: grid;
     gap: clamp(2rem, 5vw, 5rem);
     grid-template-columns: minmax(0, 1fr) minmax(17rem, 22rem);
-    padding: clamp(1.5rem, 4vw, 3.5rem);
+    padding: clamp(1rem, 3vw, 2.5rem) 0 clamp(2rem, 4vw, 3.5rem);
 }
 
 .ham-intro h1 {
-    font-size: clamp(3.25rem, 7vw, 6rem);
+    color: var(--ham-acid);
+    font-size: clamp(3rem, 6.5vw, 6.4rem);
+    line-height: 0.86;
     margin-bottom: 1rem;
-    max-width: 54rem;
+    max-width: 62rem;
 }
 
 .ham-intro-copy {
@@ -140,13 +201,13 @@
 }
 
 .ham-intro-copy .lead {
-    color: var(--cult-muted);
+    color: var(--ham-cream);
     max-width: 46rem;
 }
 
 .ham-intro-aside {
     align-content: center;
-    border-left: 1px solid var(--ham-line);
+    border-left: 2px dashed var(--ham-cyan);
     display: grid;
     gap: 1rem;
     padding-left: clamp(1.25rem, 3vw, 2.5rem);
@@ -177,8 +238,9 @@
 
 .ham-network-state {
     align-items: center;
-    background: var(--cult-coal);
-    border: 1px solid var(--ham-line);
+    background: var(--ham-acid);
+    border: 2px solid var(--ham-cream);
+    color: var(--ham-panel-deep);
     display: flex;
     flex: 0 0 auto;
     gap: 0.65rem;
@@ -187,21 +249,22 @@
 }
 
 .ham-network-state span {
-    background: #27845a;
-    border: 1px solid #dff5e9;
+    background: var(--ham-plum);
+    border: 2px solid var(--ham-panel-deep);
+    border-radius: 50%;
     height: 0.65rem;
     width: 0.65rem;
 }
 
 .ham-night-status {
-    border: 1px solid var(--ham-line);
+    border: 2px solid var(--ham-lilac);
     margin: 0;
 }
 
 .ham-night-status > div {
     align-items: baseline;
-    background: rgba(8, 8, 9, 0.72);
-    border-bottom: 1px solid var(--ham-line);
+    background: rgba(13, 9, 17, 0.84);
+    border-bottom: 1px dashed var(--ham-line);
     display: flex;
     gap: 1rem;
     justify-content: space-between;
@@ -232,18 +295,20 @@
 
 .ham-night-memo {
     align-items: center;
-    background: var(--cult-coal);
-    border: 1px solid var(--ham-line);
-    border-left: 0.35rem solid var(--cult-red-bright);
+    background: var(--ham-yellow);
+    border: 2px solid var(--ham-panel-deep);
+    border-left: 0.75rem solid var(--ham-cyan);
+    color: var(--ham-panel-deep);
     display: grid;
     gap: 0.35rem 1.5rem;
     grid-template-columns: auto minmax(0, 1fr) auto;
     padding: 1rem 1.25rem;
+    transform: rotate(-0.3deg);
 }
 
 .ham-night-memo span,
 .ham-night-memo small {
-    color: var(--cult-muted);
+    color: var(--ham-plum);
     font-size: 0.7rem;
     font-weight: 800;
     letter-spacing: 0.1em;
@@ -251,7 +316,7 @@
 }
 
 .ham-night-memo span {
-    color: var(--cult-red-bright);
+    color: var(--ham-panel-deep);
 }
 
 .ham-night-memo p {
@@ -263,20 +328,26 @@
 }
 
 .ham-stat-grid {
-    border: 0;
+    border-bottom: 2px solid var(--ham-lilac);
+    border-top: 2px solid var(--ham-lilac);
     display: grid;
-    gap: 1px;
+    gap: 0;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     padding: 0;
 }
 
 .ham-stat-grid article {
-    background: var(--cult-coal);
-    border: 1px solid var(--ham-line);
+    background: rgba(40, 19, 50, 0.62);
+    border: 0;
+    border-right: 1px dashed var(--ham-line);
     display: flex;
     flex-direction: column;
     min-height: 8.5rem;
     padding: 1.25rem;
+}
+
+.ham-stat-grid article:last-child {
+    border-right: 0;
 }
 
 .ham-stat-grid span {
@@ -288,9 +359,10 @@
 }
 
 .ham-stat-grid strong {
-    font-family: "Instrument Serif", Georgia, serif;
-    font-size: 3.6rem;
-    font-weight: 400;
+    color: var(--ham-acid);
+    font-family: "Arial Black", "Trebuchet MS", sans-serif;
+    font-size: 3.3rem;
+    font-weight: 900;
     line-height: 1;
     margin-top: auto;
 }
@@ -306,12 +378,13 @@
 
 .ham-night-briefing {
     align-items: start;
-    background: var(--ham-panel);
-    border: 1px solid var(--ham-line);
+    background: rgba(13, 9, 17, 0.45);
+    border-bottom: 2px dashed var(--ham-cyan);
+    border-top: 2px dashed var(--ham-cyan);
     display: grid;
     gap: 2rem;
     grid-template-columns: minmax(12rem, 0.5fr) minmax(0, 1.5fr);
-    padding: clamp(1.25rem, 2.5vw, 2rem);
+    padding: clamp(1.5rem, 3vw, 2.5rem) 0;
 }
 
 .ham-night-briefing h2 {
@@ -320,14 +393,14 @@
 }
 
 .ham-night-briefing-grid {
-    border-left: 1px solid var(--ham-line);
+    border-left: 2px dashed var(--ham-line);
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     margin: 0;
 }
 
 .ham-night-briefing-grid > div {
-    border-right: 1px solid var(--ham-line);
+    border-right: 1px dashed var(--ham-line);
     padding: 0.25rem 1.25rem;
 }
 
@@ -362,7 +435,7 @@
 .ham-workspace,
 .ham-panel,
 .ham-archive {
-    padding: clamp(1rem, 2.5vw, 2rem);
+    padding: 0;
 }
 
 .ham-section-heading {
@@ -374,7 +447,7 @@
 }
 
 .ham-section-heading h2 {
-    font-size: clamp(2.4rem, 5vw, 3.75rem);
+    font-size: clamp(2.2rem, 4.5vw, 3.6rem);
     margin: 0;
 }
 
@@ -386,14 +459,25 @@
 }
 
 .ham-map-filters .btn {
+    background: var(--ham-panel);
+    border: 2px solid var(--ham-lilac);
+    border-radius: 999px;
+    color: var(--ham-cream);
     font-size: 0.78rem;
-    padding: 0.5rem 0.75rem;
+    padding: 0.55rem 0.9rem;
 }
 
 .ham-map-filters .active {
-    background: var(--cult-red);
-    border-color: var(--cult-red-bright);
-    color: #fff;
+    background: var(--ham-acid);
+    border-color: var(--ham-cream);
+    color: var(--ham-panel-deep);
+}
+
+.ham-map-filters .btn:hover,
+.ham-map-filters .btn:focus-visible {
+    background: var(--ham-cyan);
+    border-color: var(--ham-cream);
+    color: var(--ham-panel-deep);
 }
 
 .ham-map-controls {
@@ -414,8 +498,9 @@
 }
 
 .ham-night-shift i {
-    background: #27845a;
-    border: 1px solid #dff5e9;
+    background: var(--ham-acid);
+    border: 1px solid var(--ham-cream);
+    border-radius: 50%;
     display: block;
     height: 0.55rem;
     width: 0.55rem;
@@ -430,14 +515,14 @@
 .ham-map-panel,
 .ham-dossier {
     background: var(--ham-panel-deep);
-    border: 1px solid var(--ham-line);
+    border: 2px solid var(--ham-lilac);
     min-width: 0;
 }
 
 .ham-map {
     background:
-        linear-gradient(rgba(120, 13, 25, 0.14), rgba(8, 8, 9, 0.32)),
-        var(--cult-black);
+        linear-gradient(rgba(77, 32, 91, 0.18), rgba(13, 9, 17, 0.35)),
+        var(--ham-panel-deep);
     height: 32rem;
     overflow: hidden;
     position: relative;
@@ -462,44 +547,47 @@
 }
 
 .ham-map-notice {
-    border-top: 1px solid var(--ham-line);
-    color: var(--cult-muted);
+    background: var(--ham-acid);
+    border-top: 2px solid var(--ham-lilac);
+    color: var(--ham-panel-deep);
     margin: 0;
     padding: 0.8rem 1rem;
 }
 
 .ham-map .leaflet-tile-pane {
-    filter: grayscale(1) invert(0.9) sepia(0.25) hue-rotate(315deg) saturate(0.8) brightness(0.5) contrast(1.45);
+    filter: grayscale(0.75) invert(0.86) sepia(0.38) hue-rotate(205deg) saturate(1.15) brightness(0.52) contrast(1.4);
 }
 
 .ham-map .leaflet-control-zoom a,
 .ham-map .leaflet-control-attribution {
-    background: var(--cult-coal);
-    border-radius: 0;
-    color: var(--cult-bone);
+    background: var(--ham-acid);
+    color: var(--ham-panel-deep);
 }
 
 .ham-map .leaflet-control-zoom {
-    border: 1px solid rgba(243, 241, 237, 0.7);
-    border-radius: 0;
+    border: 2px solid var(--ham-cream);
+    border-radius: 0.55rem;
+    overflow: hidden;
 }
 
 .ham-map .leaflet-control-zoom a {
-    border-color: var(--ham-line);
+    border-color: var(--ham-plum);
+    display: block;
     font-size: 1.45rem;
     height: 2.85rem;
     line-height: 2.7rem;
+    text-align: center;
     width: 2.85rem;
 }
 
 .ham-map .leaflet-control-zoom a:hover,
 .ham-map .leaflet-control-zoom a:focus-visible {
-    background: var(--cult-steel);
+    background: var(--ham-cyan);
 }
 
 .ham-map .leaflet-control-attribution,
 .ham-map .leaflet-control-attribution a {
-    color: var(--cult-muted);
+    color: var(--ham-panel-deep);
 }
 
 .ham-marker-shell {
@@ -508,8 +596,8 @@
 }
 
 .ham-map-marker {
-    background: var(--cult-red);
-    border: 2px solid var(--cult-bone);
+    background: var(--ham-plum);
+    border: 2px solid var(--ham-cream);
     display: block;
     height: 1.1rem;
     transform: rotate(45deg);
@@ -520,38 +608,38 @@
 .ham-map-marker.status-silent,
 .ham-map-marker.status-misplaced,
 .ham-map-marker.status-disputed {
-    background: var(--cult-black);
-    border-color: var(--cult-red-bright);
+    background: var(--ham-panel-deep);
+    border-color: var(--ham-acid);
 }
 
 .ham-map-marker.status-on_break {
-    background: var(--cult-steel);
+    background: var(--ham-yellow);
 }
 
 .ham-map-marker.selected {
-    background: var(--cult-bone);
-    border-color: var(--cult-red-bright);
+    background: var(--ham-cyan);
+    border-color: var(--ham-cream);
     height: 1.4rem;
     width: 1.4rem;
 }
 
 .ham-map .leaflet-tooltip {
-    background: var(--cult-coal);
-    border: 1px solid var(--cult-bone);
-    border-radius: 0;
-    color: var(--cult-bone);
-    font-family: "Nunito Sans", sans-serif;
+    background: var(--ham-yellow);
+    border: 2px solid var(--ham-panel-deep);
+    border-radius: 0.35rem;
+    color: var(--ham-panel-deep);
+    font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
     font-weight: 800;
 }
 
 .ham-map .leaflet-tooltip::before {
-    border-top-color: var(--cult-bone);
+    border-top-color: var(--ham-yellow);
 }
 
 .ham-dossier {
     height: calc(32rem + 2.6rem);
     overflow-y: auto;
-    scrollbar-color: var(--cult-red-bright) var(--cult-coal);
+    scrollbar-color: var(--ham-acid) var(--ham-panel);
     scrollbar-gutter: stable;
     scrollbar-width: auto;
 }
@@ -561,20 +649,20 @@
 }
 
 .ham-dossier::-webkit-scrollbar-track {
-    background: var(--cult-coal);
+    background: var(--ham-panel);
     border-left: 1px solid var(--ham-line);
 }
 
 .ham-dossier::-webkit-scrollbar-thumb {
-    background: var(--cult-red-bright);
-    border: 0.2rem solid var(--cult-coal);
+    background: var(--ham-acid);
+    border: 0.2rem solid var(--ham-panel);
 }
 
 .ham-dossier-banner {
     align-items: center;
-    background: var(--cult-coal);
-    border-bottom: 1px solid var(--ham-line);
-    color: var(--cult-muted);
+    background: var(--ham-lilac);
+    border-bottom: 2px solid var(--ham-cream);
+    color: var(--ham-panel-deep);
     display: flex;
     font-size: 0.68rem;
     font-weight: 800;
@@ -590,8 +678,10 @@
 
 .ham-dossier-scroll-cue {
     align-items: center;
-    border: 1px solid var(--cult-red-bright);
-    color: var(--cult-bone);
+    background: var(--ham-panel-deep);
+    border: 1px solid var(--ham-panel-deep);
+    border-radius: 50%;
+    color: var(--ham-acid);
     display: inline-flex;
     flex: 0 0 auto;
     font-size: 1rem;
@@ -629,10 +719,10 @@
 }
 
 .ham-dossier-image-wrap > span {
-    background: var(--cult-black);
-    border: 1px solid var(--cult-bone);
+    background: var(--ham-yellow);
+    border: 2px solid var(--ham-panel-deep);
     bottom: 1rem;
-    color: var(--cult-bone);
+    color: var(--ham-panel-deep);
     font-size: 0.75rem;
     font-weight: 800;
     left: 1rem;
@@ -648,18 +738,18 @@
 }
 
 .ham-status {
-    border-left: 0.35rem solid var(--cult-red-bright);
-    color: var(--cult-muted);
+    border-left: 0.35rem solid var(--ham-acid);
+    color: var(--ham-muted);
     margin: 0 0 0.65rem;
     padding-left: 0.55rem;
 }
 
 .ham-status-active {
-    border-left-color: #27845a;
+    border-left-color: var(--ham-cyan);
 }
 
 .ham-status-on_break {
-    border-left-color: #ffc857;
+    border-left-color: var(--ham-yellow);
 }
 
 .ham-dossier h3 {
@@ -669,7 +759,7 @@
 }
 
 .ham-alias {
-    color: var(--cult-red-bright);
+    color: var(--ham-acid);
     margin: 0.55rem 0 1.25rem;
 }
 
@@ -700,15 +790,16 @@
 }
 
 .ham-dossier-note {
-    background: var(--cult-coal);
-    border: 1px solid var(--ham-line);
+    background: transparent;
+    border: 0;
+    border-left: 0.3rem dotted var(--ham-cyan);
     margin-top: 0.75rem;
-    padding: 1rem;
+    padding: 0.6rem 0 0.6rem 1rem;
 }
 
 .ham-dossier-note h4,
 .ham-dossier-observations h4 {
-    font-family: "Nunito Sans", sans-serif;
+    font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
     font-size: 0.76rem;
     font-weight: 800;
     letter-spacing: 0.1em;
@@ -745,17 +836,21 @@
 }
 
 .ham-directory {
+    border-left: 1px solid var(--ham-line);
+    border-top: 1px solid var(--ham-line);
     display: grid;
-    gap: 0.75rem;
+    gap: 0;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     margin-top: 1rem;
 }
 
 .ham-directory-item {
     align-items: center;
-    background: var(--cult-coal);
-    border: 1px solid var(--ham-line);
-    color: var(--cult-bone);
+    background: rgba(40, 19, 50, 0.72);
+    border: 0;
+    border-bottom: 1px solid var(--ham-line);
+    border-right: 1px solid var(--ham-line);
+    color: var(--ham-cream);
     display: flex;
     gap: 0.8rem;
     min-width: 0;
@@ -764,11 +859,14 @@
 }
 
 .ham-directory-item:hover,
-.ham-directory-item:focus-visible,
+.ham-directory-item:focus-visible {
+    background: var(--ham-cyan);
+    color: var(--ham-panel-deep);
+}
+
 .ham-directory-item.active {
-    background: var(--cult-steel);
-    border-color: var(--cult-red-bright);
-    color: #fff;
+    background: var(--ham-acid);
+    color: var(--ham-panel-deep);
 }
 
 .ham-directory-item[hidden] {
@@ -776,11 +874,17 @@
 }
 
 .ham-directory-item img {
+    border: 2px solid var(--ham-lilac);
     filter: grayscale(1);
     flex: 0 0 auto;
     height: 3.2rem;
     object-fit: cover;
     width: 3.2rem;
+}
+
+.ham-directory-item.active img {
+    border-color: var(--ham-panel-deep);
+    filter: grayscale(0.4) contrast(1.05);
 }
 
 .ham-directory-item span {
@@ -796,15 +900,28 @@
 }
 
 .ham-directory-item small {
-    color: var(--cult-muted);
+    color: var(--ham-muted);
     font-size: 0.68rem;
     margin-top: 0.2rem;
 }
 
+.ham-directory-item.active small,
+.ham-directory-item:hover small,
+.ham-directory-item:focus-visible small {
+    color: var(--ham-panel-deep);
+}
+
 .ham-secondary-grid {
+    border-top: 2px dashed var(--ham-cyan);
     display: grid;
     gap: 2rem;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding-top: 2rem;
+}
+
+.ham-panel + .ham-panel {
+    border-left: 2px dashed var(--ham-line);
+    padding-left: 2rem;
 }
 
 .ham-count {
@@ -814,14 +931,15 @@
 .ham-directive-list,
 .ham-ledger {
     display: grid;
-    gap: 0.75rem;
+    gap: 0;
 }
 
 .ham-directive-list article,
 .ham-ledger li {
-    background: var(--cult-coal);
-    border: 1px solid var(--ham-line);
-    padding: 1.1rem;
+    background: transparent;
+    border: 0;
+    border-top: 1px dashed var(--ham-line);
+    padding: 1.1rem 0;
 }
 
 .ham-directive-list article > div,
@@ -846,7 +964,7 @@
 }
 
 .ham-directive-list small {
-    color: var(--cult-red-bright);
+    color: var(--ham-acid);
 }
 
 .ham-ledger {
@@ -865,18 +983,22 @@
 }
 
 .ham-archive-grid {
+    border-left: 1px solid var(--ham-line);
+    border-top: 1px solid var(--ham-line);
     display: grid;
-    gap: 1rem;
+    gap: 0;
     grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .ham-archive details {
-    background: var(--cult-coal);
-    border: 1px solid var(--ham-line);
+    background: rgba(40, 19, 50, 0.56);
+    border: 0;
+    border-bottom: 1px solid var(--ham-line);
+    border-right: 1px solid var(--ham-line);
 }
 
 .ham-archive details[open] {
-    border-color: var(--cult-red-bright);
+    background: var(--ham-panel);
 }
 
 .ham-archive summary {
@@ -890,13 +1012,20 @@
 }
 
 .ham-archive summary::before {
-    color: var(--cult-red-bright);
+    align-items: center;
+    background: var(--ham-acid);
+    border-radius: 50%;
+    color: var(--ham-panel-deep);
     content: "+";
+    display: inline-flex;
     float: right;
     font-size: 1.6rem;
     font-weight: 800;
+    height: 2rem;
+    justify-content: center;
     line-height: 1;
     margin-left: 1rem;
+    width: 2rem;
 }
 
 .ham-archive details[open] summary::before {
@@ -910,13 +1039,13 @@
 }
 
 .ham-archive summary > span {
-    color: var(--cult-red-bright);
+    color: var(--ham-acid);
 }
 
 .ham-archive summary > strong {
-    font-family: "Instrument Serif", Georgia, serif;
-    font-size: 1.8rem;
-    font-weight: 400;
+    font-family: "Arial Black", "Trebuchet MS", sans-serif;
+    font-size: 1.55rem;
+    font-weight: 900;
     line-height: 1;
     margin: 0.7rem 0;
 }
@@ -938,7 +1067,7 @@
 }
 
 .ham-redaction span {
-    background: var(--cult-black);
+    background: var(--ham-acid);
     display: block;
     height: 0.65rem;
 }
@@ -973,7 +1102,7 @@
 
     .ham-intro-aside {
         border-left: 0;
-        border-top: 1px solid var(--ham-line);
+        border-top: 2px dashed var(--ham-cyan);
         padding-left: 0;
         padding-top: 1.5rem;
     }
@@ -1006,6 +1135,13 @@
         grid-template-columns: minmax(0, 1fr);
     }
 
+    .ham-panel + .ham-panel {
+        border-left: 0;
+        border-top: 2px dashed var(--ham-line);
+        padding-left: 0;
+        padding-top: 2rem;
+    }
+
     .ham-map {
         height: clamp(26rem, 56vw, 32rem);
     }
@@ -1033,6 +1169,18 @@
 @media (max-width: 767.98px) {
     .ham-stat-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ham-stat-grid article {
+        border-bottom: 1px dashed var(--ham-line);
+    }
+
+    .ham-stat-grid article:nth-child(2n) {
+        border-right: 0;
+    }
+
+    .ham-stat-grid article:nth-last-child(-n + 2) {
+        border-bottom: 0;
     }
 
     .ham-map {
@@ -1075,7 +1223,10 @@
 
 @media (max-width: 575.98px) {
     .ham-shell {
-        gap: 1.25rem;
+        gap: 2.5rem;
+        margin-left: -0.75rem;
+        margin-right: -0.75rem;
+        padding: 1rem;
     }
 
     .ham-intro,
@@ -1092,12 +1243,23 @@
     }
 
     .ham-stat-grid article {
+        border-bottom: 1px dashed var(--ham-line);
+        border-right: 0;
         min-height: 6.5rem;
+    }
+
+    .ham-stat-grid article:nth-last-child(2) {
+        border-bottom: 1px dashed var(--ham-line);
+    }
+
+    .ham-stat-grid article:last-child {
+        border-bottom: 0;
     }
 
     .ham-night-memo {
         margin-left: -0.25rem;
         margin-right: -0.25rem;
+        transform: none;
     }
 
     .ham-map {

@@ -174,6 +174,7 @@ class HamAccessTests(TestCase):
         self.assertContains(header_response, reverse("ham:dashboard"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "The network is awake")
+        self.assertContains(response, '<body class="d-flex flex-column min-vh-100 ham-page">')
         self.assertContains(response, "HAM-ATH-042")
         self.assertContains(response, "The Spoon Protocol")
         self.assertContains(response, "maplibre-gl-leaflet")

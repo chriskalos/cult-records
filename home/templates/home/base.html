@@ -12,7 +12,7 @@
     <link href="{% static 'css/style.css' %}?v=3" rel="stylesheet">
     {% block styles %}{% endblock %}
 </head>
-<body class="d-flex flex-column min-vh-100">
+<body class="d-flex flex-column min-vh-100 {% block body_class %}{% endblock %}">
     {% include "home/includes/header.html" %}
 
     <main class="container flex-grow-1 py-4">
