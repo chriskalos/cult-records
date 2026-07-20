@@ -2,6 +2,8 @@
 
 Cult Records is a Django web application for browsing a record catalogue, finding products through fuzzy search and filters, sharing product ratings and reviews, and completing purchases through Stripe's sandbox. It provides a multi-product shopping cart, account registration, authentication, profile management, role-based permissions, and a custom administrative workspace alongside a responsive catalogue interface.
 
+**Live site:** [cult.chriskalos.xyz](https://cult.chriskalos.xyz/)
+
 ## Features
 
 ### Catalogue and product pages
@@ -30,7 +32,7 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 - Users can change their username from the protected profile page.
 - The role model distinguishes Admin, Editor, User, and Anonymous access.
 - Editors can access the custom admin panel to edit catalogue content and moderate reviews. They cannot add or delete products, manage bundles, manage users, or delete reviews.
-- Administrators can access every admin-panel section. User management, bundle management, additions, and permanent deletion remain administrator-only responsibilities.
+- Administrators can access every admin-panel section. User management, bundle management, additions, and permanent deletion are administrator-only responsibilities.
 
 ### Custom admin panel
 
@@ -38,17 +40,17 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 - Anonymous visitors are redirected to sign in, regular users receive no panel access, and every panel route applies its role check on the server.
 - The dashboard shows live catalogue, visibility, account, and review-state totals; catalogue health; the pending moderation queue; recent administrative activity; and recent users for administrators.
 - The dashboard reports Stripe sandbox order counts, pending and expired sessions, revenue, and average order value.
-- Role-aware navigation exposes only the sections available to the current administrator or editor.
+- Role-aware navigation exposes only the sections available to the signed-in administrator or editor.
 - The responsive admin shell uses a separate dark blueprint identity with a desktop sidebar and a mobile off-canvas menu.
 - `/admin/visuals/` provides the review surface for admin colors, typography, buttons, forms, badges, tables, empty states, and confirmation dialogs.
 - Administrators can search, filter, add, edit, deactivate, change the fixed application role of, replace the password of, and permanently delete users. Administrators cannot change their own role, deactivate themselves, or delete themselves.
 - Product management supports searching, filtering, sorting, creation, editing, image uploads, visibility changes, supplementary product-page fields, and permanent deletion. Product IDs become immutable after creation.
 - Editors can edit and hide LP, CD, and merchandise products. They cannot add products, delete products, or view and manage bundle records.
 - The bundle builder creates an independently priced product from ordered quantities of existing LP, CD, and merchandise products. Nested bundles are rejected in both forms and the data model.
-- A component product that belongs to a bundle cannot be deleted by itself. Administrators may explicitly delete every related bundle in the same confirmed action, or cancel the deletion.
+- A component product that belongs to a bundle cannot be deleted by itself. Administrators may explicitly delete every related bundle in the same deletion action, or cancel it.
 - Review moderation provides searchable pending, approved, and rejected queues, individual decisions, and bulk approval or rejection. Editors and administrators can moderate; only administrators can permanently delete reviews.
 - Administrators with active HAM enlightenment can search, filter, create, edit, hide, show, and permanently delete Human Asset records. The editor includes approximate coordinates, status, exposure, dossier text, and locally stored portrait uploads.
-- Human Asset management requires both the Admin role and active enlightenment. Editors and ordinary enlightened users remain read-only, and Human Asset audit entries stay hidden from panel users without active enlightenment.
+- Human Asset management requires both the Admin role and active enlightenment. Editors and ordinary enlightened users have read-only access, and Human Asset audit entries are hidden from panel users without active enlightenment.
 - Every successful management mutation records the actor, action, target, summary, timestamp, and relevant metadata in an audit trail. Administrators see all activity, while Editors see their own actions.
 - Permanent user, product, bundle, review, and Human Asset deletion requires typed confirmation where an identifier is available. There is no soft-delete state.
 
@@ -59,7 +61,7 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 - Review authors can edit or delete their own reviews.
 - Creating, editing, and deleting a review updates the review section with AJAX. The same forms and links continue to work through normal page requests when JavaScript is unavailable.
 - New and edited reviews return to pending moderation. The user receives a confirmation that the review will become public after approval.
-- Rejected reviews remain visible to their author with an optional editorial reason. Editing a rejected or approved review clears its previous moderation decision and returns it to pending.
+- Rejected reviews are visible to their author with an optional editorial reason. Editing a rejected or approved review clears its previous moderation decision and returns it to pending.
 - Review deletion requires confirmation in the browser.
 
 ### Shopping cart and checkout
@@ -71,7 +73,7 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 - A non-empty cart opens a Stripe-hosted Checkout page using a Stripe sandbox or restricted sandbox secret key. Live Stripe keys are deliberately rejected.
 - Checkout accepts Stripe test card payments in euros. Card details are entered on Stripe's hosted page and never pass through the Django application.
 - Every checkout attempt snapshots its product names, formats, prices, and quantities into an order before redirecting to Stripe.
-- Successful returns verify the Checkout Session, paid status, amount, and currency before marking the order as paid. Purchased quantities are removed once, while products added after checkout remain in the cart.
+- Successful returns verify the Checkout Session, paid status, amount, and currency before marking the order as paid. Purchased quantities are removed once, while products added after checkout stay in the cart.
 - A signed webhook handles completed, asynchronously completed, and expired Checkout Sessions. The success page also retrieves the session directly as a fallback for local testing.
 - Paid purchases appear on the account dashboard with their placed date, order reference, status, total, and product lines.
 - Users can mark an order as delivered. An in-page confirmation modal explains that the order will disappear from the dashboard, and accepting it permanently deletes the order.
@@ -86,9 +88,9 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 - The Human Assets Manager presents a decentralized network rather than a personal operator dashboard. It includes a world map, status filters, a keyboard-accessible asset directory, detailed dossiers, observations, peer directives, and archive records.
 - Twelve fictional adult human assets are seeded through a data migration with approximate coordinates, network roles, civilian covers, status, consensus, exposure, notes, and irregularities.
 - Profile portraits were sourced once from This Person Does Not Exist, screened to exclude children and age-ambiguous faces, converted to local WebP files, and stripped of metadata. The application never requests portraits from the service in a visitor's browser.
-- The map uses OpenFreeMap's dark vector basemap, built from OpenStreetMap data, through Leaflet and the MapLibre GL Leaflet bridge. Its height contracts at tablet and phone widths, and vertical panning is confined to the rendered world so empty map space cannot be pulled into view. Provider and OpenStreetMap attribution remain visible, and the server-rendered directory and dossier links continue to work if JavaScript or the map library is unavailable.
-- The HAM interface presents the protected page as a discreet after-hours label office operated by a decentralized vampire network. Vampire humor appears in memoranda, operational labels, archive copy, and small bureaucratic details while the map, records, and controls remain restrained and functional.
-- HAM keeps the shared Cult Records palette, typefaces, square geometry, one-pixel borders, visible focus treatment, and prohibition on shadows and glows. Its denser grid and nocturnal office language remain isolated from the public catalogue identity.
+- The map uses OpenFreeMap's dark vector basemap, built from OpenStreetMap data, through Leaflet and the MapLibre GL Leaflet bridge. Its height contracts at tablet and phone widths, and vertical panning is confined to the rendered world so empty map space cannot be pulled into view. Provider and OpenStreetMap attribution are visible, and the server-rendered directory and dossier links work without JavaScript or the map library.
+- The HAM interface presents the protected page as a discreet after-hours label office operated by a decentralized vampire network. Vampire humor appears in memoranda, operational labels, archive copy, and small bureaucratic details within a restrained and functional interface.
+- HAM uses the shared Cult Records palette, typefaces, square geometry, one-pixel borders, visible focus treatment, and prohibition on shadows and glows. Its denser grid and nocturnal office language are specific to the protected interface.
 
 ## Technologies
 
@@ -113,7 +115,7 @@ Cult Records is a Django web application for browsing a record catalogue, findin
 | OpenStreetMap | HAM geographic data and context | Supplies open map data with visible contributor attribution. |
 | Vanilla JavaScript | Search filter behavior, product artwork movement, interactive star ratings, AJAX review updates, dynamic bundle rows, bulk review selection, delete confirmation, HAM dossier selection, and map filtering | Adds browser interactions without a JavaScript framework or build process. |
 
-The Python project declares Django, RapidFuzz, Pillow, and Stripe as direct dependencies in `pyproject.toml`. Exact direct and transitive versions are recorded in `uv.lock` and exported to `requirements.txt`. Bootstrap's CSS and JavaScript bundle are loaded from jsDelivr, so the project does not require npm.
+Direct Python dependencies are declared in `pyproject.toml`. Exact direct and transitive versions are recorded in `uv.lock` and exported to `requirements.txt`. Bootstrap's CSS and JavaScript bundle are loaded from jsDelivr, so the project does not require npm.
 
 ## Visual design and accessibility
 
@@ -217,9 +219,9 @@ The repository includes a Render Blueprint in `render.yaml`. It provisions a fre
 
 Create a Blueprint from this repository in the Render Dashboard and apply it. Render generates the production `SECRET_KEY` and connects the application to PostgreSQL automatically. `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` are optional secret fields. Leave them empty if checkout does not need to be active, or provide sandbox values to enable it.
 
-The free PostgreSQL instance is intended for demonstrations and expires after 30 days unless it is upgraded. The free web service also uses an ephemeral filesystem. Bundled catalogue artwork remains available because WhiteNoise serves it from the deployed application, but files uploaded through the admin panel can disappear after a restart or deployment. Use a paid persistent disk or an object-storage service before relying on uploaded media in a long-running deployment.
+The free PostgreSQL instance is intended for demonstrations and expires after 30 days unless it is upgraded. The free web service also uses an ephemeral filesystem. WhiteNoise serves bundled catalogue artwork from the deployed application, but files uploaded through the admin panel can disappear after a restart or deployment. A paid persistent disk or object-storage service is required for durable uploaded media.
 
-The deployed application uses `cult.chriskalos.xyz` as its custom domain. Cloudflare DNS should define a `cult` CNAME pointing to `cult-records.onrender.com`. Keep the record set to DNS only, including after Render verifies the hostname and issues its TLS certificate. Cloudflare proxying did not fully work for this deployment, so the `cult` record should remain unproxied.
+The deployed application uses [cult.chriskalos.xyz](https://cult.chriskalos.xyz/) as its custom domain. Cloudflare DNS defines a DNS-only `cult` CNAME pointing to `cult-records.onrender.com`, allowing Render to verify the hostname and issue its TLS certificate directly.
 
 ## Stripe sandbox setup
 
